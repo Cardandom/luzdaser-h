@@ -2,9 +2,9 @@ import Image from "next/image"
 
 export function CtaSection() {
   return (
-    <section className="relative left-1/2 w-screen -translate-x-1/2">
-      <div className="relative w-full overflow-hidden border-y border-luxury-border bg-white shadow-[0_20px_45px_rgba(43,43,43,0.1)]">
-        <div className="relative min-h-[18rem] sm:min-h-[22rem] lg:min-h-[26rem] w-full">
+    <section className="luxury-shell">
+      <div className="relative overflow-hidden border border-luxury-border bg-white shadow-[0_20px_45px_rgba(43,43,43,0.1)]">
+        <div className="relative min-h-[18rem] sm:min-h-[22rem] lg:min-h-[26rem]">
           <Image
             src="/sunset.webp"
             alt="Aruba coastline at sunset"
