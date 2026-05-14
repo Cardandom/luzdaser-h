@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 })
 
 export const metadata: Metadata = {
-  title: "Luxury Villas Aruba",
+  title: "Reina Sophia Residences",
   description:
     "Premium landing page for real estate investment in Aruba, optimized for desktop, tablet, and mobile.",
 }
