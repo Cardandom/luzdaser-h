@@ -102,6 +102,11 @@
 
   html {
     @apply scroll-smooth font-sans;
+    scroll-padding-top: 7rem;
+  }
+
+  section[id] {
+    scroll-margin-top: 7rem;
   }
 
   body {
