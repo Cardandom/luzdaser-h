@@ -13,7 +13,7 @@ const galleryItems = [
   },
   {
     title: "View front house",
-    objectPosition: "center right",
+    objectPosition: "center left",
     picture: "/frontHouse1.webp",
   },
 ]
