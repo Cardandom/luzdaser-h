@@ -111,10 +111,8 @@
 
   body {
     @apply min-h-screen overflow-x-hidden bg-background text-foreground antialiased;
-    background-image:
-      radial-gradient(circle at top, rgba(220, 181, 109, 0.14), transparent 28%),
-      radial-gradient(circle at 20% 20%, rgba(43, 43, 43, 0.04), transparent 16%),
-      linear-gradient(180deg, #ffffff 0%, #f8f7f3 44%, #ffffff 100%);
+    background-color: #ffffff;
+    background-image: none;
   }
 
   ::selection {

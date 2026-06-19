@@ -12,15 +12,15 @@ export default function HomePage() {
     <main className="relative isolate overflow-hidden pb-6">
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-96 bg-gradient-to-b from-luxury-gold/15 to-transparent"
+        className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-96 bg-linear-to-b from-luxury-gold/15 to-transparent"
       />
 
       <HeroSection />
       <GallerySection />
       <CtaSection />
+      <PaymentSection />
       <FeaturedProjectsSection />
       <BenefitsSection />
-      {/* <PaymentSection /> */}
       <ContactSection />
       <SiteFooter />
     </main>

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 import { Menu, X } from "lucide-react"
 import Image from "next/image"
 import { Dialog } from "@base-ui/react/dialog"
+import { usePathname, useRouter } from "next/navigation"
 
 import { ClientLoginDialog } from "@/components/site/client-login-dialog"
 
@@ -20,6 +21,8 @@ export function SiteHeader() {
   const [isLoginOpen, setIsLoginOpen] = useState(false)
   const [isHovered, setIsHovered] = useState(false)
   const [hasScrolled, setHasScrolled] = useState(false)
+  const pathname = usePathname()
+  const router = useRouter()
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -66,15 +69,10 @@ export function SiteHeader() {
 
   const closeMenu = () => setIsMenuOpen(false)
   const isSolidHeader = isHovered || hasScrolled || isMenuOpen
+  const getNavHref = (href: string) => (pathname === "/" ? href : `/${href}`)
   const handleLoginSuccess = () => {
     closeMenu()
-
-    window.requestAnimationFrame(() => {
-      document.getElementById("project-progress")?.scrollIntoView({
-        behavior: "smooth",
-        block: "start",
-      })
-    })
+    router.push("/#project-progress")
   }
 
   return (
@@ -89,7 +87,7 @@ export function SiteHeader() {
         <div className="luxury-shell relative">
           <div className="flex items-center justify-between gap-3 py-4 md:gap-6">
             <a
-              href="#home"
+              href={getNavHref("#home")}
               className="flex items-center gap-3 transition-opacity hover:opacity-90"
               onClick={closeMenu}
             >
@@ -114,13 +112,13 @@ export function SiteHeader() {
             </a>
 
             <nav className="hidden items-center gap-10 text-lg font-medium leading-none tracking-tight text-foreground drop-shadow-sm md:flex">
-              {navItems.map((item) => (
-                <a
-                  key={item.label}
-                  href={item.href}
-                  className="transition-colors hover:text-luxury-gold"
-                >
-                  {item.label}
+                {navItems.map((item) => (
+                  <a
+                    key={item.label}
+                    href={getNavHref(item.href)}
+                    className="transition-colors hover:text-luxury-gold"
+                  >
+                    {item.label}
                 </a>
               ))}
             </nav>
@@ -155,7 +153,7 @@ export function SiteHeader() {
                 {navItems.map((item) => (
                   <a
                     key={item.label}
-                    href={item.href}
+                    href={getNavHref(item.href)}
                     className="rounded-2xl border border-transparent px-4 py-3 transition-colors hover:border-luxury-border hover:bg-stone-50 hover:text-luxury-gold"
                     onClick={closeMenu}
                   >
