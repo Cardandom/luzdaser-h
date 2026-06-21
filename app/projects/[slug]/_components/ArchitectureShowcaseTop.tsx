@@ -1,36 +1,25 @@
-﻿"use client"
+"use client"
 
 import { useState } from "react"
 import Image from "next/image"
-import Link from "next/link"
-import * as Icons from "lucide-react"
+
 import { getProjectBySlug, type ProjectSlug } from "@/lib/projects"
 
 type ArchitectureShowcaseProps = {
   slug: ProjectSlug
 }
+
 export function ArchitectureShowcaseTop({ slug }: ArchitectureShowcaseProps) {
   const project = getProjectBySlug(slug)
 
   const [hoveredFeatureIdx, setHoveredFeatureIdx] = useState<number | null>(null)
   const [hoveredHighlightIdx, setHoveredHighlightIdx] = useState<number | null>(null)
-  const [hoveredSiteId, setHoveredSiteId] = useState<string | null>(null)
-  const [hoveredLayerId, setHoveredLayerId] = useState<string | null>(null)
-  const [selectedLayerId, setSelectedLayerId] = useState<string>("layer-walls")
-  const [hoveredSolarTrack, setHoveredSolarTrack] = useState<string | null>(null)
-  const [hoveredElevationSpec, setHoveredElevationSpec] = useState<string | null>(null)
-  const [isLightboxOpen, setIsLightboxOpen] = useState(false)
 
   if (!project) {
     return null
   }
 
   const heroImage = project.picture
-  const daytimeImage = project.tiles[0]?.picture ?? project.picture
-  const activeSiteElement = siteElements.find((element) => element.id === hoveredSiteId)
-  const activeLayer =
-    axonometricLayers.find((layer) => layer.id === (hoveredLayerId ?? selectedLayerId)) ??
-    axonometricLayers[2]
 
   return (
     <section className="luxury-shell mt-6 sm:mt-8">
@@ -89,9 +78,6 @@ export function ArchitectureShowcaseTop({ slug }: ArchitectureShowcaseProps) {
                         <h3 className="font-heading text-xs font-semibold tracking-wide text-slate-900">
                           {feature.label}
                         </h3>
-                        {/* <p className="mt-0.5 text-[11px] leading-relaxed text-slate-500">
-                          {project.summary}
-                        </p> */}
                       </div>
                     </button>
                   )
@@ -139,12 +125,11 @@ export function ArchitectureShowcaseTop({ slug }: ArchitectureShowcaseProps) {
                     <span className="mr-2 inline-flex size-2 rounded-full bg-luxury-gold" />
                     {project.badge}
                   </div>
-
                 </div>
 
                 <div className="mt-3 flex items-center justify-between px-2 text-[10px] font-mono text-slate-500">
                   <span className="flex items-center gap-1.5">
-                    <Icons.Shield className="h-3.5 w-3.5 text-slate-400" aria-hidden="true" />
+                    <span className="h-3.5 w-3.5 rounded-full bg-slate-400" aria-hidden="true" />
                     Structure Classification: High-grade RC-60
                   </span>
                   <span>Project reference: {project.title}</span>
@@ -171,14 +156,13 @@ export function ArchitectureShowcaseTop({ slug }: ArchitectureShowcaseProps) {
 
                   <div className="mt-3 flex items-center justify-between px-2 text-[10px] font-mono text-slate-500">
                     <span className="flex items-center gap-1.5">
-                      <Icons.Shield className="h-3.5 w-3.5 text-slate-400" aria-hidden="true" />
+                      <span className="h-3.5 w-3.5 rounded-full bg-slate-400" aria-hidden="true" />
                       Structure Classification: High-grade RC-60
                     </span>
                     <span>Project reference: {project.title}</span>
                   </div>
                 </div>
               )}
-
             </div>
 
             <aside className="xl:col-span-3 h-full overflow-hidden rounded-xl border border-slate-200/80 bg-white/50 shadow-sm backdrop-blur-sm transition-all duration-300 hover:shadow-md">
@@ -227,47 +211,11 @@ export function ArchitectureShowcaseTop({ slug }: ArchitectureShowcaseProps) {
                     </button>
                   )
                 })}
-
               </div>
             </aside>
           </section>
-
-          <section id="featured-projects" className="space-y-6">
-            <div className="flex items-center gap-2">
-              <span className="h-px flex-1 bg-slate-200" />
-              <h2 className="font-heading text-sm font-extrabold uppercase tracking-widest text-slate-500">
-                Project Gallery
-              </h2>
-              <span className="h-px flex-1 bg-slate-200" />
-            </div>
-
-            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-              {project.tiles.map((tile) => (
-                <figure
-                  key={tile.title}
-                  className="overflow-hidden rounded-3xl border border-luxury-border bg-white shadow-lg"
-                >
-                  <div className="relative aspect-4/3 overflow-hidden">
-                    <Image
-                      src={tile.picture}
-                      alt={tile.alt}
-                      fill
-                      sizes="(min-width: 1280px) 22vw, (min-width: 768px) 50vw, 100vw"
-                      className="object-cover transition-transform duration-500 hover:scale-105"
-                      style={{ objectPosition: tile.objectPosition }}
-                    />
-                    <div className="absolute inset-0 bg-linear-to-b from-black/0 via-black/0 to-black/30" />
-                  </div>
-                  <figcaption className="space-y-2 px-4 py-4">
-                    <p className="text-xs uppercase tracking-[0.3em] text-foreground/45">
-                      {tile.title}
-                    </p>
-                    <p className="font-heading text-xl leading-tight text-foreground">
-                      {tile.caption}
-                    </p>
-                  </figcaption>
-                </figure>
-              ))}
-            </div>
-          </section>
-
+        </div>
+      </div>
+    </section>
+  )
+}

@@ -18,7 +18,6 @@ import {
 import { getProjectBySlug, type ProjectSlug } from "@/lib/projects"
 import { ArchitectureShowcaseTop } from "./ArchitectureShowcaseTop"
 import {
-  axonometricLayers,
   constructionSpecs,
   getIcon,
   idealForList,
@@ -32,8 +31,6 @@ export function ArchitectureShowcase({ slug }: ArchitectureShowcaseProps) {
   const project = getProjectBySlug(slug)
 
   const [hoveredSiteId, setHoveredSiteId] = useState<string | null>(null)
-  const [hoveredLayerId, setHoveredLayerId] = useState<string | null>(null)
-  const [selectedLayerId, setSelectedLayerId] = useState<string>("layer-walls")
   const [hoveredSolarTrack, setHoveredSolarTrack] = useState<string | null>(null)
   const [hoveredElevationSpec, setHoveredElevationSpec] = useState<string | null>(null)
   const [isLightboxOpen, setIsLightboxOpen] = useState(false)
@@ -42,17 +39,14 @@ export function ArchitectureShowcase({ slug }: ArchitectureShowcaseProps) {
     return null
   }
 
-  const heroImage = project.picture
   const daytimeImage = project.tiles[0]?.picture ?? project.picture
   const activeSiteElement = siteElements.find((element) => element.id === hoveredSiteId)
-  const activeLayer =
-    axonometricLayers.find((layer) => layer.id === (hoveredLayerId ?? selectedLayerId)) ??
-    axonometricLayers[2]
 
   return (
-        <ArchitectureShowcaseTop slug={slug} />
+    <section className="space-y-10">
+      <ArchitectureShowcaseTop slug={slug} />
 
-          <section id="featured-projects" className="space-y-6">
+      <section id="featured-projects" className="space-y-6">
             <div className="flex items-center gap-2">
               <span className="h-px flex-1 bg-slate-200" />
               <h2 className="font-heading text-sm font-extrabold uppercase tracking-widest text-slate-500">
@@ -716,6 +710,7 @@ export function ArchitectureShowcase({ slug }: ArchitectureShowcaseProps) {
                 </p>
               </div>
             </article>
+
           </section>
 
           <footer className="border-t border-slate-200 pt-6 text-center">
@@ -744,8 +739,6 @@ export function ArchitectureShowcase({ slug }: ArchitectureShowcaseProps) {
               </Link>
             </div>
           </footer>
-        </div>
-      </div>
 
       {isLightboxOpen ? (
         <div
@@ -776,7 +769,7 @@ export function ArchitectureShowcase({ slug }: ArchitectureShowcaseProps) {
                   width={1200}
                   height={900}
                   className="h-full w-full object-cover"
-                  style={{ objectPosition: project.tiles[0]?.objectPosition ?? project.objectPosition }}
+                  style={{ objectPosition: project.tiles?.[0]?.objectPosition ?? project.objectPosition }}
                 />
               </div>
 
