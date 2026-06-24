@@ -13,6 +13,16 @@ type PropertyRow = {
   created_at: string | null
 }
 
+type PropertyUpdateRow = {
+  id: string | number
+  property_id: string | number
+  title: string | null
+  description: string | null
+  progress: string | number | null
+  update_date: string | null
+  created_at: string | null
+}
+
 function formatValue(value: string | number | null | undefined) {
   if (value === null || value === undefined || value === "") {
     return "N/A"
@@ -52,9 +62,24 @@ function getProgressValue(progress: string | number | null | undefined) {
   return Math.min(100, Math.max(0, numericValue))
 }
 
+function formatProgressPercentage(
+  progress: string | number | null | undefined,
+) {
+  if (progress === null || progress === undefined || progress === "") {
+    return "N/A"
+  }
+
+  const value = String(progress)
+
+  return value.includes("%") ? value : `${value}%`
+}
+
 export default function ClientPlaceholderPage() {
   const router = useRouter()
   const [properties, setProperties] = useState<PropertyRow[]>([])
+  const [updatesByPropertyId, setUpdatesByPropertyId] = useState<
+    Record<string, PropertyUpdateRow[]>
+  >({})
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
@@ -62,42 +87,99 @@ export default function ClientPlaceholderPage() {
   useEffect(() => {
     let isActive = true
 
-    const loadProperties = async () => {
-      const {
-        data: { user },
-        error: userError,
-      } = await supabase.auth.getUser()
+    const loadPropertiesAndUpdates = async () => {
+      setError(null)
+      setIsLoading(true)
 
-      if (!isActive) {
-        return
+      try {
+        const {
+          data: { user },
+          error: userError,
+        } = await supabase.auth.getUser()
+
+        if (!isActive) {
+          return
+        }
+
+        if (userError || !user) {
+          router.replace("/client-login")
+          return
+        }
+
+        const { data: propertyData, error: propertiesError } = await supabase
+          .from("properties")
+          .select("id, property_number, progress, status, created_at")
+          .eq("buyer_id", user.id)
+          .order("created_at", { ascending: false })
+
+        if (!isActive) {
+          return
+        }
+
+        if (propertiesError) {
+          setError(propertiesError.message)
+          setProperties([])
+          setUpdatesByPropertyId({})
+          return
+        }
+
+        const propertyRows = (propertyData ?? []) as PropertyRow[]
+        setProperties(propertyRows)
+
+        if (propertyRows.length === 0) {
+          setUpdatesByPropertyId({})
+          return
+        }
+
+        const propertyIds = propertyRows.map((property) => String(property.id))
+
+        const { data: updateData, error: updatesError } = await supabase
+          .from("property_updates")
+          .select(
+            "id, property_id, title, description, progress, update_date, created_at",
+          )
+          .in("property_id", propertyIds)
+          .order("update_date", { ascending: true })
+
+        if (!isActive) {
+          return
+        }
+
+        if (updatesError) {
+          setError(updatesError.message)
+          setUpdatesByPropertyId({})
+          return
+        }
+
+        const groupedUpdates: Record<string, PropertyUpdateRow[]> = {}
+
+        for (const update of (updateData ?? []) as PropertyUpdateRow[]) {
+          const propertyKey = String(update.property_id)
+
+          if (!groupedUpdates[propertyKey]) {
+            groupedUpdates[propertyKey] = []
+          }
+
+          groupedUpdates[propertyKey].push(update)
+        }
+
+        setUpdatesByPropertyId(groupedUpdates)
+      } catch (err) {
+        if (isActive) {
+          setError(
+            err instanceof Error ? err.message : "Could not load properties.",
+          )
+          setProperties([])
+          setUpdatesByPropertyId({})
+        }
+      } finally {
+        if (isActive) {
+          setIsLoading(false)
+        }
       }
-
-      if (userError || !user) {
-        router.replace("/client-login")
-        return
-      }
-
-      const { data, error: propertiesError } = await supabase
-        .from("properties")
-        .select("id, property_number, progress, status, created_at")
-        .eq("buyer_id", user.id)
-        .order("created_at", { ascending: false })
-
-      if (!isActive) {
-        return
-      }
-
-      if (propertiesError) {
-        setError(propertiesError.message)
-        setProperties([])
-      } else {
-        setProperties((data ?? []) as PropertyRow[])
-      }
-
-      setIsLoading(false)
     }
 
-    loadProperties()
+    loadPropertiesAndUpdates()
 
     return () => {
       isActive = false
@@ -176,6 +258,8 @@ export default function ClientPlaceholderPage() {
             <div className="grid gap-4 md:grid-cols-2">
               {properties.map((property) => {
                 const progressValue = getProgressValue(property.progress)
+                const propertyUpdates =
+                  updatesByPropertyId[String(property.id)] ?? []
 
                 return (
                   <article
@@ -220,6 +304,50 @@ export default function ClientPlaceholderPage() {
                         Created
                       </span>
                       <span className="mt-1 block">{formatDate(property.created_at)}</span>
+                    </div>
+
+                    <div className="mt-6 border-t border-slate-100 pt-4">
+                      <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">
+                        Updates
+                      </p>
+
+                      {propertyUpdates.length === 0 ? (
+                        <p className="mt-3 text-sm text-slate-600">
+                          No updates available for this property yet.
+                        </p>
+                      ) : (
+                        <div className="mt-4 space-y-4">
+                          {propertyUpdates.map((update, index) => (
+                            <div key={String(update.id)} className="relative pl-5">
+                              <span className="absolute left-0 top-2 h-2.5 w-2.5 rounded-full bg-slate-900" />
+                              {index < propertyUpdates.length - 1 ? (
+                                <span className="absolute left-1.5 top-5 bottom-0 w-px bg-slate-200" />
+                              ) : null}
+
+                              <div className="rounded-2xl border border-slate-100 bg-slate-50/70 p-4">
+                                <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                                  <div>
+                                    <h3 className="font-medium text-slate-950">
+                                      {formatValue(update.title)}
+                                    </h3>
+                                    <p className="mt-1 text-sm leading-6 text-slate-600">
+                                      {formatValue(update.description)}
+                                    </p>
+                                  </div>
+
+                                  <span className="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-medium uppercase tracking-[0.16em] text-slate-700">
+                                    {formatProgressPercentage(update.progress)}
+                                  </span>
+                                </div>
+
+                                <div className="mt-3 text-xs font-medium uppercase tracking-[0.18em] text-slate-500">
+                                  {formatDate(update.update_date)}
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   </article>
                 )
