@@ -1,4 +1,4 @@
-import * as Icons from "lucide-react"
+﻿import * as Icons from "lucide-react"
 import type { LucideIcon } from "lucide-react"
 
 type SiteItem = {
@@ -36,7 +36,7 @@ export const siteElements: SiteItem[] = [
   {
     id: "site-house",
     name: "Main Residence Footprint",
-    area: "218 m2",
+    area: "218 m²",
     description: "Concrete floor slab-on-grade with full height glass and wood-clad profiles.",
     color: "#334155",
     coords: { x: 190, y: 70, w: 120, h: 110 },
@@ -44,7 +44,7 @@ export const siteElements: SiteItem[] = [
   {
     id: "site-pool",
     name: "Pool & Wetdeck System",
-    area: "98 m2",
+    area: "98 m²",
     description: "Quartz-wash infinity pool lined with dark basalt structural tiles.",
     color: "#0ea5e9",
     coords: { x: 210, y: 190, w: 100, h: 60 },
@@ -52,7 +52,7 @@ export const siteElements: SiteItem[] = [
   {
     id: "site-car",
     name: "Gravel Driveway & Parking",
-    area: "85 m2",
+    area: "85 m²",
     description: "Permeable flagstones and fine river gravel with space for charging systems.",
     color: "#64748b",
     coords: { x: 140, y: 60, w: 45, h: 100 },
@@ -60,7 +60,7 @@ export const siteElements: SiteItem[] = [
   {
     id: "site-garden",
     name: "Landscaped Buffers",
-    area: "340 m2",
+    area: "340 m²",
     description: "Drought-tolerant native plant beds, high conifers, and local stone retaining lines.",
     color: "#22c55e",
     coords: { x: 40, y: 40, w: 400, h: 260 },
@@ -68,7 +68,7 @@ export const siteElements: SiteItem[] = [
   {
     id: "site-lounge",
     name: "Sunken Gathering Terrace",
-    area: "42 m2",
+    area: "42 m²",
     description: "Recessed conversation node crafted in dry-pour concrete with in-ground chimney.",
     color: "#f97316",
     coords: { x: 320, y: 190, w: 60, h: 60 },

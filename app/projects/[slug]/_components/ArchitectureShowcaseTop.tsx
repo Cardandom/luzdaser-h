@@ -22,7 +22,7 @@ export function ArchitectureShowcaseTop({ slug }: ArchitectureShowcaseProps) {
   const heroImage = project.picture
 
   return (
-    <section className="luxury-shell mt-6 sm:mt-8">
+    <section className="luxury-shell mt-14 sm:mt-16">
       <div className="rounded-4xl border-0 bg-none bg-white px-4 py-10 shadow-none backdrop-blur-none sm:px-8 lg:px-10">
         <div className="mx-auto max-w-7xl space-y-10">
           <header className="space-y-3 text-center">
@@ -93,6 +93,7 @@ export function ArchitectureShowcaseTop({ slug }: ArchitectureShowcaseProps) {
                     alt={project.title}
                     fill
                     sizes="(min-width: 1280px) 50vw, 100vw"
+                    loading="eager"
                     className="object-cover transition-transform duration-700 group-hover:scale-[1.02]"
                     style={{ objectPosition: project.objectPosition }}
                   />
@@ -136,7 +137,7 @@ export function ArchitectureShowcaseTop({ slug }: ArchitectureShowcaseProps) {
                 </div>
               </div>
 
-              {project.slug === "lucas-boutique" && (
+              {(project.slug === "lucas-boutique" || project.slug === "oliver-boutique") && (
                 <div className="group relative overflow-hidden rounded-xl border border-slate-200 bg-white p-2 shadow-md transition-all duration-300 hover:shadow-xl">
                   <div className="relative aspect-video overflow-hidden rounded-lg bg-slate-100 xl:aspect-5/3">
                     <Image

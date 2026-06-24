@@ -1,4 +1,4 @@
-import {
+﻿import {
   Camera,
   DoorOpen,
   House,
@@ -24,6 +24,7 @@ import {
   ShieldCheckIcon,
   RockingChair,
   Gem,
+  Beef,
   type LucideIcon,
 } from "lucide-react"
 
@@ -141,7 +142,7 @@ export const projects: Project[] = [
       {
         icon: DatabaseZap,
         label: "Septic Tank",
-        description: "Individual septic tank of 12 m2.",
+        description: "Individual septic tank of 12 m².",
       },
     ],
     highlightsNote: {
@@ -185,7 +186,7 @@ export const projects: Project[] = [
     slug: "oliver-boutique",
     title: "Oliver Boutique",
     price: "$350,000 USD",
-    picture: "/Oliver.webp",
+    picture: "/OliverHouse.webp",
     objectPosition: "center center",
     summary:
       "A more expansive villa composition with a softer palette, garden framing, and a relaxed outdoor rhythm.",
@@ -196,22 +197,70 @@ export const projects: Project[] = [
     intro:
       "Oliver Boutique balances privacy and openness with generous outdoor living, a calm interior atmosphere, and a design that feels quietly refined throughout the day.",
     features: [
-      { icon: House, label: "Elegant family layout" },
-      { icon: Sparkles, label: "Refined finishes" },
-      { icon: Bath, label: "Outdoor lounge and pool" },
-      { icon: CookingPot, label: "Quiet residential feel" },
-      { icon: BedDouble, label: "Airy interior light" },
+      { icon: House, label: "130 m² House" },
+      { icon: BedDouble, label: "Three/Four Bedrooms" },
+      { icon: Bath, label: "Three bathrooms" },
+      { icon: CookingPot, label: "Luxury Kitchen With Electricity" },
+      { icon: Sprout, label: "Minimalist Design" },
+      { icon: AirVent, label: "Air Conditioning" },
+      { icon: WavesLadder, label: "15 m² Pool Area" },
+      { icon: Beef, label: "BBQ Area"},
+      { icon: BrickWall, label: "Perimeter Walls" },
+      { icon: ShieldCheckIcon, label: "Quality" },
+      { icon: RockingChair, label: "Confort" },
+      { icon: Gem, label: "Exclusiveness" }
     ],
     highlights: [
-      { icon: Camera, label: "Evening arrival composition" },
-      { icon: LayoutPanelTop, label: "Wide indoor-outdoor transitions" },
-      { icon: DoorOpen, label: "Protected entry court" },
-      { icon: Ruler, label: "Balanced proportions" },
+      {
+        icon: PanelTopOpen,
+        label: "PVC Windows",
+        description: "Double glazing, thermal and acoustic insulation, reinforced security.",
+      },
+      {
+        icon: DoorOpen,
+        label: "Quality Doors",
+        description:
+          "PVC security front door with multipoint lock and semi-solid interior doors with quality hardware.",
+      },
+      {
+        icon: Grid2x2,
+        label: "Reversed Floors",
+        description:
+          "High-quality porcelain throughout the house and non-slip ceramic in bathrooms and showers.",
+      },
+      {
+        icon: PlugZap,
+        label: "Safe Electrical Installation",
+        description:
+          "NEN 1010 compliant system with panel up to 23 kVA (110V/220V) and TV points in living room and bedrooms.",
+      },
+      {
+        icon: BrickWall,
+        label: "Robust Structure",
+        description:
+          "Solid concrete block construction with columns and tie beams, and a wooden roof with waterproof asphalt membrane.",
+      },
+      {
+        icon: Building2,
+        label: "Urban Complex",
+        description:
+          "Urban development with a children's recreational park and sidewalks around the entire complex.",
+      },
+      {
+        icon: Fence,
+        label: "Perimeter Wall",
+        description: "6-inch solid block wall around the lot, built 2 meters high.",
+      },
+      {
+        icon: DatabaseZap,
+        label: "Septic Tank",
+        description: "Individual septic tank of 12 m².",
+      },
     ],
     tiles: [
       {
         title: "Arrival view",
-        picture: "/Oliver.webp",
+        picture: "/OliverHouse.webp",
         alt: "Exterior evening view of Oliver Boutique",
         objectPosition: "center center",
         caption: "Soft lighting and a resort-style welcome.",
