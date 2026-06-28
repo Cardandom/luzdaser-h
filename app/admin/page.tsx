@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, type FormEvent } from "react"
 import { useRouter } from "next/navigation"
 
 import { supabase } from "@/lib/supabase/client"
@@ -94,6 +94,14 @@ export default function AdminOverviewPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
+  const [refreshIndex, setRefreshIndex] = useState(0)
+  const [buyerFullName, setBuyerFullName] = useState("")
+  const [buyerEmail, setBuyerEmail] = useState("")
+  const [buyerPhone, setBuyerPhone] = useState("")
+  const [buyerPassword, setBuyerPassword] = useState("")
+  const [isCreatingBuyer, setIsCreatingBuyer] = useState(false)
+  const [buyerError, setBuyerError] = useState<string | null>(null)
+  const [buyerSuccess, setBuyerSuccess] = useState<string | null>(null)
 
   useEffect(() => {
     let isActive = true
@@ -203,7 +211,62 @@ export default function AdminOverviewPage() {
     return () => {
       isActive = false
     }
-  }, [router])
+  }, [refreshIndex, router])
+
+  const handleCreateBuyer = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    setBuyerError(null)
+    setBuyerSuccess(null)
+    setIsCreatingBuyer(true)
+
+    try {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession()
+
+      if (!session) {
+        router.replace("/client-login")
+        return
+      }
+
+      const response = await fetch("/api/admin/buyers", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({
+          full_name: buyerFullName,
+          email: buyerEmail,
+          phone: buyerPhone,
+          password: buyerPassword,
+        }),
+      })
+
+      const payload = (await response.json().catch(() => null)) as
+        | { buyer?: unknown; error?: string }
+        | null
+
+      if (!response.ok) {
+        throw new Error(payload?.error ?? "Could not create the buyer.")
+      }
+
+      setBuyerFullName("")
+      setBuyerEmail("")
+      setBuyerPhone("")
+      setBuyerPassword("")
+      setBuyerSuccess("Buyer created successfully.")
+      setRefreshIndex((value) => value + 1)
+    } catch (caughtError) {
+      setBuyerError(
+        caughtError instanceof Error
+          ? caughtError.message
+          : "Could not create the buyer.",
+      )
+    } finally {
+      setIsCreatingBuyer(false)
+    }
+  }
 
   const handleLogout = async () => {
     setLoading(true)
@@ -286,6 +349,129 @@ export default function AdminOverviewPage() {
               {error}
             </div>
           ) : null}
+        </section>
+
+        <section className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+            <div className="space-y-2">
+              <p className="text-xs font-semibold uppercase tracking-[0.28em] text-slate-500">
+                Create buyer
+              </p>
+              <h2 className="text-2xl font-semibold tracking-tight text-slate-950">
+                Secure buyer creation
+              </h2>
+              <p className="max-w-2xl text-sm leading-6 text-slate-600">
+                Temporary admin form for creating authenticated buyer accounts.
+              </p>
+            </div>
+          </div>
+
+          <form className="mt-6 grid gap-4 md:grid-cols-2" onSubmit={handleCreateBuyer}>
+            <div className="space-y-2">
+              <label
+                htmlFor="buyer-full-name"
+                className="text-sm font-medium text-slate-700"
+              >
+                Full name
+              </label>
+              <input
+                id="buyer-full-name"
+                type="text"
+                value={buyerFullName}
+                onChange={(event) => setBuyerFullName(event.target.value)}
+                className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
+                placeholder="Buyer name"
+                required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label
+                htmlFor="buyer-email"
+                className="text-sm font-medium text-slate-700"
+              >
+                Email
+              </label>
+              <input
+                id="buyer-email"
+                type="email"
+                autoComplete="email"
+                value={buyerEmail}
+                onChange={(event) => setBuyerEmail(event.target.value)}
+                className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
+                placeholder="buyer@example.com"
+                required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label
+                htmlFor="buyer-phone"
+                className="text-sm font-medium text-slate-700"
+              >
+                Phone
+              </label>
+              <input
+                id="buyer-phone"
+                type="tel"
+                autoComplete="tel"
+                value={buyerPhone}
+                onChange={(event) => setBuyerPhone(event.target.value)}
+                className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
+                placeholder="+1 555 000 0000"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label
+                htmlFor="buyer-password"
+                className="text-sm font-medium text-slate-700"
+              >
+                Temporary password
+              </label>
+              <input
+                id="buyer-password"
+                type="password"
+                autoComplete="new-password"
+                value={buyerPassword}
+                onChange={(event) => setBuyerPassword(event.target.value)}
+                className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
+                placeholder="Temporary password"
+                required
+              />
+            </div>
+
+            {buyerError ? (
+              <div
+                className="md:col-span-2 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700"
+                aria-live="polite"
+              >
+                {buyerError}
+              </div>
+            ) : null}
+
+            {buyerSuccess ? (
+              <div
+                className="md:col-span-2 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700"
+                aria-live="polite"
+              >
+                {buyerSuccess}
+              </div>
+            ) : null}
+
+            <div className="md:col-span-2 flex flex-wrap items-center gap-3">
+              <button
+                type="submit"
+                disabled={isCreatingBuyer}
+                className="inline-flex items-center justify-center rounded-full bg-linear-to-b from-luxury-gold-soft to-luxury-gold px-5 py-3 text-sm font-semibold text-stone-950 shadow-lg transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-70 disabled:hover:translate-y-0"
+              >
+                {isCreatingBuyer ? "Creating buyer..." : "Create Buyer"}
+              </button>
+              <span className="text-sm text-slate-500">
+                This creates a client auth user and profile row.
+              </span>
+            </div>
+          </form>
         </section>
 
         <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
