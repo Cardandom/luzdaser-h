@@ -17,7 +17,9 @@ type BuyerProfileRow = {
   id: string | number
   full_name: string | null
   email: string | null
+  phone: string | null
   role: string | null
+  created_at: string | null
 }
 
 type PropertyRow = {
@@ -159,7 +161,7 @@ export default function AdminOverviewPage() {
             .order("created_at", { ascending: false }),
           supabase
             .from("profiles")
-            .select("id, full_name, email, role")
+            .select("id, full_name, email, phone, role, created_at")
             .eq("role", "client")
             .order("full_name", { ascending: true }),
           supabase
@@ -295,6 +297,20 @@ export default function AdminOverviewPage() {
     acc[String(buyer.id)] = buyer
     return acc
   }, {})
+
+  const propertyCountByBuyerId = properties.reduce<Record<string, number>>(
+    (acc, property) => {
+      const buyerId = String(property.buyer_id ?? "")
+
+      if (!buyerId) {
+        return acc
+      }
+
+      acc[buyerId] = (acc[buyerId] ?? 0) + 1
+      return acc
+    },
+    {},
+  )
 
   const updateCountByPropertyId = propertyUpdates.reduce<
     Record<string, number>
@@ -472,6 +488,91 @@ export default function AdminOverviewPage() {
               </span>
             </div>
           </form>
+        </section>
+
+        <section className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+            <div className="space-y-2">
+              <p className="text-xs font-semibold uppercase tracking-[0.28em] text-slate-500">
+                Buyers
+              </p>
+              <h2 className="text-2xl font-semibold tracking-tight text-slate-950">
+                Client accounts
+              </h2>
+              <p className="max-w-2xl text-sm leading-6 text-slate-600">
+                Overview of buyers currently stored in the system and their
+                assigned properties.
+              </p>
+            </div>
+          </div>
+
+          {buyers.length === 0 ? (
+            <div className="mt-6 rounded-2xl border border-slate-200 bg-slate-50 px-5 py-4 text-sm text-slate-600">
+              No buyers created yet.
+            </div>
+          ) : (
+            <div className="mt-6 grid gap-4 lg:grid-cols-2">
+              {buyers.map((buyer) => {
+                const assignedPropertyCount =
+                  propertyCountByBuyerId[String(buyer.id)] ?? 0
+
+                return (
+                  <article
+                    key={String(buyer.id)}
+                    className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm"
+                  >
+                    <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                      <div className="space-y-1">
+                        <h3 className="text-xl font-semibold tracking-tight text-slate-950">
+                          {formatValue(buyer.full_name)}
+                        </h3>
+                        <p className="text-sm text-slate-600">
+                          {formatValue(buyer.email)}
+                        </p>
+                      </div>
+
+                      <span className="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-medium uppercase tracking-[0.18em] text-slate-600">
+                        Buyer
+                      </span>
+                    </div>
+
+                    <div className="mt-6 grid gap-4 sm:grid-cols-2">
+                      <div>
+                        <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">
+                          Phone
+                        </p>
+                        <p className="mt-2 text-sm text-slate-700">
+                          {formatValue(buyer.phone)}
+                        </p>
+                      </div>
+
+                      <div>
+                        <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">
+                          Created
+                        </p>
+                        <p className="mt-2 text-sm text-slate-700">
+                          {formatDate(buyer.created_at)}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="mt-6 border-t border-slate-100 pt-4">
+                      <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">
+                        Assigned properties
+                      </p>
+                      <p className="mt-2 text-sm text-slate-700">
+                        {assignedPropertyCount > 0
+                          ? `${assignedPropertyCount} assigned ${
+                              assignedPropertyCount === 1 ? "property" : "properties"
+                            }`
+                          : "No properties assigned"}
+                      </p>
+                    </div>
+                  </article>
+                )
+              })}
+            </div>
+          )}
         </section>
 
         <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
