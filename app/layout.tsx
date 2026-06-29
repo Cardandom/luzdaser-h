@@ -1,8 +1,7 @@
 import type { Metadata } from "next"
 import type { ReactNode } from "react"
 import { Geist, Geist_Mono } from "next/font/google"
-import { SiteHeader } from "@/components/site/site-header"
-import { WhatsAppButton } from "@/components/site/whatsapp-button"
+import { AppChrome } from "@/components/site/app-chrome"
 import "./globals.css"
 
 const geistSans = Geist({
@@ -33,9 +32,8 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} scroll-smooth`}
     >
       <body className="min-h-screen bg-background text-foreground antialiased">
-        <SiteHeader />
+        <AppChrome />
         {children}
-        <WhatsAppButton />
       </body>
     </html>
   )

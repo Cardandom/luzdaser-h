@@ -4,7 +4,6 @@ import { CtaSection } from "@/components/site/cta-section"
 import { FeaturedProjectsSection } from "@/components/site/featured-projects-section"
 import { GallerySection } from "@/components/site/gallery-section"
 import { HeroSection } from "@/components/site/hero-section"
-import { PaymentSection } from "@/components/site/payment-section"
 import { SiteFooter } from "@/components/site/site-footer"
 
 export default function HomePage() {
@@ -18,7 +17,6 @@ export default function HomePage() {
       <HeroSection />
       <GallerySection />
       <CtaSection />
-      <PaymentSection />
       <FeaturedProjectsSection />
       <BenefitsSection />
       <ContactSection />

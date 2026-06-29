@@ -41,6 +41,11 @@ type PropertyUpdateRow = {
   created_at?: string | null
 }
 
+type PropertyFileRow = {
+  id: string | number
+  property_id: string | number | null
+}
+
 function formatValue(value: string | number | null | undefined) {
   if (value === null || value === undefined || value === "") {
     return "N/A"
@@ -100,12 +105,23 @@ function getTodayDateValue() {
   return localDate.toISOString().slice(0, 10)
 }
 
+function sanitizeFileName(fileName: string) {
+  return fileName
+    .trim()
+    .replace(/\s+/g, "-")
+    .replace(/[^a-zA-Z0-9._-]/g, "")
+    .replace(/-+/g, "-")
+    .replace(/^[-.]+|[-.]+$/g, "")
+    .toLowerCase()
+}
+
 export default function AdminOverviewPage() {
   const router = useRouter()
   const [adminProfile, setAdminProfile] = useState<AdminProfileRow | null>(null)
   const [buyers, setBuyers] = useState<BuyerProfileRow[]>([])
   const [properties, setProperties] = useState<PropertyRow[]>([])
   const [propertyUpdates, setPropertyUpdates] = useState<PropertyUpdateRow[]>([])
+  const [propertyFiles, setPropertyFiles] = useState<PropertyFileRow[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
@@ -120,7 +136,7 @@ export default function AdminOverviewPage() {
   const [propertyNumber, setPropertyNumber] = useState("")
   const [propertyBuyerId, setPropertyBuyerId] = useState("")
   const [propertyProgress, setPropertyProgress] = useState("0")
-  const [propertyStatus, setPropertyStatus] = useState("En construcción")
+  const [propertyStatus, setPropertyStatus] = useState("Under construction")
   const [isCreatingProperty, setIsCreatingProperty] = useState(false)
   const [propertyError, setPropertyError] = useState<string | null>(null)
   const [propertySuccess, setPropertySuccess] = useState<string | null>(null)
@@ -136,6 +152,16 @@ export default function AdminOverviewPage() {
   const [propertyUpdateSuccess, setPropertyUpdateSuccess] = useState<
     string | null
   >(null)
+  const [propertyFilePropertyId, setPropertyFilePropertyId] = useState("")
+  const [propertyFileType, setPropertyFileType] = useState<"image" | "pdf">("image")
+  const [propertyFileDescription, setPropertyFileDescription] = useState("")
+  const [selectedPropertyFile, setSelectedPropertyFile] = useState<File | null>(null)
+  const [propertyFileInputKey, setPropertyFileInputKey] = useState(0)
+  const [isUploadingPropertyFile, setIsUploadingPropertyFile] = useState(false)
+  const [propertyFileError, setPropertyFileError] = useState<string | null>(null)
+  const [propertyFileSuccess, setPropertyFileSuccess] = useState<string | null>(
+    null,
+  )
 
   useEffect(() => {
     let isActive = true
@@ -155,7 +181,7 @@ export default function AdminOverviewPage() {
         }
 
         if (userError || !user) {
-          router.replace("/client-login")
+          router.replace("/admin-login")
           return
         }
 
@@ -175,7 +201,7 @@ export default function AdminOverviewPage() {
 
         if (!profileData) {
           await supabase.auth.signOut()
-          router.replace("/client-login")
+          router.replace("/admin-login")
           return
         }
 
@@ -186,7 +212,12 @@ export default function AdminOverviewPage() {
 
         setAdminProfile(profileData as AdminProfileRow)
 
-        const [propertiesResult, buyersResult, updatesResult] = await Promise.all([
+        const [
+          propertiesResult,
+          buyersResult,
+          updatesResult,
+          propertyFilesResult,
+        ] = await Promise.all([
           supabase
             .from("properties")
             .select("id, property_number, buyer_id, progress, status, created_at")
@@ -198,6 +229,10 @@ export default function AdminOverviewPage() {
             .order("full_name", { ascending: true }),
           supabase
             .from("property_updates")
+            .select("id, property_id")
+            .order("created_at", { ascending: false }),
+          supabase
+            .from("property_files")
             .select("id, property_id")
             .order("created_at", { ascending: false }),
         ])
@@ -218,9 +253,14 @@ export default function AdminOverviewPage() {
           throw updatesResult.error
         }
 
+        if (propertyFilesResult.error) {
+          throw propertyFilesResult.error
+        }
+
         setProperties((propertiesResult.data ?? []) as PropertyRow[])
         setBuyers((buyersResult.data ?? []) as BuyerProfileRow[])
         setPropertyUpdates((updatesResult.data ?? []) as PropertyUpdateRow[])
+        setPropertyFiles((propertyFilesResult.data ?? []) as PropertyFileRow[])
       } catch (caughtError) {
         if (isActive) {
           setError(
@@ -232,6 +272,7 @@ export default function AdminOverviewPage() {
           setProperties([])
           setBuyers([])
           setPropertyUpdates([])
+          setPropertyFiles([])
         }
       } finally {
         if (isActive) {
@@ -259,7 +300,7 @@ export default function AdminOverviewPage() {
       } = await supabase.auth.getSession()
 
       if (!session) {
-        router.replace("/client-login")
+        router.replace("/admin-login")
         return
       }
 
@@ -311,7 +352,7 @@ export default function AdminOverviewPage() {
     try {
       const propertyNumberValue = propertyNumber.trim()
       const buyerIdValue = propertyBuyerId.trim()
-      const statusValue = propertyStatus.trim() || "En construcción"
+      const statusValue = propertyStatus.trim() || "Under construction"
       const progressValue = Number.parseInt(propertyProgress, 10)
 
       if (!propertyNumberValue) {
@@ -331,7 +372,7 @@ export default function AdminOverviewPage() {
       } = await supabase.auth.getSession()
 
       if (!session) {
-        router.replace("/client-login")
+        router.replace("/admin-login")
         return
       }
 
@@ -358,7 +399,7 @@ export default function AdminOverviewPage() {
       setPropertyNumber("")
       setPropertyBuyerId("")
       setPropertyProgress("0")
-      setPropertyStatus("En construcción")
+      setPropertyStatus("Under construction")
       setPropertySuccess("Property created successfully.")
       setRefreshIndex((value) => value + 1)
     } catch (caughtError) {
@@ -408,7 +449,7 @@ export default function AdminOverviewPage() {
       } = await supabase.auth.getSession()
 
       if (!session) {
-        router.replace("/client-login")
+        router.replace("/admin-login")
         return
       }
 
@@ -470,6 +511,115 @@ export default function AdminOverviewPage() {
     }
   }
 
+  const handleUploadPropertyFile = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    setPropertyFileError(null)
+    setPropertyFileSuccess(null)
+    setIsUploadingPropertyFile(true)
+
+    let uploadedFilePath: string | null = null
+
+    try {
+      const propertyIdValue = propertyFilePropertyId.trim()
+      const descriptionValue = propertyFileDescription.trim()
+      const file = selectedPropertyFile
+
+      if (!propertyIdValue) {
+        throw new Error("Please select a property.")
+      }
+
+      if (!file) {
+        throw new Error("Please choose a file to upload.")
+      }
+
+      if (!descriptionValue) {
+        throw new Error("Please add a description.")
+      }
+
+      const isPdfFile = propertyFileType === "pdf"
+      const isImageFile = propertyFileType === "image"
+      const fileMimeType = file.type.toLowerCase()
+
+      if (isPdfFile && fileMimeType !== "application/pdf") {
+        throw new Error("Please choose a PDF file for the PDF option.")
+      }
+
+      if (isImageFile && !fileMimeType.startsWith("image/")) {
+        throw new Error("Please choose an image file for the image option.")
+      }
+
+      const {
+        data: { session },
+      } = await supabase.auth.getSession()
+
+      if (!session) {
+        router.replace("/admin-login")
+        return
+      }
+
+      const safeFileName = sanitizeFileName(file.name) || "property-file"
+      const filePath = `properties/${propertyIdValue}/${Date.now()}-${safeFileName}`
+      uploadedFilePath = filePath
+
+      const { error: uploadError } = await supabase.storage
+        .from("property-files")
+        .upload(filePath, file, {
+          contentType:
+            file.type || (isPdfFile ? "application/pdf" : "application/octet-stream"),
+          upsert: false,
+        })
+
+      if (uploadError) {
+        throw uploadError
+      }
+
+      const { data: insertedFile, error: insertFileError } = await supabase
+        .from("property_files")
+        .insert({
+          property_id: propertyIdValue,
+          file_name: file.name,
+          file_path: filePath,
+          file_type: propertyFileType,
+          description: descriptionValue,
+        })
+        .select("id, property_id")
+        .single()
+
+      if (insertFileError) {
+        throw insertFileError
+      }
+
+      if (!insertedFile) {
+        throw new Error("Could not save the uploaded file.")
+      }
+
+      setPropertyFiles((current) => [insertedFile as PropertyFileRow, ...current])
+      setPropertyFilePropertyId("")
+      setPropertyFileType("image")
+      setPropertyFileDescription("")
+      setSelectedPropertyFile(null)
+      setPropertyFileInputKey((value) => value + 1)
+      setPropertyFileSuccess("Property file uploaded successfully.")
+      setRefreshIndex((value) => value + 1)
+    } catch (caughtError) {
+      if (uploadedFilePath) {
+        try {
+          await supabase.storage.from("property-files").remove([uploadedFilePath])
+        } catch {
+          // Best-effort cleanup; the primary upload error is still shown below.
+        }
+      }
+
+      setPropertyFileError(
+        caughtError instanceof Error
+          ? caughtError.message
+          : "Could not upload the property file.",
+      )
+    } finally {
+      setIsUploadingPropertyFile(false)
+    }
+  }
+
   const handleLogout = async () => {
     setLoading(true)
     setError(null)
@@ -481,7 +631,7 @@ export default function AdminOverviewPage() {
         throw signOutError
       }
 
-      router.replace("/client-login")
+      router.replace("/admin-login")
     } catch (caughtError) {
       setError(
         caughtError instanceof Error
@@ -525,33 +675,53 @@ export default function AdminOverviewPage() {
     return acc
   }, {})
 
+  const fileCountByPropertyId = propertyFiles.reduce<Record<string, number>>(
+    (acc, propertyFile) => {
+      const propertyId = String(propertyFile.property_id ?? "")
+
+      if (!propertyId) {
+        return acc
+      }
+
+      acc[propertyId] = (acc[propertyId] ?? 0) + 1
+      return acc
+    },
+    {},
+  )
+
   const totalProperties = properties.length
   const totalBuyers = buyers.length
   const totalUpdates = propertyUpdates.length
+  const totalFiles = propertyFiles.length
+  const primaryButtonClass =
+    "inline-flex items-center justify-center rounded-full bg-linear-to-b from-luxury-gold-soft to-luxury-gold px-5 py-3 text-sm font-semibold text-stone-950 shadow-lg transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-70 disabled:hover:translate-y-0"
+  const secondaryButtonClass =
+    "inline-flex items-center justify-center rounded-full border border-slate-200 bg-white px-5 py-3 text-sm font-medium text-slate-900 shadow-sm transition hover:border-slate-400 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-70"
 
   return (
-    <main className="min-h-screen bg-slate-50 px-4 py-12 text-slate-900 sm:px-6 lg:px-8">
-      <div className="mx-auto flex w-full max-w-7xl flex-col gap-6">
-        <section className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
-          <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
-            <div className="space-y-3">
-              <p className="text-xs font-semibold uppercase tracking-[0.28em] text-slate-500">
+    <main className="min-h-screen bg-gradient-to-b from-stone-50 via-white to-slate-50 px-4 py-8 text-slate-900 sm:px-6 lg:px-8 lg:py-12">
+      <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 sm:gap-8">
+        <section className="luxury-panel rounded-3xl p-6 sm:p-8 lg:p-10">
+          <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+            <div className="space-y-4">
+              <span className="luxury-eyebrow inline-flex items-center rounded-full border border-luxury-border bg-white px-3 py-1.5 text-[0.7rem] font-semibold text-slate-600">
                 Admin overview
-              </p>
-              <h1 className="text-3xl font-semibold tracking-tight text-slate-950">
-                Reina Sophia Admin Dashboard
-              </h1>
-              <p className="max-w-2xl text-sm leading-6 text-slate-600">
-                Temporary overview for checking access, counts, and property
-                records before the full dashboard is built.
-              </p>
+              </span>
+              <div className="space-y-3">
+                <h1 className="luxury-title-sm text-slate-950">
+                  Reina Sophia Admin Dashboard
+                </h1>
+                <p className="luxury-copy max-w-3xl text-sm sm:text-base">
+                  Manage buyers, properties, construction updates, and files.
+                </p>
+              </div>
             </div>
 
             <button
               type="button"
               onClick={handleLogout}
               disabled={loading}
-              className="inline-flex items-center justify-center rounded-full border border-slate-200 bg-white px-5 py-3 text-sm font-medium text-slate-900 transition hover:border-slate-400 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-70"
+              className={secondaryButtonClass}
             >
               {loading ? "Signing out..." : "Log out"}
             </button>
@@ -565,6 +735,60 @@ export default function AdminOverviewPage() {
               {error}
             </div>
           ) : null}
+        </section>
+
+        <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
+          <div className="luxury-card rounded-3xl p-6">
+            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-500">
+              Admin
+            </p>
+            <h2 className="mt-3 text-xl font-semibold tracking-tight text-slate-950">
+              {formatValue(adminProfile?.full_name)}
+            </h2>
+            <p className="mt-2 text-sm text-slate-600">
+              {formatValue(adminProfile?.email)}
+            </p>
+          </div>
+
+          <div className="luxury-card rounded-3xl p-6">
+            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-500">
+              Properties
+            </p>
+            <p className="mt-3 text-4xl font-semibold tracking-tight text-slate-950">
+              {totalProperties}
+            </p>
+            <p className="mt-2 text-sm text-slate-600">Active records</p>
+          </div>
+
+          <div className="luxury-card rounded-3xl p-6">
+            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-500">
+              Buyers
+            </p>
+            <p className="mt-3 text-4xl font-semibold tracking-tight text-slate-950">
+              {totalBuyers}
+            </p>
+            <p className="mt-2 text-sm text-slate-600">Client accounts</p>
+          </div>
+
+          <div className="luxury-card rounded-3xl p-6">
+            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-500">
+              Updates
+            </p>
+            <p className="mt-3 text-4xl font-semibold tracking-tight text-slate-950">
+              {totalUpdates}
+            </p>
+            <p className="mt-2 text-sm text-slate-600">Timeline entries</p>
+          </div>
+
+          <div className="luxury-card rounded-3xl p-6">
+            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-500">
+              Files
+            </p>
+            <p className="mt-3 text-4xl font-semibold tracking-tight text-slate-950">
+              {totalFiles}
+            </p>
+            <p className="mt-2 text-sm text-slate-600">Private uploads</p>
+          </div>
         </section>
 
         <section className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
@@ -679,7 +903,7 @@ export default function AdminOverviewPage() {
               <button
                 type="submit"
                 disabled={isCreatingBuyer}
-                className="inline-flex items-center justify-center rounded-full bg-linear-to-b from-luxury-gold-soft to-luxury-gold px-5 py-3 text-sm font-semibold text-stone-950 shadow-lg transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-70 disabled:hover:translate-y-0"
+                className={primaryButtonClass}
               >
                 {isCreatingBuyer ? "Creating buyer..." : "Create Buyer"}
               </button>
@@ -812,7 +1036,7 @@ export default function AdminOverviewPage() {
               <button
                 type="submit"
                 disabled={isCreatingProperty || buyers.length === 0}
-                className="inline-flex items-center justify-center rounded-full bg-linear-to-b from-luxury-gold-soft to-luxury-gold px-5 py-3 text-sm font-semibold text-stone-950 shadow-lg transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-70 disabled:hover:translate-y-0"
+                className={primaryButtonClass}
               >
                 {isCreatingProperty ? "Creating property..." : "Create Property"}
               </button>
@@ -972,7 +1196,7 @@ export default function AdminOverviewPage() {
               <button
                 type="submit"
                 disabled={isCreatingPropertyUpdate || properties.length === 0}
-                className="inline-flex items-center justify-center rounded-full bg-linear-to-b from-luxury-gold-soft to-luxury-gold px-5 py-3 text-sm font-semibold text-stone-950 shadow-lg transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-70 disabled:hover:translate-y-0"
+                className={primaryButtonClass}
               >
                 {isCreatingPropertyUpdate
                   ? "Creating update..."
@@ -980,6 +1204,140 @@ export default function AdminOverviewPage() {
               </button>
               <span className="text-sm text-slate-500">
                 This updates the timeline and keeps property progress in sync.
+              </span>
+            </div>
+          </form>
+        </section>
+
+        <section className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+            <div className="space-y-2">
+              <p className="text-xs font-semibold uppercase tracking-[0.28em] text-slate-500">
+                Upload property file
+              </p>
+              <h2 className="text-2xl font-semibold tracking-tight text-slate-950">
+                Add images or PDFs
+              </h2>
+              <p className="max-w-2xl text-sm leading-6 text-slate-600">
+                Temporary admin form for attaching a private file to a property.
+              </p>
+            </div>
+          </div>
+
+          <form
+            className="mt-6 grid gap-4 md:grid-cols-2"
+            onSubmit={handleUploadPropertyFile}
+          >
+            <div className="space-y-2">
+              <label
+                htmlFor="property-file-property"
+                className="text-sm font-medium text-slate-700"
+              >
+                Property
+              </label>
+              <select
+                id="property-file-property"
+                value={propertyFilePropertyId}
+                onChange={(event) => setPropertyFilePropertyId(event.target.value)}
+                className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
+                required
+                disabled={properties.length === 0}
+              >
+                <option value="">Select a property</option>
+                {properties.map((property) => (
+                  <option key={String(property.id)} value={String(property.id)}>
+                    {formatValue(property.property_number)}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="space-y-2">
+              <label
+                htmlFor="property-file-type"
+                className="text-sm font-medium text-slate-700"
+              >
+                File type
+              </label>
+              <select
+                id="property-file-type"
+                value={propertyFileType}
+                onChange={(event) =>
+                  setPropertyFileType(event.target.value as "image" | "pdf")
+                }
+                className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
+                required
+              >
+                <option value="image">image</option>
+                <option value="pdf">pdf</option>
+              </select>
+            </div>
+
+            <div className="space-y-2">
+              <label
+                htmlFor="property-file-upload"
+                className="text-sm font-medium text-slate-700"
+              >
+                File
+              </label>
+              <input
+                key={propertyFileInputKey}
+                id="property-file-upload"
+                type="file"
+                accept="image/*,application/pdf"
+                onChange={(event) => {
+                  setSelectedPropertyFile(event.target.files?.[0] ?? null)
+                }}
+                className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 file:mr-4 file:rounded-full file:border-0 file:bg-slate-100 file:px-4 file:py-2 file:text-sm file:font-medium file:text-slate-700 hover:file:bg-slate-200"
+                required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label
+                htmlFor="property-file-description"
+                className="text-sm font-medium text-slate-700"
+              >
+                Description
+              </label>
+              <textarea
+                id="property-file-description"
+                value={propertyFileDescription}
+                onChange={(event) => setPropertyFileDescription(event.target.value)}
+                className="min-h-28 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
+                placeholder="Short description for this file"
+                required
+              />
+            </div>
+
+            {propertyFileError ? (
+              <div
+                className="md:col-span-2 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700"
+                aria-live="polite"
+              >
+                {propertyFileError}
+              </div>
+            ) : null}
+
+            {propertyFileSuccess ? (
+              <div
+                className="md:col-span-2 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700"
+                aria-live="polite"
+              >
+                {propertyFileSuccess}
+              </div>
+            ) : null}
+
+            <div className="md:col-span-2 flex flex-wrap items-center gap-3">
+              <button
+                type="submit"
+                disabled={isUploadingPropertyFile || properties.length === 0}
+                className={primaryButtonClass}
+              >
+                {isUploadingPropertyFile ? "Uploading file..." : "Upload Property File"}
+              </button>
+              <span className="text-sm text-slate-500">
+                Files upload privately to Supabase Storage.
               </span>
             </div>
           </form>
@@ -1070,47 +1428,6 @@ export default function AdminOverviewPage() {
           )}
         </section>
 
-        <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-500">
-              Admin
-            </p>
-            <h2 className="mt-3 text-xl font-semibold text-slate-950">
-              {formatValue(adminProfile?.full_name)}
-            </h2>
-            <p className="mt-2 text-sm text-slate-600">
-              {formatValue(adminProfile?.email)}
-            </p>
-          </div>
-
-          <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-500">
-              Properties
-            </p>
-            <p className="mt-3 text-4xl font-semibold tracking-tight text-slate-950">
-              {totalProperties}
-            </p>
-          </div>
-
-          <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-500">
-              Buyers
-            </p>
-            <p className="mt-3 text-4xl font-semibold tracking-tight text-slate-950">
-              {totalBuyers}
-            </p>
-          </div>
-
-          <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-500">
-              Updates
-            </p>
-            <p className="mt-3 text-4xl font-semibold tracking-tight text-slate-950">
-              {totalUpdates}
-            </p>
-          </div>
-        </section>
-
         <section className="rounded-3xl border border-slate-200 bg-white shadow-sm">
           {isLoading ? (
             <div className="p-8 text-sm text-slate-600">Loading admin overview...</div>
@@ -1144,6 +1461,9 @@ export default function AdminOverviewPage() {
                       Updates
                     </th>
                     <th scope="col" className="px-6 py-4">
+                      Files
+                    </th>
+                    <th scope="col" className="px-6 py-4">
                       Created
                     </th>
                   </tr>
@@ -1154,6 +1474,7 @@ export default function AdminOverviewPage() {
                     const progressValue = getProgressValue(property.progress)
                     const updateCount =
                       updateCountByPropertyId[String(property.id)] ?? 0
+                    const fileCount = fileCountByPropertyId[String(property.id)] ?? 0
 
                     return (
                       <tr key={String(property.id)} className="hover:bg-slate-50/70">
@@ -1188,6 +1509,9 @@ export default function AdminOverviewPage() {
                         </td>
                         <td className="px-6 py-4 text-slate-700">
                           {updateCount}
+                        </td>
+                        <td className="px-6 py-4 text-slate-700">
+                          {fileCount}
                         </td>
                         <td className="px-6 py-4 text-slate-700">
                           {formatDate(property.created_at)}
