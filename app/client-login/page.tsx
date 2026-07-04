@@ -10,6 +10,7 @@ export default function ClientLoginPage() {
       successPath="/client"
       mismatchMessage="Please use the admin access route."
       mismatchRedirectPath="/admin"
+      dismissToPreviousPageOnBackdropClick
     />
   )
 }

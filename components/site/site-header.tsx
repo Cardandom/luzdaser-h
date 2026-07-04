@@ -6,9 +6,11 @@ import Image from "next/image"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 
+import { rememberClientLoginReturn } from "@/lib/client-login-return"
+
 const navItems = [
-  { label: "Projects", href: "#featured-projects" },
   { label: "Gallery", href: "#gallery" },
+  { label: "Projects", href: "#featured-projects" },
   { label: "Location", href: "#location" },
   { label: "Project Progress", href: "#project-progress" },
   { label: "Contacts", href: "#contacts" },
@@ -118,6 +120,7 @@ export function SiteHeader() {
             <Link
               href="/client-login"
               className="hidden items-center justify-center gap-2 rounded-full bg-linear-to-b from-luxury-gold-soft to-luxury-gold px-5 py-2.5 text-sm font-semibold text-stone-950 shadow-lg transition-transform hover:-translate-y-0.5 md:inline-flex"
+              onClick={rememberClientLoginReturn}
             >
               Client Login
             </Link>
@@ -154,7 +157,10 @@ export function SiteHeader() {
               <Link
                 href="/client-login"
                 className="mt-2 inline-flex items-center justify-center gap-2 rounded-full bg-linear-to-b from-luxury-gold-soft to-luxury-gold px-4 py-3 text-sm font-semibold text-stone-950 shadow-lg transition-transform hover:-translate-y-0.5"
-                onClick={closeMenu}
+                onClick={() => {
+                  rememberClientLoginReturn()
+                  closeMenu()
+                }}
               >
                 Client Login
               </Link>

@@ -3,6 +3,10 @@
 import { FormEvent, useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 
+import {
+  consumeClientLoginReturn,
+  queueClientLoginScrollRestore,
+} from "@/lib/client-login-return"
 import { supabase } from "@/lib/supabase/client"
 import { getProfileForUser } from "@/lib/supabase/profiles"
 
@@ -16,6 +20,7 @@ type PortalLoginFormProps = {
   successPath: "/client" | "/admin"
   mismatchMessage: string
   mismatchRedirectPath?: "/client" | "/admin"
+  dismissToPreviousPageOnBackdropClick?: boolean
 }
 
 function normalizeRole(role: string | null | undefined) {
@@ -30,6 +35,7 @@ export function PortalLoginForm({
   successPath,
   mismatchMessage,
   mismatchRedirectPath,
+  dismissToPreviousPageOnBackdropClick = false,
 }: PortalLoginFormProps) {
   const router = useRouter()
   const [email, setEmail] = useState("")
@@ -37,6 +43,23 @@ export function PortalLoginForm({
   const [loading, setLoading] = useState(false)
   const [statusMessage, setStatusMessage] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+
+  const returnToPreviousPage = () => {
+    const returnLocation = consumeClientLoginReturn()
+
+    if (returnLocation) {
+      queueClientLoginScrollRestore(returnLocation)
+      router.replace(returnLocation.href, { scroll: false })
+      return
+    }
+
+    if (window.history.length > 1) {
+      router.back()
+      return
+    }
+
+    router.replace("/")
+  }
 
   useEffect(() => {
     let isActive = true
@@ -150,7 +173,10 @@ export function PortalLoginForm({
   }
 
   return (
-    <main className="relative isolate flex min-h-screen overflow-hidden px-4 py-12 text-slate-900 sm:px-6 lg:px-8">
+    <main
+      className="relative isolate flex min-h-screen overflow-hidden px-4 py-12 text-slate-900 sm:px-6 lg:px-8"
+      onClick={dismissToPreviousPageOnBackdropClick ? returnToPreviousPage : undefined}
+    >
       <div aria-hidden="true" className="absolute inset-0 -z-20">
         <video
           className="absolute inset-0 size-full object-cover object-center"
@@ -169,7 +195,10 @@ export function PortalLoginForm({
       </div>
 
       <div className="relative z-10 flex w-full items-center justify-center">
-        <section className="luxury-panel w-full max-w-lg rounded-3xl p-6 sm:p-8 lg:p-10">
+        <section
+          className="luxury-panel w-full max-w-lg rounded-3xl p-6 sm:p-8 lg:p-10"
+          onClick={(event) => event.stopPropagation()}
+        >
           <div className="space-y-4">
             <span className="luxury-eyebrow inline-flex items-center rounded-full border border-luxury-border bg-white px-3 py-1.5 text-[0.7rem] font-semibold text-slate-600">
               {eyebrow}

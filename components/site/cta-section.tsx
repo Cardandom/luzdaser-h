@@ -2,7 +2,7 @@ import Image from "next/image"
 
 export function CtaSection() {
   return (
-    <section className="luxury-shell">
+    <section className="w-full">
       <div className="relative overflow-hidden border border-luxury-border bg-white shadow-xl">
         <div className="relative min-h-72 sm:min-h-80 lg:min-h-96">
           <Image
@@ -13,8 +13,8 @@ export function CtaSection() {
             className="object-cover object-center"
           />
 
-          <div className="absolute inset-0 bg-gradient-to-b from-white/10 to-black/20" />
-          <div className="absolute inset-0 bg-gradient-to-b from-luxury-gold/15 to-transparent" />
+          <div className="absolute inset-0 bg-linear-to-b from-white/10 to-black/20" />
+          <div className="absolute inset-0 bg-linear-to-b from-luxury-gold/15 to-transparent" />
 
           <div className="relative z-10 flex min-h-64 items-center justify-center px-4 py-8 sm:min-h-72 sm:px-8 lg:min-h-80">
             <div className="flex w-full max-w-3xl flex-col items-center text-center">

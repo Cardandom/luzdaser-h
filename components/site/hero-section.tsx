@@ -41,7 +41,7 @@ export function HeroSection() {
           <div className="absolute inset-x-0 top-0 h-px bg-black/10" />
           <div className="absolute inset-x-0 bottom-0 h-px bg-black/10" />
 
-          <div className="relative z-10 flex h-full items-center px-4 py-8 sm:px-8 lg:px-12">
+          <div className="relative z-10 flex h-full items-center px-12 py-8 sm:px-16 lg:px-20">
             <div className="w-full max-w-4xl text-left text-foreground lg:max-w-3xl">
               <p
                 className="max-w-md text-xs font-semibold uppercase tracking-widest text-[#201751] drop-shadow-sm"

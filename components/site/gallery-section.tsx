@@ -1,28 +1,328 @@
+"use client"
+
+import { useEffect, useMemo, useRef, useState } from "react"
+import { ChevronLeft, ChevronRight, X } from "lucide-react"
 import Image from "next/image"
 
-const galleryItems = [
+type GalleryItem = {
+  id: string
+  src: string
+  title: string
+  description: string
+  alt: string
+  objectPosition: string
+}
+
+const galleryItems: GalleryItem[] = [
   {
-    title: "Elegant Kitchens",
+    id: "elegant-kitchen",
+    src: "/kitchen.webp",
+    title: "Elegant Kitchen",
+    description: "Minimal finishes and Caribbean serenity",
+    alt: "Elegant kitchen with luxury finishes in Reina Sophia Residences",
     objectPosition: "center left",
-    picture: "/kitchen.webp",
   },
   {
-    title: "Confort living rooms",
+    id: "comfort-living-room",
+    src: "/livingroom.webp",
+    title: "Comfort Living Room",
+    description: "Soft natural light for relaxed island living",
+    alt: "Comfortable living room with refined interior design",
     objectPosition: "center center",
-    picture: "/livingroom.webp",
   },
   {
-    title: "View front house",
+    id: "front-house-view",
+    src: "/frontHouse1.webp",
+    title: "Front House View",
+    description: "A calm architectural arrival in Paradera",
+    alt: "Front house view of Reina Sophia Residences in Aruba",
     objectPosition: "center left",
-    picture: "/frontHouse1.webp",
+  },
+  {
+    id: "private-terrace",
+    src: "/frontHouse1.webp",
+    title: "Private Terrace",
+    description: "Outdoor moments framed by warm Aruba light",
+    alt: "Private terrace detail at Reina Sophia Residences",
+    objectPosition: "center center",
+  },
+  {
+    id: "luxury-bedroom",
+    src: "/livingroom.webp",
+    title: "Luxury Bedroom",
+    description: "Quiet comfort with refined residential details",
+    alt: "Luxury bedroom mood with refined comfort",
+    objectPosition: "center center",
+  },
+  {
+    id: "chef-kitchen",
+    src: "/kitchen.webp",
+    title: "Chef Kitchen",
+    description: "Clean lines designed for everyday elegance",
+    alt: "Chef kitchen with clean lines and premium finishes",
+    objectPosition: "center left",
+  },
+  {
+    id: "garden-entry",
+    src: "/frontHouse1.webp",
+    title: "Garden Entry",
+    description: "A welcoming facade with tropical calm",
+    alt: "Garden entry and facade view of the residence",
+    objectPosition: "center left",
+  },
+  {
+    id: "open-lounge",
+    src: "/livingroom.webp",
+    title: "Open Lounge",
+    description: "A social interior made for slow afternoons",
+    alt: "Open lounge interior with comfortable seating",
+    objectPosition: "center center",
   },
 ]
 
+const visibleGalleryCount = 5
+const carouselTransitionDurationMs = 700
+
+type CarouselDirection = "previous" | "next"
+
+type RenderedGalleryCard = {
+  key: string
+  item: GalleryItem
+  slot: number
+}
+
+type SlotMetrics = {
+  left: number
+  top: number
+  width: number
+  height: number
+  zIndex: number
+}
+
+function getGalleryItem(index: number) {
+  return galleryItems[(index + galleryItems.length) % galleryItems.length]
+}
+
+function getVisibleGalleryItems(startIndex: number) {
+  return Array.from(
+    { length: Math.min(visibleGalleryCount, galleryItems.length) },
+    (_, offset) => getGalleryItem(startIndex + offset),
+  )
+}
+
+function buildSteadyCards(startIndex: number): RenderedGalleryCard[] {
+  return getVisibleGalleryItems(startIndex).map((item, slot) => ({
+    key: item.id,
+    item,
+    slot,
+  }))
+}
+
+function getSlotMetrics(activeVisibleIndex: number) {
+  const inactiveWidthUnits = 1.1
+  const activeWidthUnits = 2.25
+  const gapUnits = 0.16
+  const widths = Array.from({ length: visibleGalleryCount }, (_, index) =>
+    index === activeVisibleIndex ? activeWidthUnits : inactiveWidthUnits,
+  )
+  const totalUnits =
+    widths.reduce((sum, width) => sum + width, 0) + gapUnits * (visibleGalleryCount - 1)
+  const gapPercent = (gapUnits / totalUnits) * 100
+  const visibleSlots: SlotMetrics[] = []
+  let consumedUnits = 0
+
+  widths.forEach((widthUnits, index) => {
+    const width = (widthUnits / totalUnits) * 100
+    const isActive = index === activeVisibleIndex
+
+    visibleSlots.push({
+      left: (consumedUnits / totalUnits) * 100,
+      top: isActive ? 0 : 7,
+      width,
+      height: isActive ? 100 : 86,
+      zIndex: isActive ? 30 : 10 + index,
+    })
+
+    consumedUnits += widthUnits + gapUnits
+  })
+
+  const previousSlot = visibleSlots[0]
+  const nextSlot = visibleSlots[visibleSlots.length - 1]
+
+  return {
+    visibleSlots,
+    allSlots: {
+      [-1]: {
+        ...previousSlot,
+        left: previousSlot.left - previousSlot.width - gapPercent,
+        zIndex: 5,
+      },
+      0: visibleSlots[0],
+      1: visibleSlots[1],
+      2: visibleSlots[2],
+      3: visibleSlots[3],
+      4: visibleSlots[4],
+      5: {
+        ...nextSlot,
+        left: nextSlot.left + nextSlot.width + gapPercent,
+        zIndex: 5,
+      },
+    } as Record<number, SlotMetrics>,
+  }
+}
+
 export function GallerySection() {
+  const [activeVisibleIndex, setActiveVisibleIndex] = useState(1)
+  const [carouselStartIndex, setCarouselStartIndex] = useState(0)
+  const [renderedCards, setRenderedCards] = useState<RenderedGalleryCard[]>(() =>
+    buildSteadyCards(0),
+  )
+  const [isTransitioning, setIsTransitioning] = useState(false)
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const transitionFrameRef = useRef<number | null>(null)
+  const transitionTimeoutRef = useRef<number | null>(null)
+  const { allSlots } = useMemo(() => getSlotMetrics(activeVisibleIndex), [activeVisibleIndex])
+
+  useEffect(() => {
+    if (!isModalOpen) {
+      return
+    }
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setIsModalOpen(false)
+      }
+    }
+
+    const previousOverflow = document.body.style.overflow
+
+    document.body.style.overflow = "hidden"
+    window.addEventListener("keydown", handleKeyDown)
+
+    return () => {
+      document.body.style.overflow = previousOverflow
+      window.removeEventListener("keydown", handleKeyDown)
+    }
+  }, [isModalOpen])
+
+  useEffect(() => {
+    return () => {
+      if (transitionFrameRef.current !== null) {
+        window.cancelAnimationFrame(transitionFrameRef.current)
+      }
+
+      if (transitionTimeoutRef.current !== null) {
+        window.clearTimeout(transitionTimeoutRef.current)
+      }
+    }
+  }, [])
+
+  const runCarouselTransition = (direction: CarouselDirection) => {
+    if (isTransitioning || galleryItems.length <= visibleGalleryCount) {
+      return
+    }
+
+    const currentStartIndex = carouselStartIndex
+    const currentCards = buildSteadyCards(currentStartIndex)
+
+    setIsTransitioning(true)
+
+    if (transitionFrameRef.current !== null) {
+      window.cancelAnimationFrame(transitionFrameRef.current)
+    }
+
+    if (transitionTimeoutRef.current !== null) {
+      window.clearTimeout(transitionTimeoutRef.current)
+    }
+
+    if (direction === "next") {
+      const incomingCard: RenderedGalleryCard = {
+        key: getGalleryItem(currentStartIndex + visibleGalleryCount).id,
+        item: getGalleryItem(currentStartIndex + visibleGalleryCount),
+        slot: visibleGalleryCount,
+      }
+
+      setRenderedCards([...currentCards, incomingCard])
+
+      transitionFrameRef.current = window.requestAnimationFrame(() => {
+        setRenderedCards([
+          { ...currentCards[0], slot: -1 },
+          { ...currentCards[1], slot: 0 },
+          { ...currentCards[2], slot: 1 },
+          { ...currentCards[3], slot: 2 },
+          { ...currentCards[4], slot: 3 },
+          { ...incomingCard, slot: 4 },
+        ])
+      })
+
+      transitionTimeoutRef.current = window.setTimeout(() => {
+        const nextStartIndex = (currentStartIndex + 1) % galleryItems.length
+        setCarouselStartIndex(nextStartIndex)
+        setRenderedCards(buildSteadyCards(nextStartIndex))
+        setIsTransitioning(false)
+      }, carouselTransitionDurationMs)
+
+      return
+    }
+
+    const incomingCard: RenderedGalleryCard = {
+      key: getGalleryItem(currentStartIndex - 1).id,
+      item: getGalleryItem(currentStartIndex - 1),
+      slot: -1,
+    }
+
+    setRenderedCards([incomingCard, ...currentCards])
+
+    transitionFrameRef.current = window.requestAnimationFrame(() => {
+      setRenderedCards([
+        { ...incomingCard, slot: 0 },
+        { ...currentCards[0], slot: 1 },
+        { ...currentCards[1], slot: 2 },
+        { ...currentCards[2], slot: 3 },
+        { ...currentCards[3], slot: 4 },
+        { ...currentCards[4], slot: 5 },
+      ])
+    })
+
+    transitionTimeoutRef.current = window.setTimeout(() => {
+      const nextStartIndex =
+        currentStartIndex === 0 ? galleryItems.length - 1 : currentStartIndex - 1
+      setCarouselStartIndex(nextStartIndex)
+      setRenderedCards(buildSteadyCards(nextStartIndex))
+      setIsTransitioning(false)
+    }, carouselTransitionDurationMs)
+  }
+
+  const showPrevious = () => {
+    runCarouselTransition("previous")
+  }
+
+  const showNext = () => {
+    runCarouselTransition("next")
+  }
+
+  const openModal = (visibleIndex: number) => {
+    setActiveVisibleIndex(visibleIndex)
+    setIsModalOpen(true)
+  }
+
+  const handleCardClick = (visibleIndex: number) => {
+    if (isTransitioning) {
+      return
+    }
+
+    if (visibleIndex === activeVisibleIndex) {
+      openModal(visibleIndex)
+      return
+    }
+
+    runCarouselTransition(visibleIndex < activeVisibleIndex ? "previous" : "next")
+  }
+
   return (
-    <section id="gallery" className="luxury-shell">
-      <div className="rounded-3xl border border-luxury-border bg-white px-4 py-10 shadow-xl sm:px-8 lg:px-10">
-        <div className="mx-auto max-w-6xl">
+    <section id="gallery" className=" flex min-h-screen items-center py-6">
+      <div className="w-full rounded-3xl  bg-white px-4 py-10 sm:px-8 lg:px-10">
+        <div className="mx-auto max-w-7xl">
           <p className="font-heading text-center text-3xl leading-tight text-foreground sm:text-4xl lg:text-5xl">
             Enjoy the luxury and serenity of living in Aruba
           </p>
@@ -35,33 +335,231 @@ export function GallerySection() {
             <span className="h-px flex-1 bg-foreground/20" />
           </div>
 
-          <div className="mt-8 grid gap-5 lg:grid-cols-3">
+          <div className="mt-8 px-0 py-5 lg:-mx-6">
+            <div className="mx-auto flex max-w-7xl items-center justify-center gap-6">
+              <button
+                type="button"
+                className="hidden size-12 shrink-0 items-center justify-center rounded-full border border-luxury-border bg-white text-foreground shadow-lg transition hover:border-luxury-gold hover:text-luxury-gold lg:inline-flex"
+                aria-label="Previous image"
+                onClick={showPrevious}
+              >
+                <ChevronLeft className="size-8" aria-hidden="true" />
+              </button>
+
+              <div className="min-w-0 flex-1">
+                <div className="relative mx-auto h-96 w-full max-w-7xl overflow-hidden sm:h-120` lg:h-136">
+                  {renderedCards.map(({ key, item, slot }) => {
+                    const slotMetrics = allSlots[slot]
+
+                    if (!slotMetrics) {
+                      return null
+                    }
+
+                    const isVisibleSlot = slot >= 0 && slot < visibleGalleryCount
+                    const visibleIndex = Math.min(Math.max(slot, 0), visibleGalleryCount - 1)
+
+                    return (
+                      <GalleryCard
+                        key={key}
+                        item={item}
+                        isActive={isVisibleSlot && activeVisibleIndex === visibleIndex}
+                        isTransitioning={isTransitioning}
+                        slotMetrics={slotMetrics}
+                        onActivate={() => {
+                          if (!isTransitioning && isVisibleSlot) {
+                            setActiveVisibleIndex(visibleIndex)
+                          }
+                        }}
+                        onClick={() => {
+                          if (isVisibleSlot) {
+                            handleCardClick(visibleIndex)
+                          }
+                        }}
+                      />
+                    )
+                  })}
+                </div>
+              </div>
+
+              <button
+                type="button"
+                className="hidden size-12 shrink-0 items-center justify-center rounded-full border border-luxury-border bg-white text-foreground shadow-lg transition hover:border-luxury-gold hover:text-luxury-gold lg:inline-flex"
+                aria-label="Next image"
+                onClick={showNext}
+              >
+                <ChevronRight className="size-8" aria-hidden="true" />
+              </button>
+            </div>
+
+            <div className="relative mt-4 flex items-center justify-center gap-4 lg:hidden">
+              <button
+                type="button"
+                className="inline-flex size-12 items-center justify-center rounded-full border border-luxury-border bg-white text-foreground shadow-lg transition hover:border-luxury-gold hover:text-luxury-gold"
+                aria-label="Previous image"
+                onClick={showPrevious}
+              >
+                <ChevronLeft className="size-8" aria-hidden="true" />
+              </button>
+
+              <button
+                type="button"
+                className="inline-flex size-12 items-center justify-center rounded-full border border-luxury-border bg-white text-foreground shadow-lg transition hover:border-luxury-gold hover:text-luxury-gold"
+                aria-label="Next image"
+                onClick={showNext}
+              >
+                <ChevronRight className="size-8" aria-hidden="true" />
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {isModalOpen ? <GalleryModal onClose={() => setIsModalOpen(false)} /> : null}
+    </section>
+  )
+}
+
+function GalleryCard({
+  item,
+  isActive,
+  isTransitioning,
+  slotMetrics,
+  onActivate,
+  onClick,
+}: {
+  item: GalleryItem
+  isActive: boolean
+  isTransitioning: boolean
+  slotMetrics: SlotMetrics
+  onActivate: () => void
+  onClick: () => void
+}) {
+  return (
+    <figure
+      className={`group absolute overflow-hidden rounded-xl border border-white/70 bg-white shadow-lg transition-[left,top,width,height,box-shadow] duration-700 ease-out ${
+        isActive ? "shadow-2xl" : "hover:shadow-xl"
+      }`}
+      style={{
+        left: `${slotMetrics.left}%`,
+        top: `${slotMetrics.top}%`,
+        width: `${slotMetrics.width}%`,
+        height: `${slotMetrics.height}%`,
+        zIndex: slotMetrics.zIndex,
+      }}
+      onMouseEnter={onActivate}
+    >
+      <button
+        type="button"
+        className="absolute inset-0 z-10 cursor-pointer rounded-full focus-visible:ring-4 focus-visible:ring-luxury-gold/40 focus-visible:outline-none"
+        aria-label={isActive ? `Open gallery modal for ${item.title}` : `Move gallery to ${item.title}`}
+        onClick={onClick}
+        onFocus={onActivate}
+      />
+
+      <div className="absolute inset-0">
+        <Image
+          src={item.src}
+          alt={item.alt}
+          fill
+          sizes="(min-width: 1024px) 384px, (min-width: 640px) 320px, 256px"
+          className={`object-cover transition duration-700 ${
+            isTransitioning ? "" : "group-hover:scale-105"
+          }`}
+          style={{ objectPosition: item.objectPosition }}
+          priority={false}
+        />
+      </div>
+
+      <div
+        className={`absolute inset-0 bg-linear-to-b from-transparent via-black/10 to-black/65 transition-opacity duration-500 ${
+          isActive ? "opacity-100" : "opacity-0"
+        }`}
+      />
+
+      <figcaption
+        className={`absolute inset-x-0 bottom-0 z-20 px-5 pb-8 text-white transition-all duration-500 ${
+          isActive ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0"
+        }`}
+      >
+        <p className="font-heading text-2xl leading-tight">{item.title}</p>
+        <p className="mt-2 max-w-xs text-sm leading-6 text-white/80">{item.description}</p>
+      </figcaption>
+    </figure>
+  )
+}
+
+function GalleryModal({ onClose }: { onClose: () => void }) {
+  return (
+    <div
+      className="fixed inset-x-0 bottom-0 top-18 z-50 flex items-center justify-center bg-foreground/70 px-4 py-6 backdrop-blur-sm"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="gallery-modal-title"
+      onClick={onClose}
+    >
+      <div
+        className="relative flex max-h-full w-full max-w-6xl flex-col overflow-hidden rounded-3xl border border-luxury-border bg-white shadow-2xl"
+        onClick={(event) => event.stopPropagation()}
+      >
+        <div className="relative flex shrink-0 items-center justify-center border-b border-black/10 px-16 py-4 sm:px-20">
+          <div className="flex flex-col items-center gap-3">
+            <span className="inline-flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-full border border-luxury-border bg-white">
+              <Image
+                src="/Logo_Icono_Dorado.png"
+                alt=""
+                width={40}
+                height={40}
+                className="size-full object-cover"
+                aria-hidden="true"
+              />
+            </span>
+
+            <span className="min-w-0 flex flex-col items-center gap-1 text-center">
+              <span
+                id="gallery-modal-title"
+                className="block font-heading text-xl tracking-wide text-black sm:text-2xl"
+              >
+                Reina Sophia Residences
+              </span>
+              <span className="block text-xs uppercase tracking-widest text-black/55">
+                Aruba Investment
+              </span>
+            </span>
+          </div>
+
+          <button
+            type="button"
+            className="absolute right-5 top-1/2 inline-flex size-11 -translate-y-1/2 items-center justify-center rounded-full border border-luxury-border bg-white text-foreground transition hover:border-luxury-gold hover:text-luxury-gold sm:right-6"
+            aria-label="Close gallery modal"
+            onClick={onClose}
+          >
+            <X className="size-5" aria-hidden="true" />
+          </button>
+        </div>
+
+        <div className="min-h-0 flex-1 overflow-y-auto p-4 sm:p-6">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {galleryItems.map((item) => (
-              <figure
-                key={item.title}
-                className="overflow-hidden border border-black/10 bg-white shadow-lg"
+              <div
+                key={item.id}
+                className="overflow-hidden rounded-2xl border border-black/10 bg-white shadow-lg"
               >
                 <div className="relative aspect-square overflow-hidden">
                   <Image
-                    src={item.picture}
-                    alt={item.title}
+                    src={item.src}
+                    alt={item.alt}
                     fill
-                    sizes="(min-width: 1024px) 33vw, 100vw"
+                    sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 90vw"
                     className="object-cover"
                     style={{ objectPosition: item.objectPosition }}
                     priority={false}
                   />
-                  <div className="absolute inset-0 bg-linear-to-b from-white/5 to-black/10" />
                 </div>
-
-                <figcaption className="border-t border-black/10 bg-white px-4 py-4 text-center">
-                  <p className="font-heading text-xl text-foreground">{item.title}</p>
-                </figcaption>
-              </figure>
+              </div>
             ))}
           </div>
         </div>
       </div>
-    </section>
+    </div>
   )
 }
