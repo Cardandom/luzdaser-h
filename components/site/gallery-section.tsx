@@ -13,72 +13,42 @@ type GalleryItem = {
   objectPosition: string
 }
 
-const galleryItems: GalleryItem[] = [
-  {
-    id: "elegant-kitchen",
-    src: "/kitchen.webp",
-    title: "Elegant Kitchen",
-    description: "Minimal finishes and Caribbean serenity",
-    alt: "Elegant kitchen with luxury finishes in Reina Sophia Residences",
-    objectPosition: "center left",
-  },
-  {
-    id: "comfort-living-room",
-    src: "/livingroom.webp",
-    title: "Comfort Living Room",
-    description: "Soft natural light for relaxed island living",
-    alt: "Comfortable living room with refined interior design",
+const galleryImageFiles = [
+  "001 (1) (1).webp",
+  "001 (11).webp",
+  "001 (12).webp",
+  "001 (2).webp",
+  "Entrada Principal.webp",
+  "Panoramica Lateral Der, Proyecto.webp",
+  "Panoramica Parque.webp",
+  "Planta General.webp",
+  "Planta Parque.webp",
+  "Vista Frontal Calle,Esqina Parque Izq,Oliver Der,.webp",
+  "Vista frontal Calle,Lucas Izq, Oliver Der,.webp",
+  "Vista Frontal zona verde # 3, Lucas # 38  & Modelo 19.webp",
+  "Vista lateral Parque.webp",
+] as const
+
+function getGalleryTitle(fileName: string) {
+  return fileName
+    .replace(/\.[^.]+$/, "")
+    .replace(/\s+/g, " ")
+    .replace(/\s*,\s*/g, ", ")
+    .trim()
+}
+
+const galleryItems: GalleryItem[] = galleryImageFiles.map((fileName) => {
+  const title = getGalleryTitle(fileName)
+
+  return {
+    id: fileName,
+    src: `/gallery/${encodeURIComponent(fileName)}`,
+    title,
+    description: "Reina Sophia Residences",
+    alt: `${title} at Reina Sophia Residences`,
     objectPosition: "center center",
-  },
-  {
-    id: "front-house-view",
-    src: "/frontHouse1.webp",
-    title: "Front House View",
-    description: "A calm architectural arrival in Paradera",
-    alt: "Front house view of Reina Sophia Residences in Aruba",
-    objectPosition: "center left",
-  },
-  {
-    id: "private-terrace",
-    src: "/frontHouse1.webp",
-    title: "Private Terrace",
-    description: "Outdoor moments framed by warm Aruba light",
-    alt: "Private terrace detail at Reina Sophia Residences",
-    objectPosition: "center center",
-  },
-  {
-    id: "luxury-bedroom",
-    src: "/livingroom.webp",
-    title: "Luxury Bedroom",
-    description: "Quiet comfort with refined residential details",
-    alt: "Luxury bedroom mood with refined comfort",
-    objectPosition: "center center",
-  },
-  {
-    id: "chef-kitchen",
-    src: "/kitchen.webp",
-    title: "Chef Kitchen",
-    description: "Clean lines designed for everyday elegance",
-    alt: "Chef kitchen with clean lines and premium finishes",
-    objectPosition: "center left",
-  },
-  {
-    id: "garden-entry",
-    src: "/frontHouse1.webp",
-    title: "Garden Entry",
-    description: "A welcoming facade with tropical calm",
-    alt: "Garden entry and facade view of the residence",
-    objectPosition: "center left",
-  },
-  {
-    id: "open-lounge",
-    src: "/livingroom.webp",
-    title: "Open Lounge",
-    description: "A social interior made for slow afternoons",
-    alt: "Open lounge interior with comfortable seating",
-    objectPosition: "center center",
-  },
-]
+  }
+})
 
 const visibleGalleryCount = 5
 const carouselTransitionDurationMs = 700
@@ -461,11 +431,12 @@ function GalleryCard({
           src={item.src}
           alt={item.alt}
           fill
-          sizes="(min-width: 1024px) 384px, (min-width: 640px) 320px, 256px"
+          sizes="(min-width: 1024px) 1000px, (min-width: 640px) 720px, 520px"
           className={`object-cover transition duration-700 ${
             isTransitioning ? "" : "group-hover:scale-105"
           }`}
           style={{ objectPosition: item.objectPosition }}
+          quality={95}
           priority={false}
         />
       </div>

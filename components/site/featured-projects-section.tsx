@@ -4,6 +4,10 @@ import Link from "next/link"
 import { featuredProjects } from "@/lib/projects"
 
 export function FeaturedProjectsSection() {
+  const visibleProjects = featuredProjects.filter(
+    (project) => project.slug !== "oliver-boutique",
+  )
+
   return (
     <section id="featured-projects" className="luxury-shell mt-6 sm:mt-8">
       <div className="luxury-panel rounded-3xl px-5 py-8 sm:px-8 lg:px-10">
@@ -13,7 +17,7 @@ export function FeaturedProjectsSection() {
           </p>
 
           <div className="mx-auto mt-8 grid max-w-5xl gap-5 md:grid-cols-2 lg:gap-6">
-            {featuredProjects.map((project) => (
+            {visibleProjects.map((project) => (
               <Link
                 key={project.slug}
                 href={`/projects/${project.slug}`}

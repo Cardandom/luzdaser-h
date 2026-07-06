@@ -4,6 +4,7 @@ import { CtaSection } from "@/components/site/cta-section"
 import { FeaturedProjectsSection } from "@/components/site/featured-projects-section"
 import { GallerySection } from "@/components/site/gallery-section"
 import { HeroSection } from "@/components/site/hero-section"
+import { ScrollVideoRevealSection } from "@/components/ScrollVideoRevealSection"
 import { SiteFooter } from "@/components/site/site-footer"
 
 export default function HomePage() {
@@ -16,6 +17,12 @@ export default function HomePage() {
 
       <HeroSection />
       <GallerySection />
+      {/* Scroll-controlled video reveal section. Move this block if you want it elsewhere. */}
+      <ScrollVideoRevealSection />
+      <ScrollVideoRevealSection
+        id="scroll-video-reveal-luca"
+        videoSrc="/videos/video_recortado_luca.mp4"
+      />
       <CtaSection />
       <FeaturedProjectsSection />
       <BenefitsSection />
