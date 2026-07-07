@@ -1,30 +1,35 @@
 "use client"
 
-import Image from "next/image"
 import Link from "next/link"
 import { useEffect, useRef } from "react"
 
-import { featuredProjects } from "@/lib/projects"
+import { featuredProjects, type ProjectSlug } from "@/lib/projects"
 
 const videoPhaseEnd = 0.7
 const cardRevealStart = 0.7
 const cardRevealEnd = 0.85
-const oliverProject = featuredProjects.find(
-  (project) => project.slug === "oliver-boutique",
-)
 
 type ScrollVideoRevealSectionProps = {
   id?: string
+  projectSlug?: ProjectSlug
   videoSrc?: string
 }
 
 export function ScrollVideoRevealSection({
   id = "scroll-video-reveal",
+  projectSlug = "oliver-boutique",
   videoSrc = "/videos/video_recortado_oliver.mp4",
 }: ScrollVideoRevealSectionProps) {
   const sectionRef = useRef<HTMLElement | null>(null)
   const videoRef = useRef<HTMLVideoElement | null>(null)
   const cardRef = useRef<HTMLDivElement | null>(null)
+  const revealProject = featuredProjects.find(
+    (project) => project.slug === projectSlug,
+  )
+  const revealTitle =
+    projectSlug === "oliver-boutique"
+      ? "Oliver House Boutique"
+      : "Lucas House Boutique"
 
   useEffect(() => {
     let context: { revert: () => void } | null = null
@@ -202,46 +207,24 @@ export function ScrollVideoRevealSection({
       />
 
       <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center px-5 py-10 sm:px-8">
-        <div ref={cardRef} className="pointer-events-auto w-full max-w-md">
-          {oliverProject && (
-            <Link
-              href={`/projects/${oliverProject.slug}`}
-              aria-label={`Open ${oliverProject.title} project board`}
-              className="group block overflow-hidden rounded-3xl border border-black/10 bg-white shadow-lg transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl"
-            >
-              <article>
-                <div className="relative aspect-square overflow-hidden">
-                  <Image
-                    src={oliverProject.picture}
-                    alt={oliverProject.title}
-                    fill
-                    sizes="(min-width: 768px) 448px, 100vw"
-                    className="object-cover transition-transform duration-500 group-hover:scale-105"
-                    style={{ objectPosition: oliverProject.objectPosition }}
-                  />
-                  <div className="absolute inset-0 bg-linear-to-b from-white/5 to-black/10" />
-                </div>
+        <div
+          ref={cardRef}
+          className="pointer-events-auto flex w-full max-w-xl flex-col items-center gap-5 text-center"
+        >
+          {revealProject && (
+            <>
+              <h2 className="font-heading text-4xl leading-tight text-white drop-shadow-lg sm:text-6xl">
+                {revealTitle}
+              </h2>
 
-                <div className="space-y-3 px-5 py-5 sm:px-6">
-                  <div>
-                    <p className="font-heading text-2xl leading-tight text-foreground sm:text-3xl">
-                      {oliverProject.title}
-                    </p>
-                  </div>
-
-                  <p className="text-lg text-foreground">
-                    From{" "}
-                    <span className="font-heading text-xl text-luxury-gold">
-                      {oliverProject.price}
-                    </span>
-                  </p>
-
-                  <span className="inline-flex h-11 items-center justify-center rounded-full bg-linear-to-b from-luxury-gold-soft to-luxury-gold px-6 text-sm font-semibold text-stone-950 shadow-lg transition-transform group-hover:-translate-y-0.5">
-                    Open project board
-                  </span>
-                </div>
-              </article>
-            </Link>
+              <Link
+                href={`/projects/${revealProject.slug}`}
+                aria-label={`Open ${revealTitle} project board`}
+                className="inline-flex h-11 items-center justify-center rounded-full bg-linear-to-b from-luxury-gold-soft to-luxury-gold px-6 text-sm font-semibold text-stone-950 shadow-lg transition-transform hover:-translate-y-0.5"
+              >
+                Open Project Board
+              </Link>
+            </>
           )}
         </div>
       </div>

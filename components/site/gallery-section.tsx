@@ -460,6 +460,29 @@ function GalleryCard({
 }
 
 function GalleryModal({ onClose }: { onClose: () => void }) {
+  const [expandedImageIndex, setExpandedImageIndex] = useState<number | null>(null)
+  const expandedItem = expandedImageIndex === null ? null : galleryItems[expandedImageIndex]
+
+  const showPreviousExpandedImage = () => {
+    setExpandedImageIndex((currentIndex) => {
+      if (currentIndex === null) {
+        return currentIndex
+      }
+
+      return currentIndex === 0 ? galleryItems.length - 1 : currentIndex - 1
+    })
+  }
+
+  const showNextExpandedImage = () => {
+    setExpandedImageIndex((currentIndex) => {
+      if (currentIndex === null) {
+        return currentIndex
+      }
+
+      return (currentIndex + 1) % galleryItems.length
+    })
+  }
+
   return (
     <div
       className="fixed inset-x-0 bottom-0 top-18 z-50 flex items-center justify-center bg-foreground/70 px-4 py-6 backdrop-blur-sm"
@@ -510,10 +533,13 @@ function GalleryModal({ onClose }: { onClose: () => void }) {
 
         <div className="min-h-0 flex-1 overflow-y-auto p-4 sm:p-6">
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {galleryItems.map((item) => (
-              <div
+            {galleryItems.map((item, index) => (
+              <button
+                type="button"
                 key={item.id}
-                className="overflow-hidden rounded-2xl border border-black/10 bg-white shadow-lg"
+                className="overflow-hidden rounded-2xl border border-black/10 bg-white text-left shadow-lg transition hover:shadow-xl focus-visible:ring-4 focus-visible:ring-luxury-gold/40 focus-visible:outline-none"
+                aria-label={`Open enlarged image for ${item.title}`}
+                onClick={() => setExpandedImageIndex(index)}
               >
                 <div className="relative aspect-square overflow-hidden">
                   <Image
@@ -526,10 +552,64 @@ function GalleryModal({ onClose }: { onClose: () => void }) {
                     priority={false}
                   />
                 </div>
-              </div>
+              </button>
             ))}
           </div>
         </div>
+
+        {expandedItem ? (
+          <div
+            className="fixed inset-0 z-[60] flex items-center justify-center bg-foreground/85 px-3 py-4 backdrop-blur-sm sm:px-6"
+            role="dialog"
+            aria-modal="true"
+            aria-label={`Expanded view of ${expandedItem.title}`}
+            onClick={() => setExpandedImageIndex(null)}
+          >
+            <div
+              className="relative flex h-[90vh] w-4/5 max-w-screen-2xl items-center justify-center"
+              onClick={(event) => event.stopPropagation()}
+            >
+              <div className="relative h-full w-full overflow-hidden rounded-2xl bg-black shadow-2xl">
+                <Image
+                  src={expandedItem.src}
+                  alt={expandedItem.alt}
+                  fill
+                  sizes="80vw"
+                  className="object-contain"
+                  style={{ objectPosition: expandedItem.objectPosition }}
+                  quality={95}
+                />
+              </div>
+
+              <button
+                type="button"
+                className="absolute left-3 top-1/2 z-20 inline-flex size-12 -translate-y-1/2 items-center justify-center rounded-full border border-white/70 bg-white/90 text-foreground shadow-lg transition hover:border-luxury-gold hover:text-luxury-gold sm:left-5"
+                aria-label="Previous enlarged image"
+                onClick={showPreviousExpandedImage}
+              >
+                <ChevronLeft className="size-7" aria-hidden="true" />
+              </button>
+
+              <button
+                type="button"
+                className="absolute right-3 top-1/2 z-20 inline-flex size-12 -translate-y-1/2 items-center justify-center rounded-full border border-white/70 bg-white/90 text-foreground shadow-lg transition hover:border-luxury-gold hover:text-luxury-gold sm:right-5"
+                aria-label="Next enlarged image"
+                onClick={showNextExpandedImage}
+              >
+                <ChevronRight className="size-7" aria-hidden="true" />
+              </button>
+
+              <button
+                type="button"
+                className="absolute right-3 top-3 z-20 inline-flex size-11 items-center justify-center rounded-full border border-white/70 bg-white/90 text-foreground shadow-lg transition hover:border-luxury-gold hover:text-luxury-gold sm:right-5 sm:top-5"
+                aria-label="Close enlarged image"
+                onClick={() => setExpandedImageIndex(null)}
+              >
+                <X className="size-5" aria-hidden="true" />
+              </button>
+            </div>
+          </div>
+        ) : null}
       </div>
     </div>
   )

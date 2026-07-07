@@ -21,6 +21,7 @@ export default function HomePage() {
       <ScrollVideoRevealSection />
       <ScrollVideoRevealSection
         id="scroll-video-reveal-luca"
+        projectSlug="lucas-boutique"
         videoSrc="/videos/video_recortado_luca.mp4"
       />
       <CtaSection />

@@ -19,7 +19,12 @@ export function ArchitectureShowcaseTop({ slug }: ArchitectureShowcaseProps) {
     return null
   }
 
-  const heroImage = project.picture
+  const heroImage =
+    project.slug === "oliver-boutique"
+      ? "/lucaSectionPhotp.webp"
+      : project.slug === "lucas-boutique"
+        ? "/lucaPhotoMain.webp"
+      : project.picture
 
   return (
     <section className="luxury-shell mt-14 sm:mt-16">
