@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState, type FormEvent } from "react"
+import { Fragment, useEffect, useState, type FormEvent } from "react"
 import { useRouter } from "next/navigation"
 
 import { supabase } from "@/lib/supabase/client"
@@ -34,16 +34,53 @@ type PropertyRow = {
 type PropertyUpdateRow = {
   id: string | number
   property_id: string | number | null
-  title?: string | null
-  description?: string | null
-  progress?: string | number | null
-  update_date?: string | null
-  created_at?: string | null
+  title: string | null
+  description: string | null
+  progress: string | number | null
+  update_date: string | null
+  created_at: string | null
 }
 
 type PropertyFileRow = {
   id: string | number
   property_id: string | number | null
+  file_name: string | null
+  file_path: string | null
+  file_type: string | null
+  description: string | null
+  created_at: string | null
+}
+
+type ManagementFeedback = {
+  tone: "success" | "error"
+  message: string
+}
+
+type BuyerEditForm = {
+  id: string
+  fullName: string
+  phone: string
+}
+
+type PropertyEditForm = {
+  id: string
+  propertyNumber: string
+  buyerId: string
+  progress: string
+  status: string
+}
+
+type PropertyUpdateEditForm = {
+  id: string
+  title: string
+  description: string
+  progress: string
+  updateDate: string
+}
+
+type PropertyFileEditForm = {
+  id: string
+  description: string
 }
 
 function formatValue(value: string | number | null | undefined) {
@@ -162,6 +199,18 @@ export default function AdminOverviewPage() {
   const [propertyFileSuccess, setPropertyFileSuccess] = useState<string | null>(
     null,
   )
+  const [managementFeedback, setManagementFeedback] =
+    useState<ManagementFeedback | null>(null)
+  const [activeManagementAction, setActiveManagementAction] = useState<
+    string | null
+  >(null)
+  const [buyerEditForm, setBuyerEditForm] = useState<BuyerEditForm | null>(null)
+  const [propertyEditForm, setPropertyEditForm] =
+    useState<PropertyEditForm | null>(null)
+  const [propertyUpdateEditForm, setPropertyUpdateEditForm] =
+    useState<PropertyUpdateEditForm | null>(null)
+  const [propertyFileEditForm, setPropertyFileEditForm] =
+    useState<PropertyFileEditForm | null>(null)
 
   useEffect(() => {
     let isActive = true
@@ -229,11 +278,15 @@ export default function AdminOverviewPage() {
             .order("full_name", { ascending: true }),
           supabase
             .from("property_updates")
-            .select("id, property_id")
+            .select(
+              "id, property_id, title, description, progress, update_date, created_at",
+            )
             .order("created_at", { ascending: false }),
           supabase
             .from("property_files")
-            .select("id, property_id")
+            .select(
+              "id, property_id, file_name, file_path, file_type, description, created_at",
+            )
             .order("created_at", { ascending: false }),
         ])
 
@@ -582,7 +635,9 @@ export default function AdminOverviewPage() {
           file_type: propertyFileType,
           description: descriptionValue,
         })
-        .select("id, property_id")
+        .select(
+          "id, property_id, file_name, file_path, file_type, description, created_at",
+        )
         .single()
 
       if (insertFileError) {
@@ -620,6 +675,490 @@ export default function AdminOverviewPage() {
     }
   }
 
+  const startBuyerEdit = (buyer: BuyerProfileRow) => {
+    setManagementFeedback(null)
+    setBuyerEditForm({
+      id: String(buyer.id),
+      fullName: buyer.full_name ?? "",
+      phone: buyer.phone ?? "",
+    })
+  }
+
+  const handleSaveBuyer = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+
+    if (!buyerEditForm) {
+      return
+    }
+
+    const fullName = buyerEditForm.fullName.trim()
+    const phone = buyerEditForm.phone.trim()
+
+    if (!fullName) {
+      setManagementFeedback({
+        tone: "error",
+        message: "Buyer full name is required.",
+      })
+      return
+    }
+
+    const actionKey = `buyer:${buyerEditForm.id}`
+    setActiveManagementAction(actionKey)
+    setManagementFeedback(null)
+
+    try {
+      const { data: updatedBuyer, error: updateError } = await supabase
+        .from("profiles")
+        .update({ full_name: fullName, phone: phone || null })
+        .eq("id", buyerEditForm.id)
+        .eq("role", "client")
+        .select("id")
+        .maybeSingle()
+
+      if (updateError) {
+        throw updateError
+      }
+
+      if (!updatedBuyer) {
+        throw new Error("The buyer could not be updated.")
+      }
+
+      setBuyerEditForm(null)
+      setManagementFeedback({
+        tone: "success",
+        message: "Buyer changes saved successfully.",
+      })
+      setRefreshIndex((value) => value + 1)
+    } catch (caughtError) {
+      setManagementFeedback({
+        tone: "error",
+        message:
+          caughtError instanceof Error
+            ? caughtError.message
+            : "Could not save the buyer changes.",
+      })
+    } finally {
+      setActiveManagementAction(null)
+    }
+  }
+
+  const startPropertyEdit = (property: PropertyRow) => {
+    setManagementFeedback(null)
+    setPropertyEditForm({
+      id: String(property.id),
+      propertyNumber: String(property.property_number ?? ""),
+      buyerId: String(property.buyer_id ?? ""),
+      progress: String(property.progress ?? "0").replace("%", ""),
+      status: property.status ?? "",
+    })
+  }
+
+  const handleSaveProperty = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+
+    if (!propertyEditForm) {
+      return
+    }
+
+    const propertyNumber = propertyEditForm.propertyNumber.trim()
+    const buyerId = propertyEditForm.buyerId.trim()
+    const status = propertyEditForm.status.trim()
+    const progress = Number.parseInt(propertyEditForm.progress, 10)
+
+    if (!propertyNumber || !buyerId || !status) {
+      setManagementFeedback({
+        tone: "error",
+        message: "Property number, buyer, and status are required.",
+      })
+      return
+    }
+
+    if (Number.isNaN(progress) || progress < 0 || progress > 100) {
+      setManagementFeedback({
+        tone: "error",
+        message: "Progress must be a number between 0 and 100.",
+      })
+      return
+    }
+
+    const actionKey = `property:${propertyEditForm.id}`
+    setActiveManagementAction(actionKey)
+    setManagementFeedback(null)
+
+    try {
+      const { data: updatedProperty, error: updateError } = await supabase
+        .from("properties")
+        .update({
+          property_number: propertyNumber,
+          buyer_id: buyerId,
+          progress,
+          status,
+        })
+        .eq("id", propertyEditForm.id)
+        .select("id")
+        .maybeSingle()
+
+      if (updateError) {
+        throw updateError
+      }
+
+      if (!updatedProperty) {
+        throw new Error("The property could not be updated.")
+      }
+
+      setPropertyEditForm(null)
+      setManagementFeedback({
+        tone: "success",
+        message: "Property changes saved successfully.",
+      })
+      setRefreshIndex((value) => value + 1)
+    } catch (caughtError) {
+      setManagementFeedback({
+        tone: "error",
+        message:
+          caughtError instanceof Error
+            ? caughtError.message
+            : "Could not save the property changes.",
+      })
+    } finally {
+      setActiveManagementAction(null)
+    }
+  }
+
+  const handleDeleteProperty = async (property: PropertyRow) => {
+    const propertyLabel = formatValue(property.property_number)
+
+    if (
+      !window.confirm(
+        `Are you sure? This will permanently delete property ${propertyLabel}, its updates, and its file records.`,
+      )
+    ) {
+      return
+    }
+
+    const propertyId = String(property.id)
+    const actionKey = `property:${propertyId}`
+    let removedStorageFiles = false
+    setActiveManagementAction(actionKey)
+    setManagementFeedback(null)
+
+    try {
+      const { data: relatedFiles, error: relatedFilesError } = await supabase
+        .from("property_files")
+        .select("file_path")
+        .eq("property_id", propertyId)
+
+      if (relatedFilesError) {
+        throw relatedFilesError
+      }
+
+      const filePaths = (relatedFiles ?? [])
+        .map((file) => file.file_path)
+        .filter((filePath): filePath is string => Boolean(filePath))
+
+      if (filePaths.length > 0) {
+        const { error: storageError } = await supabase.storage
+          .from("property-files")
+          .remove(filePaths)
+
+        if (storageError) {
+          throw storageError
+        }
+
+        removedStorageFiles = true
+      }
+
+      const { data: deletedProperty, error: deleteError } = await supabase
+        .from("properties")
+        .delete()
+        .eq("id", propertyId)
+        .select("id")
+        .maybeSingle()
+
+      if (deleteError) {
+        throw deleteError
+      }
+
+      if (!deletedProperty) {
+        throw new Error("The property could not be deleted.")
+      }
+
+      setPropertyEditForm(null)
+      setManagementFeedback({
+        tone: "success",
+        message: `Property ${propertyLabel} was deleted successfully.`,
+      })
+      setRefreshIndex((value) => value + 1)
+    } catch (caughtError) {
+      const message =
+        caughtError instanceof Error
+          ? caughtError.message
+          : "Could not delete the property."
+      setManagementFeedback({
+        tone: "error",
+        message: removedStorageFiles
+          ? `Storage files were removed, but the property row could not be deleted: ${message}`
+          : message,
+      })
+    } finally {
+      setActiveManagementAction(null)
+    }
+  }
+
+  const startPropertyUpdateEdit = (update: PropertyUpdateRow) => {
+    setManagementFeedback(null)
+    setPropertyUpdateEditForm({
+      id: String(update.id),
+      title: update.title ?? "",
+      description: update.description ?? "",
+      progress: String(update.progress ?? "0").replace("%", ""),
+      updateDate: update.update_date?.slice(0, 10) ?? getTodayDateValue(),
+    })
+  }
+
+  const handleSavePropertyUpdate = async (
+    event: FormEvent<HTMLFormElement>,
+  ) => {
+    event.preventDefault()
+
+    if (!propertyUpdateEditForm) {
+      return
+    }
+
+    const title = propertyUpdateEditForm.title.trim()
+    const description = propertyUpdateEditForm.description.trim()
+    const updateDate = propertyUpdateEditForm.updateDate.trim()
+    const progress = Number.parseInt(propertyUpdateEditForm.progress, 10)
+
+    if (!title || !description || !updateDate) {
+      setManagementFeedback({
+        tone: "error",
+        message: "Title, description, and update date are required.",
+      })
+      return
+    }
+
+    if (Number.isNaN(progress) || progress < 0 || progress > 100) {
+      setManagementFeedback({
+        tone: "error",
+        message: "Progress must be a number between 0 and 100.",
+      })
+      return
+    }
+
+    const actionKey = `update:${propertyUpdateEditForm.id}`
+    setActiveManagementAction(actionKey)
+    setManagementFeedback(null)
+
+    try {
+      const { data: updatedRecord, error: updateError } = await supabase
+        .from("property_updates")
+        .update({ title, description, progress, update_date: updateDate })
+        .eq("id", propertyUpdateEditForm.id)
+        .select("id")
+        .maybeSingle()
+
+      if (updateError) {
+        throw updateError
+      }
+
+      if (!updatedRecord) {
+        throw new Error("The property update could not be updated.")
+      }
+
+      setPropertyUpdateEditForm(null)
+      setManagementFeedback({
+        tone: "success",
+        message: "Property update changes saved successfully.",
+      })
+      setRefreshIndex((value) => value + 1)
+    } catch (caughtError) {
+      setManagementFeedback({
+        tone: "error",
+        message:
+          caughtError instanceof Error
+            ? caughtError.message
+            : "Could not save the property update changes.",
+      })
+    } finally {
+      setActiveManagementAction(null)
+    }
+  }
+
+  const handleDeletePropertyUpdate = async (update: PropertyUpdateRow) => {
+    if (!window.confirm("Are you sure? This property update will be deleted.")) {
+      return
+    }
+
+    const updateId = String(update.id)
+    const actionKey = `update:${updateId}`
+    setActiveManagementAction(actionKey)
+    setManagementFeedback(null)
+
+    try {
+      const { data: deletedUpdate, error: deleteError } = await supabase
+        .from("property_updates")
+        .delete()
+        .eq("id", updateId)
+        .select("id")
+        .maybeSingle()
+
+      if (deleteError) {
+        throw deleteError
+      }
+
+      if (!deletedUpdate) {
+        throw new Error("The property update could not be deleted.")
+      }
+
+      setPropertyUpdateEditForm(null)
+      setManagementFeedback({
+        tone: "success",
+        message: "Property update deleted successfully.",
+      })
+      setRefreshIndex((value) => value + 1)
+    } catch (caughtError) {
+      setManagementFeedback({
+        tone: "error",
+        message:
+          caughtError instanceof Error
+            ? caughtError.message
+            : "Could not delete the property update.",
+      })
+    } finally {
+      setActiveManagementAction(null)
+    }
+  }
+
+  const startPropertyFileEdit = (propertyFile: PropertyFileRow) => {
+    setManagementFeedback(null)
+    setPropertyFileEditForm({
+      id: String(propertyFile.id),
+      description: propertyFile.description ?? "",
+    })
+  }
+
+  const handleSavePropertyFile = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+
+    if (!propertyFileEditForm) {
+      return
+    }
+
+    const description = propertyFileEditForm.description.trim()
+
+    if (!description) {
+      setManagementFeedback({
+        tone: "error",
+        message: "File description is required.",
+      })
+      return
+    }
+
+    const actionKey = `file:${propertyFileEditForm.id}`
+    setActiveManagementAction(actionKey)
+    setManagementFeedback(null)
+
+    try {
+      const { data: updatedFile, error: updateError } = await supabase
+        .from("property_files")
+        .update({ description })
+        .eq("id", propertyFileEditForm.id)
+        .select("id")
+        .maybeSingle()
+
+      if (updateError) {
+        throw updateError
+      }
+
+      if (!updatedFile) {
+        throw new Error("The file description could not be updated.")
+      }
+
+      setPropertyFileEditForm(null)
+      setManagementFeedback({
+        tone: "success",
+        message: "File description saved successfully.",
+      })
+      setRefreshIndex((value) => value + 1)
+    } catch (caughtError) {
+      setManagementFeedback({
+        tone: "error",
+        message:
+          caughtError instanceof Error
+            ? caughtError.message
+            : "Could not save the file description.",
+      })
+    } finally {
+      setActiveManagementAction(null)
+    }
+  }
+
+  const handleDeletePropertyFile = async (propertyFile: PropertyFileRow) => {
+    if (
+      !window.confirm(
+        `Are you sure? ${formatValue(propertyFile.file_name)} will be permanently deleted.`,
+      )
+    ) {
+      return
+    }
+
+    const fileId = String(propertyFile.id)
+    const actionKey = `file:${fileId}`
+    let removedStorageFile = false
+    setActiveManagementAction(actionKey)
+    setManagementFeedback(null)
+
+    try {
+      if (propertyFile.file_path) {
+        const { error: storageError } = await supabase.storage
+          .from("property-files")
+          .remove([propertyFile.file_path])
+
+        if (storageError) {
+          throw storageError
+        }
+
+        removedStorageFile = true
+      }
+
+      const { data: deletedFile, error: deleteError } = await supabase
+        .from("property_files")
+        .delete()
+        .eq("id", fileId)
+        .select("id")
+        .maybeSingle()
+
+      if (deleteError) {
+        throw deleteError
+      }
+
+      if (!deletedFile) {
+        throw new Error("The property file row could not be deleted.")
+      }
+
+      setPropertyFileEditForm(null)
+      setManagementFeedback({
+        tone: "success",
+        message: "Property file deleted from Storage and records successfully.",
+      })
+      setRefreshIndex((value) => value + 1)
+    } catch (caughtError) {
+      const message =
+        caughtError instanceof Error
+          ? caughtError.message
+          : "Could not delete the property file."
+      setManagementFeedback({
+        tone: "error",
+        message: removedStorageFile
+          ? `The Storage object was removed, but its database row could not be deleted: ${message}`
+          : message,
+      })
+    } finally {
+      setActiveManagementAction(null)
+    }
+  }
+
   const handleLogout = async () => {
     setLoading(true)
     setError(null)
@@ -647,6 +1186,14 @@ export default function AdminOverviewPage() {
     acc[String(buyer.id)] = buyer
     return acc
   }, {})
+
+  const propertyById = properties.reduce<Record<string, PropertyRow>>(
+    (acc, property) => {
+      acc[String(property.id)] = property
+      return acc
+    },
+    {},
+  )
 
   const propertyCountByBuyerId = properties.reduce<Record<string, number>>(
     (acc, property) => {
@@ -697,6 +1244,10 @@ export default function AdminOverviewPage() {
     "inline-flex items-center justify-center rounded-full bg-linear-to-b from-luxury-gold-soft to-luxury-gold px-5 py-3 text-sm font-semibold text-stone-950 shadow-lg transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-70 disabled:hover:translate-y-0"
   const secondaryButtonClass =
     "inline-flex items-center justify-center rounded-full border border-slate-200 bg-white px-5 py-3 text-sm font-medium text-slate-900 shadow-sm transition hover:border-slate-400 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-70"
+  const smallSecondaryButtonClass =
+    "inline-flex items-center justify-center rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-700 transition hover:border-slate-400 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
+  const smallDeleteButtonClass =
+    "inline-flex items-center justify-center rounded-full border border-rose-200 bg-white px-4 py-2 text-xs font-semibold text-rose-700 transition hover:border-rose-300 hover:bg-rose-50 disabled:cursor-not-allowed disabled:opacity-60"
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-stone-50 via-white to-slate-50 px-4 py-8 text-slate-900 sm:px-6 lg:px-8 lg:py-12">
@@ -733,6 +1284,19 @@ export default function AdminOverviewPage() {
               aria-live="polite"
             >
               {error}
+            </div>
+          ) : null}
+
+          {managementFeedback ? (
+            <div
+              className={`fixed right-4 bottom-4 z-50 max-w-sm rounded-2xl border px-4 py-3 text-sm shadow-xl sm:right-6 sm:bottom-6 ${
+                managementFeedback.tone === "success"
+                  ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+                  : "border-rose-200 bg-rose-50 text-rose-700"
+              }`}
+              aria-live="polite"
+            >
+              {managementFeedback.message}
             </div>
           ) : null}
         </section>
@@ -1384,30 +1948,127 @@ export default function AdminOverviewPage() {
                         </p>
                       </div>
 
-                      <span className="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-medium uppercase tracking-[0.18em] text-slate-600">
-                        Buyer
-                      </span>
-                    </div>
-
-                    <div className="mt-6 grid gap-4 sm:grid-cols-2">
-                      <div>
-                        <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">
-                          Phone
-                        </p>
-                        <p className="mt-2 text-sm text-slate-700">
-                          {formatValue(buyer.phone)}
-                        </p>
-                      </div>
-
-                      <div>
-                        <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">
-                          Created
-                        </p>
-                        <p className="mt-2 text-sm text-slate-700">
-                          {formatDate(buyer.created_at)}
-                        </p>
+                      <div className="flex items-center gap-2">
+                        <span className="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-medium uppercase tracking-widest text-slate-600">
+                          Buyer
+                        </span>
+                        <button
+                          type="button"
+                          className={smallSecondaryButtonClass}
+                          onClick={() => startBuyerEdit(buyer)}
+                          disabled={activeManagementAction !== null}
+                        >
+                          Edit
+                        </button>
                       </div>
                     </div>
+
+                    {buyerEditForm?.id === String(buyer.id) ? (
+                      <form
+                        className="mt-6 grid gap-4 rounded-2xl border border-slate-200 bg-slate-50 p-4 sm:grid-cols-2"
+                        onSubmit={handleSaveBuyer}
+                      >
+                        <div className="space-y-2">
+                          <label
+                            htmlFor={`buyer-edit-name-${buyer.id}`}
+                            className="text-sm font-medium text-slate-700"
+                          >
+                            Full name
+                          </label>
+                          <input
+                            id={`buyer-edit-name-${buyer.id}`}
+                            type="text"
+                            value={buyerEditForm.fullName}
+                            onChange={(event) =>
+                              setBuyerEditForm((current) =>
+                                current
+                                  ? { ...current, fullName: event.target.value }
+                                  : current,
+                              )
+                            }
+                            className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
+                            required
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <label
+                            htmlFor={`buyer-edit-phone-${buyer.id}`}
+                            className="text-sm font-medium text-slate-700"
+                          >
+                            Phone
+                          </label>
+                          <input
+                            id={`buyer-edit-phone-${buyer.id}`}
+                            type="tel"
+                            value={buyerEditForm.phone}
+                            onChange={(event) =>
+                              setBuyerEditForm((current) =>
+                                current
+                                  ? { ...current, phone: event.target.value }
+                                  : current,
+                              )
+                            }
+                            className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
+                          />
+                        </div>
+                        <div className="space-y-2 sm:col-span-2">
+                          <label
+                            htmlFor={`buyer-edit-email-${buyer.id}`}
+                            className="text-sm font-medium text-slate-700"
+                          >
+                            Email (read-only)
+                          </label>
+                          <input
+                            id={`buyer-edit-email-${buyer.id}`}
+                            type="email"
+                            value={buyer.email ?? ""}
+                            readOnly
+                            className="w-full rounded-2xl border border-slate-200 bg-slate-100 px-4 py-3 text-slate-500 outline-none"
+                          />
+                        </div>
+                        <div className="flex flex-wrap gap-2 sm:col-span-2">
+                          <button
+                            type="submit"
+                            className={primaryButtonClass}
+                            disabled={
+                              activeManagementAction === `buyer:${buyer.id}`
+                            }
+                          >
+                            {activeManagementAction === `buyer:${buyer.id}`
+                              ? "Saving..."
+                              : "Save changes"}
+                          </button>
+                          <button
+                            type="button"
+                            className={secondaryButtonClass}
+                            onClick={() => setBuyerEditForm(null)}
+                            disabled={activeManagementAction !== null}
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      </form>
+                    ) : (
+                      <div className="mt-6 grid gap-4 sm:grid-cols-2">
+                        <div>
+                          <p className="text-xs font-semibold uppercase tracking-widest text-slate-500">
+                            Phone
+                          </p>
+                          <p className="mt-2 text-sm text-slate-700">
+                            {formatValue(buyer.phone)}
+                          </p>
+                        </div>
+
+                        <div>
+                          <p className="text-xs font-semibold uppercase tracking-widest text-slate-500">
+                            Created
+                          </p>
+                          <p className="mt-2 text-sm text-slate-700">
+                            {formatDate(buyer.created_at)}
+                          </p>
+                        </div>
+                      </div>
+                    )}
 
                     <div className="mt-6 border-t border-slate-100 pt-4">
                       <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">
@@ -1466,6 +2127,9 @@ export default function AdminOverviewPage() {
                     <th scope="col" className="px-6 py-4">
                       Created
                     </th>
+                    <th scope="col" className="px-6 py-4">
+                      Actions
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 bg-white">
@@ -1477,7 +2141,8 @@ export default function AdminOverviewPage() {
                     const fileCount = fileCountByPropertyId[String(property.id)] ?? 0
 
                     return (
-                      <tr key={String(property.id)} className="hover:bg-slate-50/70">
+                      <Fragment key={String(property.id)}>
+                      <tr className="hover:bg-slate-50/70">
                         <td className="px-6 py-4">
                           <div className="font-medium text-slate-950">
                             {formatValue(property.property_number)}
@@ -1516,13 +2181,513 @@ export default function AdminOverviewPage() {
                         <td className="px-6 py-4 text-slate-700">
                           {formatDate(property.created_at)}
                         </td>
+                        <td className="px-6 py-4">
+                          <div className="flex items-center gap-2">
+                            <button
+                              type="button"
+                              className={smallSecondaryButtonClass}
+                              onClick={() => startPropertyEdit(property)}
+                              disabled={activeManagementAction !== null}
+                            >
+                              Edit
+                            </button>
+                            <button
+                              type="button"
+                              className={smallDeleteButtonClass}
+                              onClick={() => handleDeleteProperty(property)}
+                              disabled={activeManagementAction !== null}
+                            >
+                              {activeManagementAction === `property:${property.id}`
+                                ? "Deleting..."
+                                : "Delete"}
+                            </button>
+                          </div>
+                        </td>
                       </tr>
+                      {propertyEditForm?.id === String(property.id) ? (
+                        <tr className="bg-slate-50">
+                          <td colSpan={9} className="px-6 py-5">
+                            <form
+                              className="grid gap-4 rounded-2xl border border-slate-200 bg-white p-5 md:grid-cols-2 xl:grid-cols-4"
+                              onSubmit={handleSaveProperty}
+                            >
+                              <div className="space-y-2">
+                                <label
+                                  htmlFor={`property-edit-number-${property.id}`}
+                                  className="text-sm font-medium text-slate-700"
+                                >
+                                  Property number
+                                </label>
+                                <input
+                                  id={`property-edit-number-${property.id}`}
+                                  type="text"
+                                  value={propertyEditForm.propertyNumber}
+                                  onChange={(event) =>
+                                    setPropertyEditForm((current) =>
+                                      current
+                                        ? {
+                                            ...current,
+                                            propertyNumber: event.target.value,
+                                          }
+                                        : current,
+                                    )
+                                  }
+                                  className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
+                                  required
+                                />
+                              </div>
+                              <div className="space-y-2">
+                                <label
+                                  htmlFor={`property-edit-buyer-${property.id}`}
+                                  className="text-sm font-medium text-slate-700"
+                                >
+                                  Buyer
+                                </label>
+                                <select
+                                  id={`property-edit-buyer-${property.id}`}
+                                  value={propertyEditForm.buyerId}
+                                  onChange={(event) =>
+                                    setPropertyEditForm((current) =>
+                                      current
+                                        ? { ...current, buyerId: event.target.value }
+                                        : current,
+                                    )
+                                  }
+                                  className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
+                                  required
+                                >
+                                  <option value="">Select a buyer</option>
+                                  {buyers.map((buyerOption) => (
+                                    <option
+                                      key={String(buyerOption.id)}
+                                      value={String(buyerOption.id)}
+                                    >
+                                      {formatValue(buyerOption.full_name)} (
+                                      {formatValue(buyerOption.email)})
+                                    </option>
+                                  ))}
+                                </select>
+                              </div>
+                              <div className="space-y-2">
+                                <label
+                                  htmlFor={`property-edit-progress-${property.id}`}
+                                  className="text-sm font-medium text-slate-700"
+                                >
+                                  Progress
+                                </label>
+                                <input
+                                  id={`property-edit-progress-${property.id}`}
+                                  type="number"
+                                  min={0}
+                                  max={100}
+                                  value={propertyEditForm.progress}
+                                  onChange={(event) =>
+                                    setPropertyEditForm((current) =>
+                                      current
+                                        ? { ...current, progress: event.target.value }
+                                        : current,
+                                    )
+                                  }
+                                  className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
+                                  required
+                                />
+                              </div>
+                              <div className="space-y-2">
+                                <label
+                                  htmlFor={`property-edit-status-${property.id}`}
+                                  className="text-sm font-medium text-slate-700"
+                                >
+                                  Status
+                                </label>
+                                <input
+                                  id={`property-edit-status-${property.id}`}
+                                  type="text"
+                                  value={propertyEditForm.status}
+                                  onChange={(event) =>
+                                    setPropertyEditForm((current) =>
+                                      current
+                                        ? { ...current, status: event.target.value }
+                                        : current,
+                                    )
+                                  }
+                                  className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
+                                  required
+                                />
+                              </div>
+                              <div className="flex flex-wrap gap-2 md:col-span-2 xl:col-span-4">
+                                <button
+                                  type="submit"
+                                  className={primaryButtonClass}
+                                  disabled={
+                                    activeManagementAction ===
+                                    `property:${property.id}`
+                                  }
+                                >
+                                  {activeManagementAction ===
+                                  `property:${property.id}`
+                                    ? "Saving..."
+                                    : "Save changes"}
+                                </button>
+                                <button
+                                  type="button"
+                                  className={secondaryButtonClass}
+                                  onClick={() => setPropertyEditForm(null)}
+                                  disabled={activeManagementAction !== null}
+                                >
+                                  Cancel
+                                </button>
+                              </div>
+                            </form>
+                          </td>
+                        </tr>
+                      ) : null}
+                      </Fragment>
                     )
                   })}
                 </tbody>
               </table>
             </div>
           )}
+        </section>
+
+        <section className="rounded-3xl border border-slate-200 bg-white shadow-sm">
+          <details>
+            <summary className="flex cursor-pointer list-none items-center justify-between gap-4 p-8">
+              <div className="space-y-2">
+                <p className="text-xs font-semibold uppercase tracking-widest text-slate-500">
+                  Property updates
+                </p>
+                <h2 className="text-2xl font-semibold tracking-tight text-slate-950">
+                  Manage timeline updates
+                </h2>
+                <p className="text-sm leading-6 text-slate-600">
+                  Expand to edit or delete existing construction updates.
+                </p>
+              </div>
+              <span className="rounded-full border border-slate-200 bg-slate-50 px-4 py-2 text-sm font-semibold text-slate-700">
+                {totalUpdates} {totalUpdates === 1 ? "update" : "updates"}
+              </span>
+            </summary>
+
+            <div className="border-t border-slate-100 p-8 pt-6">
+              {propertyUpdates.length === 0 ? (
+                <div className="rounded-2xl border border-slate-200 bg-slate-50 px-5 py-4 text-sm text-slate-600">
+                  No property updates created yet.
+                </div>
+              ) : (
+                <div className="grid gap-4 lg:grid-cols-2">
+                  {propertyUpdates.map((update) => {
+                    const property =
+                      propertyById[String(update.property_id ?? "")]
+                    const actionKey = `update:${update.id}`
+
+                    return (
+                      <article
+                        key={String(update.id)}
+                        className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm"
+                      >
+                        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                          <div className="space-y-1">
+                            <p className="text-xs font-semibold uppercase tracking-widest text-slate-500">
+                              Property {formatValue(property?.property_number)}
+                            </p>
+                            <h3 className="text-lg font-semibold text-slate-950">
+                              {formatValue(update.title)}
+                            </h3>
+                            <p className="text-sm text-slate-500">
+                              {formatDate(update.update_date)}
+                            </p>
+                          </div>
+                          <div className="flex flex-wrap gap-2">
+                            <button
+                              type="button"
+                              className={smallSecondaryButtonClass}
+                              onClick={() => startPropertyUpdateEdit(update)}
+                              disabled={activeManagementAction !== null}
+                            >
+                              Edit
+                            </button>
+                            <button
+                              type="button"
+                              className={smallDeleteButtonClass}
+                              onClick={() => handleDeletePropertyUpdate(update)}
+                              disabled={activeManagementAction !== null}
+                            >
+                              {activeManagementAction === actionKey
+                                ? "Deleting..."
+                                : "Delete"}
+                            </button>
+                          </div>
+                        </div>
+
+                        {propertyUpdateEditForm?.id === String(update.id) ? (
+                          <form
+                            className="mt-5 grid gap-4 rounded-2xl border border-slate-200 bg-slate-50 p-4 sm:grid-cols-2"
+                            onSubmit={handleSavePropertyUpdate}
+                          >
+                            <div className="space-y-2 sm:col-span-2">
+                              <label
+                                htmlFor={`update-edit-title-${update.id}`}
+                                className="text-sm font-medium text-slate-700"
+                              >
+                                Title
+                              </label>
+                              <input
+                                id={`update-edit-title-${update.id}`}
+                                type="text"
+                                value={propertyUpdateEditForm.title}
+                                onChange={(event) =>
+                                  setPropertyUpdateEditForm((current) =>
+                                    current
+                                      ? { ...current, title: event.target.value }
+                                      : current,
+                                  )
+                                }
+                                className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
+                                required
+                              />
+                            </div>
+                            <div className="space-y-2 sm:col-span-2">
+                              <label
+                                htmlFor={`update-edit-description-${update.id}`}
+                                className="text-sm font-medium text-slate-700"
+                              >
+                                Description
+                              </label>
+                              <textarea
+                                id={`update-edit-description-${update.id}`}
+                                value={propertyUpdateEditForm.description}
+                                onChange={(event) =>
+                                  setPropertyUpdateEditForm((current) =>
+                                    current
+                                      ? {
+                                          ...current,
+                                          description: event.target.value,
+                                        }
+                                      : current,
+                                  )
+                                }
+                                className="min-h-28 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
+                                required
+                              />
+                            </div>
+                            <div className="space-y-2">
+                              <label
+                                htmlFor={`update-edit-progress-${update.id}`}
+                                className="text-sm font-medium text-slate-700"
+                              >
+                                Progress
+                              </label>
+                              <input
+                                id={`update-edit-progress-${update.id}`}
+                                type="number"
+                                min={0}
+                                max={100}
+                                value={propertyUpdateEditForm.progress}
+                                onChange={(event) =>
+                                  setPropertyUpdateEditForm((current) =>
+                                    current
+                                      ? { ...current, progress: event.target.value }
+                                      : current,
+                                  )
+                                }
+                                className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
+                                required
+                              />
+                            </div>
+                            <div className="space-y-2">
+                              <label
+                                htmlFor={`update-edit-date-${update.id}`}
+                                className="text-sm font-medium text-slate-700"
+                              >
+                                Update date
+                              </label>
+                              <input
+                                id={`update-edit-date-${update.id}`}
+                                type="date"
+                                value={propertyUpdateEditForm.updateDate}
+                                onChange={(event) =>
+                                  setPropertyUpdateEditForm((current) =>
+                                    current
+                                      ? { ...current, updateDate: event.target.value }
+                                      : current,
+                                  )
+                                }
+                                className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
+                                required
+                              />
+                            </div>
+                            <div className="flex flex-wrap gap-2 sm:col-span-2">
+                              <button
+                                type="submit"
+                                className={primaryButtonClass}
+                                disabled={activeManagementAction === actionKey}
+                              >
+                                {activeManagementAction === actionKey
+                                  ? "Saving..."
+                                  : "Save changes"}
+                              </button>
+                              <button
+                                type="button"
+                                className={secondaryButtonClass}
+                                onClick={() => setPropertyUpdateEditForm(null)}
+                                disabled={activeManagementAction !== null}
+                              >
+                                Cancel
+                              </button>
+                            </div>
+                          </form>
+                        ) : (
+                          <div className="mt-5 space-y-4 border-t border-slate-100 pt-4">
+                            <p className="text-sm leading-6 text-slate-700">
+                              {formatValue(update.description)}
+                            </p>
+                            <p className="text-sm font-semibold text-slate-600">
+                              Progress: {formatProgressPercentage(update.progress)}
+                            </p>
+                          </div>
+                        )}
+                      </article>
+                    )
+                  })}
+                </div>
+              )}
+            </div>
+          </details>
+        </section>
+
+        <section className="rounded-3xl border border-slate-200 bg-white shadow-sm">
+          <details>
+            <summary className="flex cursor-pointer list-none items-center justify-between gap-4 p-8">
+              <div className="space-y-2">
+                <p className="text-xs font-semibold uppercase tracking-widest text-slate-500">
+                  Property files
+                </p>
+                <h2 className="text-2xl font-semibold tracking-tight text-slate-950">
+                  Manage uploaded files
+                </h2>
+                <p className="text-sm leading-6 text-slate-600">
+                  Expand to edit descriptions or remove files from Storage.
+                </p>
+              </div>
+              <span className="rounded-full border border-slate-200 bg-slate-50 px-4 py-2 text-sm font-semibold text-slate-700">
+                {totalFiles} {totalFiles === 1 ? "file" : "files"}
+              </span>
+            </summary>
+
+            <div className="border-t border-slate-100 p-8 pt-6">
+              {propertyFiles.length === 0 ? (
+                <div className="rounded-2xl border border-slate-200 bg-slate-50 px-5 py-4 text-sm text-slate-600">
+                  No property files uploaded yet.
+                </div>
+              ) : (
+                <div className="grid gap-4 lg:grid-cols-2">
+                  {propertyFiles.map((propertyFile) => {
+                    const property =
+                      propertyById[String(propertyFile.property_id ?? "")]
+                    const actionKey = `file:${propertyFile.id}`
+
+                    return (
+                      <article
+                        key={String(propertyFile.id)}
+                        className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm"
+                      >
+                        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                          <div className="min-w-0 space-y-1">
+                            <p className="text-xs font-semibold uppercase tracking-widest text-slate-500">
+                              Property {formatValue(property?.property_number)}
+                            </p>
+                            <h3 className="truncate text-lg font-semibold text-slate-950">
+                              {formatValue(propertyFile.file_name)}
+                            </h3>
+                            <p className="text-sm text-slate-500">
+                              {formatValue(propertyFile.file_type)} ·{" "}
+                              {formatDate(propertyFile.created_at)}
+                            </p>
+                          </div>
+                          <div className="flex shrink-0 flex-wrap gap-2">
+                            <button
+                              type="button"
+                              className={smallSecondaryButtonClass}
+                              onClick={() => startPropertyFileEdit(propertyFile)}
+                              disabled={activeManagementAction !== null}
+                            >
+                              Edit description
+                            </button>
+                            <button
+                              type="button"
+                              className={smallDeleteButtonClass}
+                              onClick={() => handleDeletePropertyFile(propertyFile)}
+                              disabled={activeManagementAction !== null}
+                            >
+                              {activeManagementAction === actionKey
+                                ? "Deleting..."
+                                : "Delete file"}
+                            </button>
+                          </div>
+                        </div>
+
+                        {propertyFileEditForm?.id === String(propertyFile.id) ? (
+                          <form
+                            className="mt-5 space-y-4 rounded-2xl border border-slate-200 bg-slate-50 p-4"
+                            onSubmit={handleSavePropertyFile}
+                          >
+                            <div className="space-y-2">
+                              <label
+                                htmlFor={`file-edit-description-${propertyFile.id}`}
+                                className="text-sm font-medium text-slate-700"
+                              >
+                                Description
+                              </label>
+                              <textarea
+                                id={`file-edit-description-${propertyFile.id}`}
+                                value={propertyFileEditForm.description}
+                                onChange={(event) =>
+                                  setPropertyFileEditForm((current) =>
+                                    current
+                                      ? {
+                                          ...current,
+                                          description: event.target.value,
+                                        }
+                                      : current,
+                                  )
+                                }
+                                className="min-h-28 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
+                                required
+                              />
+                            </div>
+                            <div className="flex flex-wrap gap-2">
+                              <button
+                                type="submit"
+                                className={primaryButtonClass}
+                                disabled={activeManagementAction === actionKey}
+                              >
+                                {activeManagementAction === actionKey
+                                  ? "Saving..."
+                                  : "Save changes"}
+                              </button>
+                              <button
+                                type="button"
+                                className={secondaryButtonClass}
+                                onClick={() => setPropertyFileEditForm(null)}
+                                disabled={activeManagementAction !== null}
+                              >
+                                Cancel
+                              </button>
+                            </div>
+                          </form>
+                        ) : (
+                          <p className="mt-5 border-t border-slate-100 pt-4 text-sm leading-6 text-slate-700">
+                            {formatValue(propertyFile.description)}
+                          </p>
+                        )}
+                      </article>
+                    )
+                  })}
+                </div>
+              )}
+            </div>
+          </details>
         </section>
       </div>
     </main>

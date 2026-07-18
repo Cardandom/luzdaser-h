@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, type MouseEvent } from "react"
 import { Menu, X } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
@@ -10,7 +10,8 @@ import { rememberClientLoginReturn } from "@/lib/client-login-return"
 
 const navItems = [
   { label: "Gallery", href: "#gallery" },
-  { label: "Projects", href: "#featured-projects" },
+  { label: "Oliver", href: "#scroll-video-reveal" },
+  { label: "Luca", href: "#scroll-video-reveal-luca" },
   { label: "Location", href: "#location" },
   { label: "Project Progress", href: "#project-progress" },
   { label: "Contacts", href: "#contacts" },
@@ -68,6 +69,24 @@ export function SiteHeader() {
   const closeMenu = () => setIsMenuOpen(false)
   const isSolidHeader = isHovered || hasScrolled || isMenuOpen
   const getNavHref = (href: string) => (pathname === "/" ? href : `/${href}`)
+  const handleNavClick = (
+    event: MouseEvent<HTMLAnchorElement>,
+    href: string,
+  ) => {
+    closeMenu()
+
+    if (pathname !== "/" || href !== "#scroll-video-reveal-luca") {
+      return
+    }
+
+    event.preventDefault()
+    window.history.pushState(null, "", href)
+    window.dispatchEvent(
+      new CustomEvent("scroll-video-reveal:navigate", {
+        detail: { id: href.slice(1) },
+      }),
+    )
+  }
 
   return (
     <header
@@ -110,6 +129,7 @@ export function SiteHeader() {
                 key={item.label}
                 href={getNavHref(item.href)}
                 className="transition-colors hover:text-luxury-gold"
+                onClick={(event) => handleNavClick(event, item.href)}
               >
                 {item.label}
               </a>
@@ -149,7 +169,7 @@ export function SiteHeader() {
                   key={item.label}
                   href={getNavHref(item.href)}
                   className="rounded-2xl border border-transparent px-4 py-3 transition-colors hover:border-luxury-border hover:bg-stone-50 hover:text-luxury-gold"
-                  onClick={closeMenu}
+                  onClick={(event) => handleNavClick(event, item.href)}
                 >
                   {item.label}
                 </a>

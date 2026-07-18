@@ -24,7 +24,7 @@ const googleMapsEmbedUrl =
 
 export function BenefitsSection() {
   return (
-    <section id="location" className="">
+    <section id="location" className="scroll-mt-0">
       <div className="overflow-hidden bg-white">
         <div className="bg-[radial-gradient(circle_at_top_left,rgba(220,181,109,0.12),transparent_28%),radial-gradient(circle_at_100%_0%,rgba(43,43,43,0.04),transparent_22%),linear-gradient(180deg,#ffffff,#fbfaf7)] px-5 py-20 sm:px-8 lg:px-10">
           <div className="mx-auto max-w-6xl">

@@ -50,7 +50,8 @@ const galleryItems: GalleryItem[] = galleryImageFiles.map((fileName) => {
   }
 })
 
-const visibleGalleryCount = 5
+const desktopVisibleGalleryCount = 5
+const mobileVisibleGalleryCount = 3
 const carouselTransitionDurationMs = 700
 
 type CarouselDirection = "previous" | "next"
@@ -73,27 +74,31 @@ function getGalleryItem(index: number) {
   return galleryItems[(index + galleryItems.length) % galleryItems.length]
 }
 
-function getVisibleGalleryItems(startIndex: number) {
+function getVisibleGalleryItems(startIndex: number, visibleGalleryCount: number) {
   return Array.from(
     { length: Math.min(visibleGalleryCount, galleryItems.length) },
     (_, offset) => getGalleryItem(startIndex + offset),
   )
 }
 
-function buildSteadyCards(startIndex: number): RenderedGalleryCard[] {
-  return getVisibleGalleryItems(startIndex).map((item, slot) => ({
+function buildSteadyCards(
+  startIndex: number,
+  visibleGalleryCount: number,
+): RenderedGalleryCard[] {
+  return getVisibleGalleryItems(startIndex, visibleGalleryCount).map((item, slot) => ({
     key: item.id,
     item,
     slot,
   }))
 }
 
-function getSlotMetrics(activeVisibleIndex: number) {
+function getSlotMetrics(activeVisibleIndex: number, visibleGalleryCount: number) {
   const inactiveWidthUnits = 1.1
   const activeWidthUnits = 2.25
   const gapUnits = 0.16
+  const activeSlotIndex = Math.min(Math.max(activeVisibleIndex, 0), visibleGalleryCount - 1)
   const widths = Array.from({ length: visibleGalleryCount }, (_, index) =>
-    index === activeVisibleIndex ? activeWidthUnits : inactiveWidthUnits,
+    index === activeSlotIndex ? activeWidthUnits : inactiveWidthUnits,
   )
   const totalUnits =
     widths.reduce((sum, width) => sum + width, 0) + gapUnits * (visibleGalleryCount - 1)
@@ -103,7 +108,7 @@ function getSlotMetrics(activeVisibleIndex: number) {
 
   widths.forEach((widthUnits, index) => {
     const width = (widthUnits / totalUnits) * 100
-    const isActive = index === activeVisibleIndex
+    const isActive = index === activeSlotIndex
 
     visibleSlots.push({
       left: (consumedUnits / totalUnits) * 100,
@@ -118,40 +123,69 @@ function getSlotMetrics(activeVisibleIndex: number) {
 
   const previousSlot = visibleSlots[0]
   const nextSlot = visibleSlots[visibleSlots.length - 1]
+  const allSlots: Record<number, SlotMetrics> = {
+    [-1]: {
+      ...previousSlot,
+      left: previousSlot.left - previousSlot.width - gapPercent,
+      zIndex: 5,
+    },
+    [visibleGalleryCount]: {
+      ...nextSlot,
+      left: nextSlot.left + nextSlot.width + gapPercent,
+      zIndex: 5,
+    },
+  }
+
+  visibleSlots.forEach((slotMetrics, index) => {
+    allSlots[index] = slotMetrics
+  })
 
   return {
     visibleSlots,
-    allSlots: {
-      [-1]: {
-        ...previousSlot,
-        left: previousSlot.left - previousSlot.width - gapPercent,
-        zIndex: 5,
-      },
-      0: visibleSlots[0],
-      1: visibleSlots[1],
-      2: visibleSlots[2],
-      3: visibleSlots[3],
-      4: visibleSlots[4],
-      5: {
-        ...nextSlot,
-        left: nextSlot.left + nextSlot.width + gapPercent,
-        zIndex: 5,
-      },
-    } as Record<number, SlotMetrics>,
+    allSlots,
   }
 }
 
 export function GallerySection() {
+  const [visibleGalleryCount, setVisibleGalleryCount] = useState(desktopVisibleGalleryCount)
   const [activeVisibleIndex, setActiveVisibleIndex] = useState(1)
   const [carouselStartIndex, setCarouselStartIndex] = useState(0)
   const [renderedCards, setRenderedCards] = useState<RenderedGalleryCard[]>(() =>
-    buildSteadyCards(0),
+    buildSteadyCards(0, desktopVisibleGalleryCount),
   )
   const [isTransitioning, setIsTransitioning] = useState(false)
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const carouselStartIndexRef = useRef(carouselStartIndex)
   const transitionFrameRef = useRef<number | null>(null)
   const transitionTimeoutRef = useRef<number | null>(null)
-  const { allSlots } = useMemo(() => getSlotMetrics(activeVisibleIndex), [activeVisibleIndex])
+  const { allSlots } = useMemo(
+    () => getSlotMetrics(activeVisibleIndex, visibleGalleryCount),
+    [activeVisibleIndex, visibleGalleryCount],
+  )
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(max-width: 639px)")
+    const updateVisibleGalleryCount = () => {
+      const nextVisibleGalleryCount = mediaQuery.matches
+        ? mobileVisibleGalleryCount
+        : desktopVisibleGalleryCount
+
+      setVisibleGalleryCount(nextVisibleGalleryCount)
+      setActiveVisibleIndex((currentIndex) =>
+        Math.min(currentIndex, nextVisibleGalleryCount - 1),
+      )
+      setRenderedCards(
+        buildSteadyCards(carouselStartIndexRef.current, nextVisibleGalleryCount),
+      )
+    }
+
+    updateVisibleGalleryCount()
+    mediaQuery.addEventListener("change", updateVisibleGalleryCount)
+
+    return () => {
+      mediaQuery.removeEventListener("change", updateVisibleGalleryCount)
+    }
+  }, [])
 
   useEffect(() => {
     if (!isModalOpen) {
@@ -193,7 +227,7 @@ export function GallerySection() {
     }
 
     const currentStartIndex = carouselStartIndex
-    const currentCards = buildSteadyCards(currentStartIndex)
+    const currentCards = buildSteadyCards(currentStartIndex, visibleGalleryCount)
 
     setIsTransitioning(true)
 
@@ -216,19 +250,16 @@ export function GallerySection() {
 
       transitionFrameRef.current = window.requestAnimationFrame(() => {
         setRenderedCards([
-          { ...currentCards[0], slot: -1 },
-          { ...currentCards[1], slot: 0 },
-          { ...currentCards[2], slot: 1 },
-          { ...currentCards[3], slot: 2 },
-          { ...currentCards[4], slot: 3 },
-          { ...incomingCard, slot: 4 },
+          ...currentCards.map((card, index) => ({ ...card, slot: index - 1 })),
+          { ...incomingCard, slot: visibleGalleryCount - 1 },
         ])
       })
 
       transitionTimeoutRef.current = window.setTimeout(() => {
         const nextStartIndex = (currentStartIndex + 1) % galleryItems.length
+        carouselStartIndexRef.current = nextStartIndex
         setCarouselStartIndex(nextStartIndex)
-        setRenderedCards(buildSteadyCards(nextStartIndex))
+        setRenderedCards(buildSteadyCards(nextStartIndex, visibleGalleryCount))
         setIsTransitioning(false)
       }, carouselTransitionDurationMs)
 
@@ -246,19 +277,16 @@ export function GallerySection() {
     transitionFrameRef.current = window.requestAnimationFrame(() => {
       setRenderedCards([
         { ...incomingCard, slot: 0 },
-        { ...currentCards[0], slot: 1 },
-        { ...currentCards[1], slot: 2 },
-        { ...currentCards[2], slot: 3 },
-        { ...currentCards[3], slot: 4 },
-        { ...currentCards[4], slot: 5 },
+        ...currentCards.map((card, index) => ({ ...card, slot: index + 1 })),
       ])
     })
 
     transitionTimeoutRef.current = window.setTimeout(() => {
       const nextStartIndex =
         currentStartIndex === 0 ? galleryItems.length - 1 : currentStartIndex - 1
+      carouselStartIndexRef.current = nextStartIndex
       setCarouselStartIndex(nextStartIndex)
-      setRenderedCards(buildSteadyCards(nextStartIndex))
+      setRenderedCards(buildSteadyCards(nextStartIndex, visibleGalleryCount))
       setIsTransitioning(false)
     }, carouselTransitionDurationMs)
   }
@@ -290,7 +318,7 @@ export function GallerySection() {
   }
 
   return (
-    <section id="gallery" className=" flex min-h-screen items-center py-6">
+    <section id="gallery" className="flex min-h-screen scroll-mt-0 items-center py-6">
       <div className="w-full rounded-3xl  bg-white px-4 py-10 sm:px-8 lg:px-10">
         <div className="mx-auto max-w-7xl">
           <p className="font-heading text-center text-3xl leading-tight text-foreground sm:text-4xl lg:text-5xl">
@@ -437,7 +465,7 @@ function GalleryCard({
           }`}
           style={{ objectPosition: item.objectPosition }}
           quality={95}
-          priority={false}
+          loading={isActive ? "eager" : "lazy"}
         />
       </div>
 
