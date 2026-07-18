@@ -16,11 +16,17 @@ const stats = [
   },
 ]
 
+const locationAddress = "Paradera 184, Aruba"
+const googleMapsUrl =
+  "https://www.google.com/maps/search/?api=1&query=Paradera%20184%2C%20Aruba"
+const googleMapsEmbedUrl =
+  "https://maps.google.com/maps?q=Paradera%20184%2C%20Aruba&output=embed"
+
 export function BenefitsSection() {
   return (
-    <section id="location" className="luxury-shell mt-6 sm:mt-8">
-      <div className="overflow-hidden rounded-3xl border border-luxury-border bg-white shadow-xl">
-        <div className="bg-[radial-gradient(circle_at_top_left,rgba(220,181,109,0.12),transparent_28%),radial-gradient(circle_at_100%_0%,rgba(43,43,43,0.04),transparent_22%),linear-gradient(180deg,#ffffff,#fbfaf7)] px-5 py-8 sm:px-8 lg:px-10">
+    <section id="location" className="scroll-mt-0">
+      <div className="overflow-hidden bg-white">
+        <div className="bg-[radial-gradient(circle_at_top_left,rgba(220,181,109,0.12),transparent_28%),radial-gradient(circle_at_100%_0%,rgba(43,43,43,0.04),transparent_22%),linear-gradient(180deg,#ffffff,#fbfaf7)] px-5 py-20 sm:px-8 lg:px-10">
           <div className="mx-auto max-w-6xl">
             <div className="text-center">
               <p className="font-heading text-3xl leading-tight text-foreground sm:text-4xl lg:text-5xl">
@@ -31,8 +37,8 @@ export function BenefitsSection() {
               </p>
             </div>
 
-            <div className="mt-8 grid gap-6 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
-              <div className="relative overflow-hidden rounded-3xl border border-luxury-border bg-linear-to-b from-white to-stone-50 p-4 sm:p-6 lg:p-8">
+            <div className="mt-8 grid gap-6 lg:grid-cols-2 lg:items-stretch">
+              <div className="relative flex h-full overflow-hidden rounded-3xl border border-luxury-border bg-linear-to-b from-white to-stone-50 p-4 sm:p-6 lg:p-8">
                 <div className="absolute inset-x-0 top-0 h-20 bg-linear-to-b from-luxury-gold/10 to-transparent" />
 
                 <div className="absolute left-4 top-4 z-20 inline-flex items-center gap-2 rounded-full border border-luxury-border bg-white/90 px-3 py-1.5 text-xs uppercase tracking-widest text-foreground/70 shadow-sm backdrop-blur">
@@ -40,7 +46,7 @@ export function BenefitsSection() {
                   Aruba
                 </div>
 
-                <div className="relative aspect-video overflow-hidden rounded-2xl">
+                <div className="relative min-h-80 w-full overflow-hidden rounded-2xl lg:min-h-96">
                   <Image
                     src="/aruba-map.png"
                     alt="Golden map of Aruba"
@@ -65,7 +71,7 @@ export function BenefitsSection() {
                 </div>
               </div>
 
-              <div className="rounded-3xl border border-luxury-border bg-white shadow-lg">
+              <div className="flex h-full flex-col rounded-3xl border border-luxury-border bg-white shadow-lg">
                 <div className="grid divide-y divide-luxury-border md:grid-cols-3 md:divide-x md:divide-y-0">
                   {stats.map((stat) => (
                     <div
@@ -82,11 +88,32 @@ export function BenefitsSection() {
                   ))}
                 </div>
 
-                <div className="border-t border-luxury-border px-5 py-5 sm:px-6">
+                <div className="flex flex-1 items-center border-t border-luxury-border px-5 py-5 sm:px-6">
                   <p className="text-sm leading-7 text-foreground/70">
                     It offers the perfect combination of tranquility, security, and a prime location, as it is a modern private residential community situated in a central area of the island. It is ideal for those seeking a more exclusive and relaxed environment away from the tourist crowds, while still enjoying easy access to supermarkets, restaurants, schools, and being only 10–15 minutes from famous beaches such as Eagle Beach and Palm Beach. It also stands out as an excellent option for living or investing thanks to its comfort, privacy, and quality of life.
                   </p>
                 </div>
+              </div>
+            </div>
+
+            <div className="mt-6 overflow-hidden rounded-3xl border border-luxury-border bg-white shadow-lg">
+              <div className="relative aspect-video min-h-80">
+                <iframe
+                  src={googleMapsEmbedUrl}
+                  title={`Google Maps location for ${locationAddress}`}
+                  className="absolute inset-0 size-full border-0"
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                />
+                <a
+                  href={googleMapsUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="absolute inset-0"
+                  aria-label={`Open ${locationAddress} in Google Maps`}
+                >
+                  <span className="sr-only">Open {locationAddress} in Google Maps</span>
+                </a>
               </div>
             </div>
           </div>

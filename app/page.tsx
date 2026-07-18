@@ -4,7 +4,7 @@ import { CtaSection } from "@/components/site/cta-section"
 import { FeaturedProjectsSection } from "@/components/site/featured-projects-section"
 import { GallerySection } from "@/components/site/gallery-section"
 import { HeroSection } from "@/components/site/hero-section"
-import { PaymentSection } from "@/components/site/payment-section"
+import { ScrollVideoRevealSection } from "@/components/ScrollVideoRevealSection"
 import { SiteFooter } from "@/components/site/site-footer"
 
 export default function HomePage() {
@@ -12,15 +12,22 @@ export default function HomePage() {
     <main className="relative isolate overflow-hidden pb-6">
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-96 bg-gradient-to-b from-luxury-gold/15 to-transparent"
+        className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-96 bg-linear-to-b from-luxury-gold/15 to-transparent"
       />
 
       <HeroSection />
       <GallerySection />
+      {/* Scroll-controlled video reveal section. Move this block if you want it elsewhere. */}
+      <ScrollVideoRevealSection />
+      <ScrollVideoRevealSection
+        id="scroll-video-reveal-luca"
+        projectSlug="lucas-boutique"
+        videoSrc="/videos/video_recortado_luca.mp4"
+        revealOnHashNavigation
+      />
       <CtaSection />
       <FeaturedProjectsSection />
       <BenefitsSection />
-      {/* <PaymentSection /> */}
       <ContactSection />
       <SiteFooter />
     </main>

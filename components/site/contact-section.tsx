@@ -4,7 +4,7 @@ import { SectionHeading } from "@/components/site/section-heading"
 
 export function ContactSection() {
   return (
-    <section id="contacts" className="luxury-shell mt-6 sm:mt-8">
+    <section id="contacts" className="luxury-shell mt-6 scroll-mt-0 sm:mt-8">
       <div className="luxury-panel rounded-3xl px-5 py-8 sm:px-8 lg:px-10">
         <SectionHeading
           eyebrow="Contacts"

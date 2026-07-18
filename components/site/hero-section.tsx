@@ -41,7 +41,7 @@ export function HeroSection() {
           <div className="absolute inset-x-0 top-0 h-px bg-black/10" />
           <div className="absolute inset-x-0 bottom-0 h-px bg-black/10" />
 
-          <div className="relative z-10 flex h-full items-center px-4 py-8 sm:px-8 lg:px-12">
+          <div className="relative z-10 flex h-full items-start px-12 pt-40 pb-44 sm:items-center sm:px-16 sm:py-8 lg:px-20">
             <div className="w-full max-w-4xl text-left text-foreground lg:max-w-3xl">
               <p
                 className="max-w-md text-xs font-semibold uppercase tracking-widest text-[#201751] drop-shadow-sm"
@@ -53,20 +53,20 @@ export function HeroSection() {
                 Exclusive Real Estate in Aruba
               </p>
 
-              <p className="mt-5 max-w-md font-heading text-5xl italic leading-none tracking-tight text-foreground drop-shadow-sm sm:text-5xl lg:text-7xl">
+              <p className="mt-4 max-w-md font-heading text-4xl italic leading-none tracking-tight text-foreground drop-shadow-sm sm:mt-5 sm:text-5xl lg:text-7xl">
                 Your Home in
               </p>
 
-              <p className="mt-1 max-w-md font-heading text-5xl italic leading-none tracking-tight text-[#201751] drop-shadow-sm sm:text-5xl lg:text-7xl">
+              <p className="mt-1 max-w-md font-heading text-4xl italic leading-none tracking-tight text-[#201751] drop-shadow-sm sm:text-5xl lg:text-7xl">
                 Paradise
               </p>
 
-              <p className="mt-6 max-w-2xl text-balance text-xs font-medium leading-7 text-foreground/90 sm:text-lg">
+              <p className="mt-4 max-w-sm text-balance text-xs font-medium leading-6 text-foreground/90 sm:mt-6 sm:max-w-2xl sm:text-lg sm:leading-7">
                 We design and build exclusive residences in Aruba, blending
                 contemporary elegance with the serenity of the Caribbean.
               </p>
 
-              <div className="mt-8 flex justify-start">
+              <div className="mt-5 flex justify-start sm:mt-8">
                 <a
                   href="#featured-projects"
                   className="inline-flex h-11 items-center justify-center gap-2 rounded-full bg-linear-to-b from-luxury-gold-soft to-luxury-gold px-6 text-xs font-semibold uppercase tracking-widest text-stone-950 shadow-lg transition-transform hover:-translate-y-0.5 sm:h-12 sm:px-7"
@@ -78,18 +78,18 @@ export function HeroSection() {
             </div>
           </div>
 
-          <div className="absolute inset-x-0 bottom-8 z-10 flex justify-center px-4 sm:bottom-10">
-            <div className="flex flex-wrap backdrop-blur-sm text-xs md:text-base rounded-full p-5 justify-center gap-x-8 gap-y-6 sm:gap-x-10 lg:gap-x-12">
+          <div className="absolute inset-x-0 bottom-5 z-10 flex justify-center px-4 sm:bottom-10">
+            <div className="grid w-full max-w-sm grid-cols-2 gap-x-3 gap-y-4 rounded-full p-4 text-xs backdrop-blur-sm sm:flex sm:w-auto sm:max-w-none sm:flex-wrap sm:justify-center sm:gap-x-10 sm:gap-y-6 sm:p-5 md:text-base lg:gap-x-12">
               {heroFeatures.map((item) => {
                 const Icon = item.icon
 
                 return (
-                  <div key={item.label} className="flex w-40 items-center gap-3">
+                  <div key={item.label} className="flex min-w-0 items-center gap-2 sm:w-40 sm:gap-3">
                     <Icon
-                      className="size-9 shrink-0 text-luxury-gold drop-shadow-sm"
+                      className="size-8 shrink-0 text-luxury-gold drop-shadow-sm sm:size-9"
                       aria-hidden="true"
                     />
-                    <p className="font-heading text-sm leading-tight text-stone-100 drop-shadow-sm sm:text-base">
+                    <p className="font-heading text-xs leading-tight text-stone-100 drop-shadow-sm sm:text-base">
                       {item.label}
                     </p>
                   </div>
