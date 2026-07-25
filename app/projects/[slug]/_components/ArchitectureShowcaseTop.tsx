@@ -1,7 +1,9 @@
 "use client"
 
 import { useState } from "react"
+import { ArrowRight, ChevronLeft } from "lucide-react"
 import Image from "next/image"
+import Link from "next/link"
 
 import { getProjectBySlug, type ProjectSlug } from "@/lib/projects"
 
@@ -19,9 +21,18 @@ export function ArchitectureShowcaseTop({ slug }: ArchitectureShowcaseProps) {
     return null
   }
 
+  const isOliverProject = project.slug === "oliver-boutique"
+  const otherProjectHref = isOliverProject
+    ? "/projects/lucas-boutique"
+    : "/projects/oliver-boutique"
+  const otherProjectLabel = isOliverProject
+    ? "View Luca Boutique"
+    : "View Oliver Boutique"
+  const backToProjectsHref = isOliverProject ? "/#oliver" : "/#luca"
+
   const heroImage =
     project.slug === "oliver-boutique"
-      ? "/lucaSectionPhotp.webp"
+      ? "/front3DOliver.webp"
       : project.slug === "lucas-boutique"
         ? "/lucaPhotoMain.webp"
       : project.picture
@@ -41,6 +52,25 @@ export function ArchitectureShowcaseTop({ slug }: ArchitectureShowcaseProps) {
             <p className="mx-auto max-w-4xl text-sm leading-7 text-foreground/68 sm:text-base">
               {project.intro}
             </p>
+            <nav
+              aria-label="Project board navigation"
+              className="flex flex-wrap justify-center gap-3 pt-2"
+            >
+              <Link
+                href={backToProjectsHref}
+                className="inline-flex h-10 items-center justify-center gap-2 rounded-full border border-luxury-border bg-white px-4 text-xs font-medium text-foreground transition hover:border-luxury-gold hover:text-luxury-gold"
+              >
+                <ChevronLeft className="size-4" aria-hidden="true" />
+                Back to projects
+              </Link>
+              <Link
+                href={otherProjectHref}
+                className="inline-flex h-10 items-center justify-center gap-2 rounded-full bg-linear-to-b from-luxury-gold-soft to-luxury-gold px-4 text-xs font-semibold text-stone-950 shadow-lg transition-transform hover:-translate-y-0.5"
+              >
+                {otherProjectLabel}
+                <ArrowRight className="size-4" aria-hidden="true" />
+              </Link>
+            </nav>
           </header>
 
           <section className="grid gap-8 xl:grid-cols-12">
@@ -146,8 +176,8 @@ export function ArchitectureShowcaseTop({ slug }: ArchitectureShowcaseProps) {
                 <div className="group relative overflow-hidden rounded-xl border border-slate-200 bg-white p-2 shadow-md transition-all duration-300 hover:shadow-xl">
                   <div className="relative aspect-video overflow-hidden rounded-lg bg-slate-100 xl:aspect-5/3">
                     <Image
-                      src="/lucaComplex.webp"
-                      alt="Luca Boutique House complex view"
+                      src="/newComplex.webp"
+                      alt="Boutique House complex view"
                       fill
                       sizes="(min-width: 1280px) 50vw, 100vw"
                       className="object-cover transition-transform duration-700 group-hover:scale-[1.02]"

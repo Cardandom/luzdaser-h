@@ -6,7 +6,7 @@ export function SiteFooter() {
           <p className="text-foreground/75">
             2026 Reina Sophia Residences. All rights reserved.
           </p>
-          <p className="text-foreground/60">
+          <p className="text-foreground/70">
             Designed to look solid on desktop, tablet, and mobile.
           </p>
         </div>

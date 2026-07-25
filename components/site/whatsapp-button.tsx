@@ -10,7 +10,7 @@ export function WhatsAppButton() {
       target="_blank"
       rel="noreferrer"
       aria-label="Open WhatsApp chat"
-      className="fixed bottom-5 right-5 z-50 inline-flex items-center gap-3 rounded-full border border-white/10 bg-green-500 px-4 py-3 text-white shadow-lg transition-transform hover:-translate-y-0.5 hover:shadow-xl sm:bottom-7 sm:right-7"
+      className="fixed bottom-5 right-5 z-50 inline-flex items-center gap-3 rounded-full border border-white/10 bg-green-700 px-4 py-3 text-white shadow-lg transition-transform hover:-translate-y-0.5 hover:shadow-xl sm:bottom-7 sm:right-7"
     >
       <span className="inline-flex size-10 items-center justify-center rounded-full bg-white/15">
         <MessageCircleMore className="size-5" aria-hidden="true" />

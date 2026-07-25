@@ -24,7 +24,7 @@ const googleMapsEmbedUrl =
 
 export function BenefitsSection() {
   return (
-    <section id="location" className="scroll-mt-0">
+    <section id="location">
       <div className="overflow-hidden bg-white">
         <div className="bg-[radial-gradient(circle_at_top_left,rgba(220,181,109,0.12),transparent_28%),radial-gradient(circle_at_100%_0%,rgba(43,43,43,0.04),transparent_22%),linear-gradient(180deg,#ffffff,#fbfaf7)] px-5 py-20 sm:px-8 lg:px-10">
           <div className="mx-auto max-w-6xl">
@@ -32,7 +32,7 @@ export function BenefitsSection() {
               <p className="font-heading text-3xl leading-tight text-foreground sm:text-4xl lg:text-5xl">
                 Exclusive Location
               </p>
-              <p className="mt-3 text-xs uppercase tracking-widest text-luxury-gold sm:text-sm">
+              <p className="mt-3 text-xs uppercase tracking-widest text-luxury-gold-ink sm:text-sm">
                 Paradera 184, Aruba
               </p>
             </div>
@@ -51,8 +51,7 @@ export function BenefitsSection() {
                     src="/aruba-map.png"
                     alt="Golden map of Aruba"
                     fill
-                    priority={false}
-                    sizes="(min-width: 1024px) 52vw, 100vw"
+                    sizes="(min-width: 1024px) 560px, calc(100vw - 40px)"
                     className="object-contain object-center drop-shadow-[0_18px_40px_rgba(43,43,43,0.16)]"
                   />
 
@@ -78,7 +77,7 @@ export function BenefitsSection() {
                       key={stat.label}
                       className="flex flex-col items-center justify-center px-5 py-6 text-center md:min-h-44 md:px-6"
                     >
-                      <p className="font-heading leading-none text-luxury-gold sm:text-4xl lg:text-5xl">
+                      <p className="font-heading leading-none text-luxury-gold-ink sm:text-4xl lg:text-5xl">
                         {stat.value}
                       </p>
                       <p className="mt-2 text-sm uppercase tracking-widest text-foreground/70">
