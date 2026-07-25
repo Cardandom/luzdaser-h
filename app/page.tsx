@@ -18,10 +18,11 @@ export default function HomePage() {
       <HeroSection />
       <GallerySection />
       {/* Scroll-controlled video reveal section. Move this block if you want it elsewhere. */}
-      <ScrollVideoRevealSection />
+      <ScrollVideoRevealSection id="oliver" revealOnHashNavigation />
       <ScrollVideoRevealSection
-        id="scroll-video-reveal-luca"
+        id="luca"
         projectSlug="lucas-boutique"
+        posterSrc="/lucaPhotoMain.webp"
         videoSrc="/videos/video_recortado_luca.mp4"
         revealOnHashNavigation
       />

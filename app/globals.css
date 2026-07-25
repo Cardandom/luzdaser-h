@@ -29,6 +29,7 @@
   --color-ring: var(--ring);
 
   --color-luxury-gold: var(--luxury-gold);
+  --color-luxury-gold-ink: var(--luxury-gold-ink);
   --color-luxury-gold-soft: var(--luxury-gold-soft);
   --color-luxury-surface: var(--luxury-surface);
   --color-luxury-surface-strong: var(--luxury-surface-strong);
@@ -69,6 +70,7 @@
   --luxury-surface-strong: rgba(247, 247, 244, 0.98);
   --luxury-border: rgba(43, 43, 43, 0.12);
   --luxury-gold: #dcb56d;
+  --luxury-gold-ink: #8a641f;
   --luxury-gold-soft: #f4ddb0;
   --luxury-shadow: 0 28px 90px rgba(43, 43, 43, 0.12);
   --font-luxury-heading: Georgia, "Times New Roman", serif;
@@ -166,7 +168,7 @@
     font-size: 0.72rem;
     letter-spacing: 0.36em;
     text-transform: uppercase;
-    color: var(--luxury-gold);
+    color: var(--luxury-gold-ink);
   }
 
   .luxury-title {
@@ -211,7 +213,7 @@
   }
 
   .luxury-input::placeholder {
-    color: rgba(43, 43, 43, 0.4);
+    color: rgba(43, 43, 43, 0.65);
   }
 
   .luxury-input:focus {

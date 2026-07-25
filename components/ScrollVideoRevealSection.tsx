@@ -1,7 +1,8 @@
 "use client"
 
 import Link from "next/link"
-import { useEffect, useRef } from "react"
+import Image from "next/image"
+import { useEffect, useRef, useState } from "react"
 
 import { featuredProjects, type ProjectSlug } from "@/lib/projects"
 
@@ -18,19 +19,22 @@ const mobileSeekThreshold = 1 / 30
 type ScrollVideoRevealSectionProps = {
   id?: string
   projectSlug?: ProjectSlug
+  posterSrc?: string
   videoSrc?: string
   revealOnHashNavigation?: boolean
 }
 
 export function ScrollVideoRevealSection({
-  id = "scroll-video-reveal",
+  id = "oliver",
   projectSlug = "oliver-boutique",
+  posterSrc = "/oliver-house-scroll-poster.jpg",
   videoSrc = "/videos/video_recortado_oliver.mp4",
   revealOnHashNavigation = false,
 }: ScrollVideoRevealSectionProps) {
   const sectionRef = useRef<HTMLElement | null>(null)
   const videoRef = useRef<HTMLVideoElement | null>(null)
   const cardRef = useRef<HTMLDivElement | null>(null)
+  const [shouldLoadVideo, setShouldLoadVideo] = useState(false)
   const revealProject = featuredProjects.find(
     (project) => project.slug === projectSlug,
   )
@@ -38,6 +42,30 @@ export function ScrollVideoRevealSection({
     projectSlug === "oliver-boutique"
       ? "Oliver House Boutique"
       : "Lucas House Boutique"
+
+  useEffect(() => {
+    const section = sectionRef.current
+
+    if (!section || shouldLoadVideo) {
+      return
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setShouldLoadVideo(true)
+          observer.disconnect()
+        }
+      },
+      { rootMargin: "50% 0px" },
+    )
+
+    observer.observe(section)
+
+    return () => {
+      observer.disconnect()
+    }
+  }, [shouldLoadVideo])
 
   useEffect(() => {
     let context: { revert: () => void } | null = null
@@ -78,17 +106,29 @@ export function ScrollVideoRevealSection({
       })
     }
 
+    const navigateToReveal = (behavior: ScrollBehavior) => {
+      if (scrollTriggerInstance) {
+        scheduleRevealNavigation(behavior)
+      } else {
+        setShouldLoadVideo(true)
+        sectionRef.current?.scrollIntoView({
+          behavior,
+          block: "start",
+        })
+      }
+    }
+
     const handleRevealNavigation = (event: Event) => {
       const navigationEvent = event as CustomEvent<{ id?: string }>
 
       if (navigationEvent.detail?.id === id) {
-        scheduleRevealNavigation("smooth")
+        navigateToReveal("smooth")
       }
     }
 
     const handleHashChange = () => {
       if (window.location.hash === `#${id}`) {
-        scheduleRevealNavigation("smooth")
+        navigateToReveal("smooth")
       }
     }
 
@@ -98,6 +138,18 @@ export function ScrollVideoRevealSection({
         handleRevealNavigation,
       )
       window.addEventListener("hashchange", handleHashChange)
+    }
+
+    if (!shouldLoadVideo) {
+      return () => {
+        if (revealOnHashNavigation) {
+          window.removeEventListener(
+            "scroll-video-reveal:navigate",
+            handleRevealNavigation,
+          )
+          window.removeEventListener("hashchange", handleHashChange)
+        }
+      }
     }
 
     const initScrollAnimation = async () => {
@@ -277,7 +329,7 @@ export function ScrollVideoRevealSection({
       scrollTriggerInstance?.kill()
       context?.revert()
     }
-  }, [id, revealOnHashNavigation])
+  }, [id, revealOnHashNavigation, shouldLoadVideo, videoSrc])
 
   return (
     <section
@@ -285,15 +337,24 @@ export function ScrollVideoRevealSection({
       ref={sectionRef}
       className="relative h-svh w-full overflow-hidden bg-black md:h-screen"
     >
+      <Image
+        src={posterSrc}
+        alt=""
+        fill
+        sizes="100vw"
+        className="object-cover"
+        aria-hidden="true"
+      />
+
       <video
         ref={videoRef}
         className="absolute inset-0 h-full w-full object-cover"
         muted
         playsInline
-        preload="auto"
+        preload="metadata"
         aria-hidden="true"
       >
-        <source src={videoSrc} type="video/mp4" />
+        {shouldLoadVideo ? <source src={videoSrc} type="video/mp4" /> : null}
       </video>
 
       <div
@@ -304,7 +365,7 @@ export function ScrollVideoRevealSection({
       <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center px-5 py-10 sm:px-8">
         <div
           ref={cardRef}
-          className="pointer-events-auto flex w-full max-w-xl flex-col items-center gap-5 text-center"
+          className="pointer-events-auto flex w-full max-w-xl flex-col items-center gap-5 text-center opacity-0"
         >
           {revealProject && (
             <>

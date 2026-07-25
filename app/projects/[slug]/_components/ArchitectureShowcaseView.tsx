@@ -277,7 +277,7 @@ export function ArchitectureShowcase({ slug }: ArchitectureShowcaseProps) {
               <div className="relative overflow-hidden rounded-lg border border-slate-100 bg-slate-50/40 p-3">
                 <div className="relative aspect-[3/2] overflow-hidden rounded-md bg-white">
                   <Image
-                    src="/front2DLuca.webp"
+                    src="/lucaFrontView.webp"
                     alt="Front elevation for Luca Boutique House"
                     fill
                     sizes="(min-width: 1024px) 40vw, 100vw"

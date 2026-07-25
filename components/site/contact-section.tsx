@@ -4,7 +4,7 @@ import { SectionHeading } from "@/components/site/section-heading"
 
 export function ContactSection() {
   return (
-    <section id="contacts" className="luxury-shell mt-6 scroll-mt-0 sm:mt-8">
+    <section id="contacts" className="luxury-shell mt-6 sm:mt-8">
       <div className="luxury-panel rounded-3xl px-5 py-8 sm:px-8 lg:px-10">
         <SectionHeading
           eyebrow="Contacts"
@@ -41,7 +41,7 @@ export function ContactSection() {
             </div>
 
             <div className="mt-5 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-              <p className="text-sm text-foreground/60">
+              <p className="text-sm text-foreground/70">
                 We will respond with commercial information and personalized support.
               </p>
               <button
@@ -62,17 +62,17 @@ export function ContactSection() {
 
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="rounded-3xl border border-black/10 bg-white p-4">
-                  <p className="text-xs uppercase tracking-widest text-foreground/50">
+                  <p className="text-xs uppercase tracking-widest text-foreground/70">
                     Returns
                   </p>
-                  <p className="mt-2 font-heading text-4xl text-luxury-gold">30%</p>
+                  <p className="mt-2 font-heading text-4xl text-luxury-gold-ink">30%</p>
                   <p className="text-sm text-foreground/70">Of the initial deposit.</p>
                 </div>
                 <div className="rounded-3xl border border-black/10 bg-white p-4">
-                  <p className="text-xs uppercase tracking-widest text-foreground/50">
+                  <p className="text-xs uppercase tracking-widest text-foreground/70">
                     Benefit
                   </p>
-                  <p className="mt-2 font-heading text-4xl text-luxury-gold">100%</p>
+                  <p className="mt-2 font-heading text-4xl text-luxury-gold-ink">100%</p>
                   <p className="text-sm text-foreground/70">Tax exemption.</p>
                 </div>
               </div>

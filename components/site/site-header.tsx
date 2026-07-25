@@ -10,12 +10,14 @@ import { rememberClientLoginReturn } from "@/lib/client-login-return"
 
 const navItems = [
   { label: "Gallery", href: "#gallery" },
-  { label: "Oliver", href: "#scroll-video-reveal" },
-  { label: "Luca", href: "#scroll-video-reveal-luca" },
+  { label: "Oliver", href: "#oliver" },
+  { label: "Luca", href: "#luca" },
   { label: "Location", href: "#location" },
   { label: "Project Progress", href: "#project-progress" },
   { label: "Contacts", href: "#contacts" },
 ]
+
+const scrollVideoRevealHrefs = new Set(["#oliver", "#luca"])
 
 export function SiteHeader() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
@@ -68,14 +70,19 @@ export function SiteHeader() {
 
   const closeMenu = () => setIsMenuOpen(false)
   const isSolidHeader = isHovered || hasScrolled || isMenuOpen
-  const getNavHref = (href: string) => (pathname === "/" ? href : `/${href}`)
+  const isHomePage = pathname === "/"
+  const getNavHref = (href: string) => (isHomePage ? href : `/${href}`)
   const handleNavClick = (
     event: MouseEvent<HTMLAnchorElement>,
     href: string,
   ) => {
     closeMenu()
 
-    if (pathname !== "/" || href !== "#scroll-video-reveal-luca") {
+    if (
+      !isHomePage ||
+      !scrollVideoRevealHrefs.has(href) ||
+      !document.getElementById(href.slice(1))
+    ) {
       return
     }
 
@@ -117,7 +124,7 @@ export function SiteHeader() {
               <span className="block font-heading text-xl tracking-wide text-black">
                 Reina Sophia Residences
               </span>
-              <span className="block text-xs uppercase tracking-widest text-black/55">
+              <span className="block text-xs uppercase tracking-widest text-black/70">
                 Aruba Investment
               </span>
             </span>
@@ -125,14 +132,14 @@ export function SiteHeader() {
 
           <nav className="hidden items-center gap-10 text-lg font-medium leading-none tracking-tight text-foreground drop-shadow-sm md:flex">
             {navItems.map((item) => (
-              <a
+              <Link
                 key={item.label}
                 href={getNavHref(item.href)}
                 className="transition-colors hover:text-luxury-gold"
                 onClick={(event) => handleNavClick(event, item.href)}
               >
                 {item.label}
-              </a>
+              </Link>
             ))}
           </nav>
 
@@ -165,14 +172,14 @@ export function SiteHeader() {
           <div className="absolute inset-x-0 top-full mt-3 rounded-3xl border border-luxury-border bg-white p-4 shadow-2xl backdrop-blur-xl">
             <nav className="flex flex-col gap-2 text-sm text-black/75">
               {navItems.map((item) => (
-                <a
+                <Link
                   key={item.label}
                   href={getNavHref(item.href)}
                   className="rounded-2xl border border-transparent px-4 py-3 transition-colors hover:border-luxury-border hover:bg-stone-50 hover:text-luxury-gold"
                   onClick={(event) => handleNavClick(event, item.href)}
                 >
                   {item.label}
-                </a>
+                </Link>
               ))}
               <Link
                 href="/client-login"

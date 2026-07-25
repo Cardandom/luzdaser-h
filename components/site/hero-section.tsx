@@ -1,4 +1,5 @@
 import { ArrowRight, ChefHat, PlaySquare, ShieldCheck, Waves } from "lucide-react"
+import Image from "next/image"
 
 const heroFeatures = [
   {
@@ -24,6 +25,16 @@ export function HeroSection() {
     <section id="home" className="h-dvh w-full">
       <div className="relative h-full w-full overflow-hidden bg-white shadow-2xl">
         <div className="relative h-full min-h-0">
+          <Image
+            src="/newComplex.webp"
+            alt=""
+            fill
+            preload
+            sizes="100vw"
+            className="object-cover object-center"
+            aria-hidden="true"
+          />
+
           <video
             className="absolute inset-0 size-full object-cover object-center"
             autoPlay
@@ -79,7 +90,7 @@ export function HeroSection() {
           </div>
 
           <div className="absolute inset-x-0 bottom-5 z-10 flex justify-center px-4 sm:bottom-10">
-            <div className="grid w-full max-w-sm grid-cols-2 gap-x-3 gap-y-4 rounded-full p-4 text-xs backdrop-blur-sm sm:flex sm:w-auto sm:max-w-none sm:flex-wrap sm:justify-center sm:gap-x-10 sm:gap-y-6 sm:p-5 md:text-base lg:gap-x-12">
+            <div className="grid w-full max-w-sm grid-cols-2 gap-x-3 gap-y-4 rounded-full bg-black/35 p-4 text-xs backdrop-blur-sm sm:flex sm:w-auto sm:max-w-none sm:flex-wrap sm:justify-center sm:gap-x-10 sm:gap-y-6 sm:p-5 md:text-base lg:gap-x-12">
               {heroFeatures.map((item) => {
                 const Icon = item.icon
 

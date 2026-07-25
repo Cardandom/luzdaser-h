@@ -318,7 +318,7 @@ export function GallerySection() {
   }
 
   return (
-    <section id="gallery" className="flex min-h-screen scroll-mt-0 items-center py-6">
+    <section id="gallery" className="flex min-h-screen items-center py-6">
       <div className="w-full rounded-3xl  bg-white px-4 py-10 sm:px-8 lg:px-10">
         <div className="mx-auto max-w-7xl">
           <p className="font-heading text-center text-3xl leading-tight text-foreground sm:text-4xl lg:text-5xl">
@@ -459,13 +459,12 @@ function GalleryCard({
           src={item.src}
           alt={item.alt}
           fill
-          sizes="(min-width: 1024px) 1000px, (min-width: 640px) 720px, 520px"
+          sizes="(min-width: 1280px) 520px, (min-width: 1024px) 38vw, (min-width: 640px) 34vw, 48vw"
           className={`object-cover transition duration-700 ${
             isTransitioning ? "" : "group-hover:scale-105"
           }`}
           style={{ objectPosition: item.objectPosition }}
-          quality={95}
-          loading={isActive ? "eager" : "lazy"}
+          loading="lazy"
         />
       </div>
 
@@ -481,7 +480,7 @@ function GalleryCard({
         }`}
       >
         <p className="font-heading text-2xl leading-tight">{item.title}</p>
-        <p className="mt-2 max-w-xs text-sm leading-6 text-white/80">{item.description}</p>
+        <p className="mt-2 max-w-xs text-sm leading-6 text-white/90">{item.description}</p>
       </figcaption>
     </figure>
   )
@@ -543,7 +542,7 @@ function GalleryModal({ onClose }: { onClose: () => void }) {
               >
                 Reina Sophia Residences
               </span>
-              <span className="block text-xs uppercase tracking-widest text-black/55">
+              <span className="block text-xs uppercase tracking-widest text-black/70">
                 Aruba Investment
               </span>
             </span>
@@ -577,7 +576,6 @@ function GalleryModal({ onClose }: { onClose: () => void }) {
                     sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 90vw"
                     className="object-cover"
                     style={{ objectPosition: item.objectPosition }}
-                    priority={false}
                   />
                 </div>
               </button>
