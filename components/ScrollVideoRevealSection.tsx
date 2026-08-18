@@ -14,7 +14,10 @@ const desktopScrollDistance = 6500
 const mobileScrollDistanceViewportRatio = 3.8
 const desktopVideoCatchup = 0.12
 const mobileVideoCatchup = 0.3
+// The sources are 24 FPS: use half a frame on desktop and a wider mobile tolerance.
+const desktopSeekThreshold = 1 / 48
 const mobileSeekThreshold = 1 / 30
+const seekFallbackDelayMs = 100
 
 type ScrollVideoRevealSectionProps = {
   id?: string
@@ -68,10 +71,13 @@ export function ScrollVideoRevealSection({
   }, [shouldLoadVideo])
 
   useEffect(() => {
+    let cancelBoundarySeekFallback: (() => void) | null = null
     let context: { revert: () => void } | null = null
+    let removeVideoSeekListener: (() => void) | null = null
     let removeVideoTicker: (() => void) | null = null
     let scrollTriggerInstance: {
       end: number
+      isActive: boolean
       kill: () => void
       start: number
     } | null = null
@@ -194,10 +200,146 @@ export function ScrollVideoRevealSection({
         ? `+=${desktopScrollDistance}`
         : () => `+=${Math.round(window.innerHeight * mobileScrollDistanceViewportRatio)}`
       const videoCatchup = isDesktop ? desktopVideoCatchup : mobileVideoCatchup
-      const seekThreshold = isDesktop ? 0 : mobileSeekThreshold
+      const seekThreshold = isDesktop
+        ? desktopSeekThreshold
+        : mobileSeekThreshold
       const cardEase = gsap.parseEase("power3.out")
       let targetTime = 0
       let currentTime = 0
+      let boundarySeekFallbackId: number | null = null
+      let isTickerActive = false
+      let lastRequestedTime: number | null = null
+      let pendingSeekIsBoundary = false
+      let pendingSeekTime: number | null = null
+      let seekInFlight = false
+      let seekRequestedAt = 0
+
+      const isWithinSeekThreshold = (firstTime: number, secondTime: number) =>
+        Math.abs(firstTime - secondTime) <= seekThreshold
+
+      const clearBoundarySeekFallback = () => {
+        if (boundarySeekFallbackId === null) {
+          return
+        }
+
+        window.clearTimeout(boundarySeekFallbackId)
+        boundarySeekFallbackId = null
+      }
+
+      cancelBoundarySeekFallback = clearBoundarySeekFallback
+
+      const reconcileSeekState = () => {
+        if (
+          seekInFlight &&
+          !video.seeking &&
+          performance.now() - seekRequestedAt >= seekFallbackDelayMs
+        ) {
+          seekInFlight = false
+        }
+      }
+
+      const flushPendingSeek = () => {
+        reconcileSeekState()
+
+        if (
+          (!isTickerActive && !pendingSeekIsBoundary) ||
+          pendingSeekTime === null
+        ) {
+          return
+        }
+
+        if (seekInFlight || video.seeking) {
+          return
+        }
+
+        const nextSeekTime = pendingSeekTime
+        clearBoundarySeekFallback()
+        pendingSeekIsBoundary = false
+        pendingSeekTime = null
+
+        if (
+          (lastRequestedTime !== null &&
+            isWithinSeekThreshold(lastRequestedTime, nextSeekTime)) ||
+          isWithinSeekThreshold(video.currentTime, nextSeekTime)
+        ) {
+          return
+        }
+
+        lastRequestedTime = nextSeekTime
+        seekInFlight = true
+        seekRequestedAt = performance.now()
+
+        try {
+          video.currentTime = nextSeekTime
+        } catch {
+          seekInFlight = false
+        }
+      }
+
+      const scheduleBoundarySeekFallback = () => {
+        if (
+          !isMounted ||
+          isTickerActive ||
+          !pendingSeekIsBoundary ||
+          pendingSeekTime === null ||
+          (!seekInFlight && !video.seeking) ||
+          boundarySeekFallbackId !== null
+        ) {
+          return
+        }
+
+        boundarySeekFallbackId = window.setTimeout(() => {
+          boundarySeekFallbackId = null
+          flushPendingSeek()
+          scheduleBoundarySeekFallback()
+        }, seekFallbackDelayMs)
+      }
+
+      const queueLatestSeek = (
+        nextSeekTime: number,
+        allowBoundarySeek = false,
+      ) => {
+        if (!isTickerActive && !allowBoundarySeek) {
+          return
+        }
+
+        const duration = video.duration
+
+        if (!Number.isFinite(duration) || duration <= 0) {
+          return
+        }
+
+        const clampedSeekTime = gsap.utils.clamp(0, duration, nextSeekTime)
+        reconcileSeekState()
+
+        const matchesLastRequest =
+          lastRequestedTime !== null &&
+          isWithinSeekThreshold(lastRequestedTime, clampedSeekTime)
+
+        if (
+          matchesLastRequest ||
+          isWithinSeekThreshold(video.currentTime, clampedSeekTime)
+        ) {
+          clearBoundarySeekFallback()
+          pendingSeekIsBoundary = false
+          pendingSeekTime = null
+          return
+        }
+
+        pendingSeekIsBoundary = allowBoundarySeek
+        pendingSeekTime = clampedSeekTime
+        flushPendingSeek()
+        scheduleBoundarySeekFallback()
+      }
+
+      const handleSeeked = () => {
+        if (video.seeking) {
+          return
+        }
+
+        seekInFlight = false
+        flushPendingSeek()
+      }
 
       const setVideoTargetTime = (nextTargetTime: number, shouldSnap = false) => {
         const duration = video.duration
@@ -210,7 +352,11 @@ export function ScrollVideoRevealSection({
 
         if (shouldSnap) {
           currentTime = targetTime
-          video.currentTime = targetTime
+          queueLatestSeek(targetTime, true)
+        } else {
+          clearBoundarySeekFallback()
+          pendingSeekIsBoundary = false
+          pendingSeekTime = null
         }
       }
 
@@ -236,22 +382,52 @@ export function ScrollVideoRevealSection({
         const catchup = 1 - Math.pow(1 - videoCatchup, frameRatio)
         currentTime += (targetTime - currentTime) * catchup
 
-        const nextCurrentTime = gsap.utils.clamp(0, duration, currentTime)
-        const isCloseToTarget = Math.abs(targetTime - nextCurrentTime) <= seekThreshold
+        if (isWithinSeekThreshold(targetTime, currentTime)) {
+          currentTime = targetTime
+        }
 
-        if (
-          seekThreshold === 0 ||
-          Math.abs(video.currentTime - nextCurrentTime) >= seekThreshold ||
-          isCloseToTarget
-        ) {
-          video.currentTime = nextCurrentTime
+        const nextCurrentTime = gsap.utils.clamp(0, duration, currentTime)
+        queueLatestSeek(nextCurrentTime)
+      }
+
+      const startVideoTicker = () => {
+        if (!isMounted || isTickerActive) {
+          return
+        }
+
+        isTickerActive = true
+        gsap.ticker.add(updateVideoTime)
+      }
+
+      const stopVideoTicker = () => {
+        // Let only the latest final-frame handoff finish after crossing the boundary.
+        if (!pendingSeekIsBoundary) {
+          clearBoundarySeekFallback()
+          pendingSeekTime = null
+        }
+
+        if (!isTickerActive) {
+          return
+        }
+
+        gsap.ticker.remove(updateVideoTime)
+        isTickerActive = false
+        scheduleBoundarySeekFallback()
+      }
+
+      const syncVideoTicker = (isActive: boolean) => {
+        if (isActive) {
+          startVideoTicker()
+        } else {
+          stopVideoTicker()
         }
       }
 
-      gsap.ticker.add(updateVideoTime)
-      removeVideoTicker = () => {
-        gsap.ticker.remove(updateVideoTime)
+      video.addEventListener("seeked", handleSeeked)
+      removeVideoSeekListener = () => {
+        video.removeEventListener("seeked", handleSeeked)
       }
+      removeVideoTicker = stopVideoTicker
 
       context = gsap.context(() => {
         gsap.set(card, {
@@ -268,6 +444,12 @@ export function ScrollVideoRevealSection({
           pin: true,
           anticipatePin: 1,
           invalidateOnRefresh: true,
+          onToggle: (self) => {
+            syncVideoTicker(self.isActive)
+          },
+          onRefresh: (self) => {
+            syncVideoTicker(self.isActive)
+          },
           onUpdate: (self) => {
             const duration = video.duration
 
@@ -289,6 +471,8 @@ export function ScrollVideoRevealSection({
       }, section)
 
       ScrollTrigger.refresh()
+
+      syncVideoTicker(scrollTriggerInstance?.isActive ?? false)
 
       if (
         revealOnHashNavigation &&
@@ -314,6 +498,7 @@ export function ScrollVideoRevealSection({
 
     return () => {
       isMounted = false
+      cancelBoundarySeekFallback?.()
       if (navigationFrameId !== null) {
         window.cancelAnimationFrame(navigationFrameId)
       }
@@ -326,6 +511,7 @@ export function ScrollVideoRevealSection({
       }
       video?.removeEventListener("loadedmetadata", handleLoadedMetadata)
       removeVideoTicker?.()
+      removeVideoSeekListener?.()
       scrollTriggerInstance?.kill()
       context?.revert()
     }
@@ -351,7 +537,7 @@ export function ScrollVideoRevealSection({
         className="absolute inset-0 h-full w-full object-cover"
         muted
         playsInline
-        preload="metadata"
+        preload="auto"
         aria-hidden="true"
       >
         {shouldLoadVideo ? <source src={videoSrc} type="video/mp4" /> : null}
