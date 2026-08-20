@@ -24,6 +24,7 @@ export default function HomePage() {
         projectSlug="lucas-boutique"
         posterSrc="/lucaPhotoMain.webp"
         videoSrc="/videos/video_recortado_luca.mp4"
+        mobileVideoSrc="/videos/scroll-luca-mobile-g4-hq-v2.mp4"
         revealOnHashNavigation
       />
       <CtaSection />

@@ -24,6 +24,7 @@ type ScrollVideoRevealSectionProps = {
   projectSlug?: ProjectSlug
   posterSrc?: string
   videoSrc?: string
+  mobileVideoSrc?: string
   revealOnHashNavigation?: boolean
 }
 
@@ -32,6 +33,7 @@ export function ScrollVideoRevealSection({
   projectSlug = "oliver-boutique",
   posterSrc = "/oliver-house-scroll-poster.jpg",
   videoSrc = "/videos/video_recortado_oliver.mp4",
+  mobileVideoSrc,
   revealOnHashNavigation = false,
 }: ScrollVideoRevealSectionProps) {
   const sectionRef = useRef<HTMLElement | null>(null)
@@ -540,7 +542,24 @@ export function ScrollVideoRevealSection({
         preload="auto"
         aria-hidden="true"
       >
-        {shouldLoadVideo ? <source src={videoSrc} type="video/mp4" /> : null}
+        {shouldLoadVideo ? (
+          mobileVideoSrc ? (
+            <>
+              <source
+                src={mobileVideoSrc}
+                type="video/mp4"
+                media="(max-width: 767px)"
+              />
+              <source
+                src={videoSrc}
+                type="video/mp4"
+                media="(min-width: 768px)"
+              />
+            </>
+          ) : (
+            <source src={videoSrc} type="video/mp4" />
+          )
+        ) : null}
       </video>
 
       <div
