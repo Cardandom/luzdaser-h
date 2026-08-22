@@ -44,7 +44,16 @@ export function HeroSection() {
             preload="metadata"
             aria-hidden="true"
           >
-            <source src="/vid1.mp4" type="video/mp4" />
+            <source
+              src="/videos/hero-reina-mobile-hq-v2.mp4"
+              type="video/mp4"
+              media="(max-width: 767px)"
+            />
+            <source
+              src="/vid1.mp4"
+              type="video/mp4"
+              media="(min-width: 768px)"
+            />
           </video>
 
           <div className="absolute inset-y-0 left-0 w-3/5 bg-linear-to-r from-white/85 via-white/55 to-white/0 sm:w-1/2 lg:w-2/5" />
