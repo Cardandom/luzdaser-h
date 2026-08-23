@@ -27,7 +27,7 @@ export default function HomePage() {
         id="luca"
         projectSlug="lucas-boutique"
         posterSrc="/lucaPhotoMain.webp"
-        videoSrc="/videos/video_recortado_luca.mp4"
+        videoSrc="/videos/scroll-luca-desktop-g4-hq-v2.mp4"
         mobileVideoSrc="/videos/scroll-luca-mobile-g4-hq-v2.mp4"
         revealOnHashNavigation
       />
