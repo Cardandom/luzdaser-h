@@ -50,7 +50,7 @@ export function HeroSection() {
               media="(max-width: 767px)"
             />
             <source
-              src="/vid1.mp4"
+              src="/videos/hero-reina-desktop-hq-v2.mp4"
               type="video/mp4"
               media="(min-width: 768px)"
             />
