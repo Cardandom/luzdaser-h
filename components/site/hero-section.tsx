@@ -36,6 +36,7 @@ export function HeroSection() {
           />
 
           <video
+            data-home-hero-video
             className="absolute inset-0 size-full object-cover object-center"
             autoPlay
             muted

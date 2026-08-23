@@ -4,8 +4,11 @@ import { CtaSection } from "@/components/site/cta-section"
 import { FeaturedProjectsSection } from "@/components/site/featured-projects-section"
 import { GallerySection } from "@/components/site/gallery-section"
 import { HeroSection } from "@/components/site/hero-section"
+import { HomeVideoLoadCoordinator } from "@/components/site/home-video-load-coordinator"
 import { ScrollVideoRevealSection } from "@/components/ScrollVideoRevealSection"
 import { SiteFooter } from "@/components/site/site-footer"
+
+const homeScrollVideoProjectIds = ["oliver", "luca"] as const
 
 export default function HomePage() {
   return (
@@ -15,6 +18,7 @@ export default function HomePage() {
         className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-96 bg-linear-to-b from-luxury-gold/15 to-transparent"
       />
 
+      <HomeVideoLoadCoordinator projectIds={homeScrollVideoProjectIds} />
       <HeroSection />
       <GallerySection />
       {/* Scroll-controlled video reveal section. Move this block if you want it elsewhere. */}

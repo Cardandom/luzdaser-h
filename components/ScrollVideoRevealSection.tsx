@@ -5,6 +5,10 @@ import Image from "next/image"
 import { useEffect, useRef, useState } from "react"
 
 import { featuredProjects, type ProjectSlug } from "@/lib/projects"
+import {
+  scrollVideoRevealActiveEvent,
+  scrollVideoRevealPrepareEvent,
+} from "@/components/site/home-video-load-coordinator"
 
 const videoPhaseEnd = 0.7
 const cardRevealStart = 0.7
@@ -47,6 +51,28 @@ export function ScrollVideoRevealSection({
     projectSlug === "oliver-boutique"
       ? "Oliver House Boutique"
       : "Lucas House Boutique"
+
+  useEffect(() => {
+    const handlePrepareVideo = (event: Event) => {
+      const prepareEvent = event as CustomEvent<{ id?: string }>
+
+      if (prepareEvent.detail?.id === id) {
+        setShouldLoadVideo(true)
+      }
+    }
+
+    window.addEventListener(
+      scrollVideoRevealPrepareEvent,
+      handlePrepareVideo,
+    )
+
+    return () => {
+      window.removeEventListener(
+        scrollVideoRevealPrepareEvent,
+        handlePrepareVideo,
+      )
+    }
+  }, [id])
 
   useEffect(() => {
     const section = sectionRef.current
@@ -448,6 +474,14 @@ export function ScrollVideoRevealSection({
           invalidateOnRefresh: true,
           onToggle: (self) => {
             syncVideoTicker(self.isActive)
+
+            if (self.isActive) {
+              window.dispatchEvent(
+                new CustomEvent(scrollVideoRevealActiveEvent, {
+                  detail: { id },
+                }),
+              )
+            }
           },
           onRefresh: (self) => {
             syncVideoTicker(self.isActive)
