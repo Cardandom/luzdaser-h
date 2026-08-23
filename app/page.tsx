@@ -20,6 +20,7 @@ export default function HomePage() {
       {/* Scroll-controlled video reveal section. Move this block if you want it elsewhere. */}
       <ScrollVideoRevealSection
         id="oliver"
+        videoSrc="/videos/scroll-oliver-desktop-g4-hq-v2.mp4"
         mobileVideoSrc="/videos/scroll-oliver-mobile-g4-hq-v2.mp4"
         revealOnHashNavigation
       />
