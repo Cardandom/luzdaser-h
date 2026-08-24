@@ -20,6 +20,7 @@ export function HomeVideoLoadCoordinator({
 
   useEffect(() => {
     let hasScheduledFirstProject = false
+    let heroVisibilityObserver: IntersectionObserver | null = null
     let idleCallbackId: number | null = null
     let isMounted = true
     let timeoutId: number | null = null
@@ -84,6 +85,17 @@ export function HomeVideoLoadCoordinator({
     )
 
     if (heroVideo) {
+      heroVisibilityObserver = new IntersectionObserver(([entry]) => {
+        if (entry.isIntersecting) {
+          if (heroVideo.paused) {
+            void heroVideo.play().catch(() => {})
+          }
+        } else {
+          heroVideo.pause()
+        }
+      })
+      heroVisibilityObserver.observe(heroVideo)
+
       if (heroVideo.readyState >= 2) {
         prepareFirstProject()
       } else {
@@ -104,6 +116,7 @@ export function HomeVideoLoadCoordinator({
         window.clearTimeout(timeoutId)
       }
 
+      heroVisibilityObserver?.disconnect()
       window.removeEventListener(
         scrollVideoRevealActiveEvent,
         handleActiveProject,
