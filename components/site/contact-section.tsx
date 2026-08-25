@@ -88,7 +88,7 @@ export function ContactSection() {
                 </div>
                 <div className="flex items-center gap-3">
                   <MapPin className="size-4 text-luxury-gold" aria-hidden="true" />
-                  <span>Palm Beach, Aruba</span>
+                  <span>Paradera 184, Aruba</span>
                 </div>
               </div>
             </div>

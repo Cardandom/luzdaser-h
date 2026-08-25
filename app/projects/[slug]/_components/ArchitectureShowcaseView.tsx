@@ -9,9 +9,6 @@ import {
   ChevronLeft,
   Compass,
   Layers,
-  Move,
-  Sun,
-  Wind,
 } from "lucide-react"
 
 import { getProjectBySlug, type ProjectSlug } from "@/lib/projects"
@@ -112,7 +109,7 @@ export function ArchitectureShowcase({ slug }: ArchitectureShowcaseProps) {
                   <div className="relative aspect-[3/2] w-full overflow-hidden rounded-md bg-white">
                     <Image
                       src="/planoOliver.webp"
-                      alt="Site plan for Oliver Boutique"
+                      alt="Site plan for Oliver Villa"
                       fill
                       sizes="(min-width: 1280px) 38vw, (min-width: 1024px) 48vw, 100vw"
                       className="object-contain p-2"
@@ -166,7 +163,7 @@ export function ArchitectureShowcase({ slug }: ArchitectureShowcaseProps) {
                   <div className="relative min-h-130 overflow-hidden rounded-lg border border-slate-100 bg-slate-50/40">
                     <Image
                       src="/oliverRender.webp"
-                      alt="Exploded axonometric render for Oliver Boutique"
+                      alt="Exploded axonometric render for Oliver Villa"
                       fill
                       sizes="(min-width: 1024px) 40vw, 100vw"
                       className="object-contain p-4"
@@ -203,95 +200,6 @@ export function ArchitectureShowcase({ slug }: ArchitectureShowcaseProps) {
                 )}
               </div>
             </article>
-        </section>
-
-        <div className="flex items-center gap-2 my-14">
-          <span className="h-px flex-1 bg-slate-200" />
-          <h2 className="font-heading text-sm font-extrabold uppercase tracking-widest text-slate-500">
-            Technical Performance Visualizations
-          </h2>
-          <span className="h-px flex-1 bg-slate-200" />
-        </div>
-
-        <section className="grid grid-cols-1 gap-6 md:grid-cols-2">
-          <article className="blueprint-grid flex h-full flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition-all duration-300 hover:shadow-md">
-            <div className="flex items-center justify-between border-b border-slate-100 p-4">
-              <div>
-                <span className="text-[10px] font-mono uppercase tracking-widest text-slate-400 font-bold">
-                  Sheet A-108
-                </span>
-                <h3 className="font-heading text-sm font-bold uppercase tracking-wider text-slate-900">
-                  SUN PATH & VENTILATION
-                </h3>
-              </div>
-              <div className="flex items-center gap-1.5 rounded border border-orange-100 bg-orange-50 px-2 py-1">
-                <Sun className="h-3.5 w-3.5 text-orange-500" aria-hidden="true" />
-                <span className="text-[9px] font-mono uppercase font-semibold text-orange-600">
-                  Passive Solar Simulation
-                </span>
-              </div>
-            </div>
-
-            <div className="flex flex-1 flex-col justify-between p-4">
-              <div className="relative overflow-hidden rounded-lg border border-slate-100 bg-slate-50/40 p-3">
-                <div className="relative aspect-[16/10] overflow-hidden rounded-md bg-white">
-                  <Image
-                    src="/front3DOliver.webp"
-                    alt="Front perspective for Oliver Boutique"
-                    fill
-                    sizes="(min-width: 1024px) 40vw, 100vw"
-                    className="object-cover object-center"
-                  />
-                </div>
-              </div>
-
-              <div className="mt-3 flex items-center justify-between border-t border-slate-100 pt-2 text-[10px] font-mono text-slate-500">
-                <span className="flex items-center gap-1">
-                  <Wind className="h-3 w-3 text-sky-500" aria-hidden="true" />
-                  Breezeway Cross flow
-                </span>
-                <span>Passive Thermal Efficiency: High A++</span>
-              </div>
-            </div>
-          </article>
-
-          <article className="blueprint-grid flex h-full flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition-all duration-300 hover:shadow-md">
-            <div className="flex items-center justify-between border-b border-slate-100 p-4">
-              <div>
-                <span className="text-[10px] font-mono uppercase tracking-widest text-slate-400 font-bold">
-                  Sheet A-106
-                </span>
-                <h3 className="font-heading text-sm font-bold uppercase tracking-wider text-slate-900">
-                  FRONT ELEVATION
-                </h3>
-              </div>
-              <div className="flex items-center gap-1.5 rounded border border-slate-200 bg-slate-100 px-2 py-1">
-                <Move className="h-3.5 w-3.5 text-slate-500" aria-hidden="true" />
-                <span className="text-[9px] font-mono uppercase font-semibold text-slate-600">
-                  Scale 1 : 150
-                </span>
-              </div>
-            </div>
-
-            <div className="flex flex-1 flex-col justify-between p-4">
-              <div className="relative overflow-hidden rounded-lg border border-slate-100 bg-slate-50/40 p-3">
-                <div className="relative aspect-[3/2] overflow-hidden rounded-md bg-white">
-                  <Image
-                    src="/lucaFrontView.webp"
-                    alt="Front elevation for Luca Boutique House"
-                    fill
-                    sizes="(min-width: 1024px) 40vw, 100vw"
-                    className="object-contain p-2"
-                  />
-                </div>
-              </div>
-
-              <div className="mt-3 flex items-center justify-between border-t border-slate-100 pt-2 text-[10px] font-mono text-slate-500">
-                <span>Finishes: Matte Polyurethane & Oil Cedar</span>
-                <span>Cladding Depth: 24mm profile slats</span>
-              </div>
-            </div>
-          </article>
         </section>
 
         <div className="flex items-center gap-2 my-14">
@@ -500,7 +408,7 @@ export function ArchitectureShowcase({ slug }: ArchitectureShowcaseProps) {
                         Glazing Frame
                       </span>
                       <span className="mt-0.5 block text-[11px] font-semibold text-slate-800">
-                        Anodized Black Matt Aluminum Double Profile
+                        Black Matte PVC Double-Glazing Profile
                       </span>
                     </div>
                     <div>

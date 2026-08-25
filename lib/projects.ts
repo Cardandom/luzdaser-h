@@ -12,7 +12,6 @@
   Bath,
   AirVent,
   WavesLadder,
-  Trees,
   BrickWall,
   PanelTopOpen,
   PlugZap,
@@ -91,9 +90,7 @@ export const projects: Project[] = [
       { icon: CookingPot, label: "Luxury Kitchen With Electricity" },
       { icon: Sprout, label: "Minimalist Design" },
       { icon: AirVent, label: "Air Conditioning" },
-      { icon: WavesLadder, label: "12 m² Pool Area" },
-      { icon: Trees, label: "Landscaping" },
-      { icon: BrickWall, label: "Perimeter Walls" },
+      { icon: WavesLadder, label: "11 m² Pool Area" },
       { icon: ShieldCheckIcon, label: "Quality" },
       { icon: RockingChair, label: "Confort" },
       { icon: Gem, label: "Exclusiveness" }
@@ -112,7 +109,7 @@ export const projects: Project[] = [
       },
       {
         icon: Grid2x2,
-        label: "Reversed Floors",
+        label: "Quality Floors",
         description:
           "High-quality porcelain throughout the house and non-slip ceramic in bathrooms and showers.",
       },
@@ -142,7 +139,7 @@ export const projects: Project[] = [
       {
         icon: DatabaseZap,
         label: "Septic Tank",
-        description: "Individual septic tank of 12 m².",
+        description: "Individual septic tank of 12 m³.",
       },
     ],
     highlightsNote: {
@@ -184,7 +181,7 @@ export const projects: Project[] = [
   },
   {
     slug: "oliver-boutique",
-    title: "Oliver Boutique",
+    title: "Oliver Villa",
     price: "$350,000 USD",
     picture: "/OliverHouse.webp",
     objectPosition: "center center",
@@ -192,21 +189,20 @@ export const projects: Project[] = [
       "A more expansive villa composition with a softer palette, garden framing, and a relaxed outdoor rhythm.",
     badge: "Villa collection",
     eyebrow: "Project dossier",
-    boardTitle: "Oliver Boutique House",
+    boardTitle: "Oliver Villa",
     boardSubtitle: "Living by the sea",
     intro:
-      "Oliver Boutique balances privacy and openness with generous outdoor living, a calm interior atmosphere, and a design that feels quietly refined throughout the day.",
+      "Oliver Villa balances privacy and openness with generous outdoor living, a calm interior atmosphere, and a design that feels quietly refined throughout the day.",
     features: [
       { icon: House, label: "130 m² House" },
-      { icon: BedDouble, label: "Three/Four Bedrooms" },
+      { icon: BedDouble, label: "Three Bedrooms" },
       { icon: Bath, label: "Three bathrooms" },
-      { icon: CookingPot, label: "Luxury Kitchen With Electricity" },
+      { icon: CookingPot, label: "Dual Luxury Kitchen" },
       { icon: Sprout, label: "Minimalist Design" },
       { icon: AirVent, label: "Air Conditioning" },
-      { icon: WavesLadder, label: "15 m² Pool Area" },
+      { icon: WavesLadder, label: "18 m² Pool Area" },
       { icon: Beef, label: "BBQ Area"},
-      { icon: BrickWall, label: "Perimeter Walls" },
-      { icon: ShieldCheckIcon, label: "Quality" },
+      { icon: ShieldCheckIcon, label: "Quality Finishes" },
       { icon: RockingChair, label: "Confort" },
       { icon: Gem, label: "Exclusiveness" }
     ],
@@ -224,7 +220,7 @@ export const projects: Project[] = [
       },
       {
         icon: Grid2x2,
-        label: "Reversed Floors",
+        label: "Quality Floors",
         description:
           "High-quality porcelain throughout the house and non-slip ceramic in bathrooms and showers.",
       },
@@ -254,35 +250,35 @@ export const projects: Project[] = [
       {
         icon: DatabaseZap,
         label: "Septic Tank",
-        description: "Individual septic tank of 12 m².",
+        description: "Individual septic tank of 12 m³.",
       },
     ],
     tiles: [
       {
         title: "Arrival view",
         picture: "/OliverHouse.webp",
-        alt: "Exterior evening view of Oliver Boutique",
+        alt: "Exterior evening view of Oliver Villa",
         objectPosition: "center center",
         caption: "Soft lighting and a resort-style welcome.",
       },
       {
         title: "Terrace life",
         picture: "/frontHouse1.webp",
-        alt: "Terrace and exterior view for Oliver Boutique",
+        alt: "Terrace and exterior view for Oliver Villa",
         objectPosition: "center center",
         caption: "A broad terrace that opens the home to the garden.",
       },
       {
         title: "Interior calm",
         picture: "/livingroom.webp",
-        alt: "Living room interior for Oliver Boutique",
+        alt: "Living room interior for Oliver Villa",
         objectPosition: "center center",
         caption: "Neutral interiors that keep the focus on comfort.",
       },
       {
         title: "Beach mood",
         picture: "/beachView.webp",
-        alt: "Beach view mood image for Oliver Boutique",
+        alt: "Beach view mood image for Oliver Villa",
         objectPosition: "center center",
         caption: "A coastal note that reinforces the Aruba lifestyle.",
       },

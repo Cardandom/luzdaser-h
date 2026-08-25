@@ -8,11 +8,11 @@ const heroFeatures = [
   },
   {
     icon: PlaySquare,
-    label: "Playground",
+    label: "Playground Area",
   },
   {
     icon: Waves,
-    label: "Swimming pool",
+    label: "Private Swimming Pool",
   },
   {
     icon: ChefHat,
@@ -92,7 +92,7 @@ export function HeroSection() {
                   href="#featured-projects"
                   className="inline-flex h-11 items-center justify-center gap-2 rounded-full bg-linear-to-b from-luxury-gold-soft to-luxury-gold px-6 text-xs font-semibold uppercase tracking-widest text-stone-950 shadow-lg transition-transform hover:-translate-y-0.5 sm:h-12 sm:px-7"
                 >
-                  Explore Projects
+                  Explorar modelos
                   <ArrowRight className="size-4" aria-hidden="true" />
                 </a>
               </div>

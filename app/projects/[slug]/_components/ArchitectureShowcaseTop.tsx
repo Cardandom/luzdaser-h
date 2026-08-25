@@ -27,7 +27,7 @@ export function ArchitectureShowcaseTop({ slug }: ArchitectureShowcaseProps) {
     : "/projects/oliver-boutique"
   const otherProjectLabel = isOliverProject
     ? "View Luca Boutique"
-    : "View Oliver Boutique"
+    : "View Oliver Villa"
   const backToProjectsHref = isOliverProject ? "/#oliver" : "/#luca"
 
   const heroImage =

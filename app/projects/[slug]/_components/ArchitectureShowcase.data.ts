@@ -133,7 +133,7 @@ export const constructionSpecs: SpecItem[] = [
   },
   {
     id: "cs-3",
-    title: "Aluminum double glazing",
+    title: "PVC double glazing",
     description: "Low-E glass coated panels with double structural seals.",
     iconName: "Grid",
   },
