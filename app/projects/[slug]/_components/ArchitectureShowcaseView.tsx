@@ -9,10 +9,12 @@ import {
   ChevronLeft,
   Compass,
   Layers,
+  ZoomIn,
 } from "lucide-react"
 
 import { getProjectBySlug, type ProjectSlug } from "@/lib/projects"
 import { ArchitectureShowcaseTop } from "./ArchitectureShowcaseTop"
+import { ProjectImageLightbox } from "./ProjectImageLightbox"
 import {
   constructionSpecs,
   getIcon,
@@ -27,15 +29,23 @@ export function ArchitectureShowcase({ slug }: ArchitectureShowcaseProps) {
 
   const [hoveredElevationSpec, setHoveredElevationSpec] = useState<string | null>(null)
   const [isLightboxOpen, setIsLightboxOpen] = useState(false)
+  const [isPlanLightboxOpen, setIsPlanLightboxOpen] = useState(false)
 
   if (!project) {
     return null
   }
 
+  const backToProjectsHref = project.slug === "oliver-boutique" ? "/#oliver" : "/#luca"
   const daytimeImage = project.tiles[0]?.picture ?? project.picture
+  const sitePlanAlt = "Site plan for Oliver Villa"
+  const sitePlanSrc = "/planoOliver.webp"
+
   return (
     <section className="space-y-10">
-      <ArchitectureShowcaseTop slug={slug} />
+      <ArchitectureShowcaseTop
+        slug={slug}
+        backToProjectsHref={backToProjectsHref}
+      />
 
       <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
         <section id="featured-projects" className="">
@@ -106,15 +116,25 @@ export function ArchitectureShowcase({ slug }: ArchitectureShowcaseProps) {
 
               <div className="flex flex-1 flex-col justify-between p-4">
                 <div className="relative overflow-hidden rounded-lg border border-stone-200/60 bg-stone-50 p-4">
-                  <div className="relative aspect-[3/2] w-full overflow-hidden rounded-md bg-white">
+                  <button
+                    type="button"
+                    className="group relative block aspect-[3/2] w-full cursor-zoom-in overflow-hidden rounded-md bg-white focus-visible:ring-4 focus-visible:ring-luxury-gold/50 focus-visible:outline-none"
+                    aria-label="Open enlarged site plan"
+                    onClick={() => setIsPlanLightboxOpen(true)}
+                  >
                     <Image
-                      src="/planoOliver.webp"
-                      alt="Site plan for Oliver Villa"
+                      src={sitePlanSrc}
+                      alt={sitePlanAlt}
                       fill
                       sizes="(min-width: 1280px) 38vw, (min-width: 1024px) 48vw, 100vw"
-                      className="object-contain p-2"
+                      className="object-contain p-2 transition-transform duration-300 group-hover:scale-105"
                     />
-                  </div>
+
+                    <span className="absolute bottom-3 right-3 inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/90 px-3 py-1.5 text-xs font-medium text-slate-800 shadow-lg backdrop-blur-sm">
+                      <ZoomIn className="size-4" aria-hidden="true" />
+                      Enlarge
+                    </span>
+                  </button>
                 </div>
 
                 <div className="mt-4 grid grid-cols-3 gap-2 text-center">
@@ -334,7 +354,7 @@ export function ArchitectureShowcase({ slug }: ArchitectureShowcaseProps) {
 
           <div className="mt-6 flex flex-col justify-center gap-3 sm:flex-row">
             <Link
-              href="/#featured-projects"
+              href={backToProjectsHref}
               className="inline-flex items-center justify-center gap-2 rounded-full border border-luxury-border bg-white px-5 py-3 text-sm font-medium text-foreground transition hover:border-luxury-gold hover:text-luxury-gold"
             >
               <ChevronLeft className="h-4 w-4" aria-hidden="true" />
@@ -351,6 +371,14 @@ export function ArchitectureShowcase({ slug }: ArchitectureShowcaseProps) {
           </div>
         </footer>
       </div>
+
+      <ProjectImageLightbox
+        src={sitePlanSrc}
+        alt={`Expanded ${sitePlanAlt.toLowerCase()}`}
+        title="Site Plan"
+        isOpen={isPlanLightboxOpen}
+        onClose={() => setIsPlanLightboxOpen(false)}
+      />
 
       {isLightboxOpen ? (
         <div

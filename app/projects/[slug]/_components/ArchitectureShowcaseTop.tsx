@@ -1,21 +1,27 @@
 "use client"
 
 import { useState } from "react"
-import { ArrowRight, ChevronLeft } from "lucide-react"
+import { ArrowRight, ChevronLeft, ZoomIn } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 
 import { getProjectBySlug, type ProjectSlug } from "@/lib/projects"
+import { ProjectImageLightbox } from "./ProjectImageLightbox"
 
 type ArchitectureShowcaseProps = {
+  backToProjectsHref: string
   slug: ProjectSlug
 }
 
-export function ArchitectureShowcaseTop({ slug }: ArchitectureShowcaseProps) {
+export function ArchitectureShowcaseTop({
+  backToProjectsHref,
+  slug,
+}: ArchitectureShowcaseProps) {
   const project = getProjectBySlug(slug)
 
   const [hoveredFeatureIdx, setHoveredFeatureIdx] = useState<number | null>(null)
   const [hoveredHighlightIdx, setHoveredHighlightIdx] = useState<number | null>(null)
+  const [isHeroLightboxOpen, setIsHeroLightboxOpen] = useState(false)
 
   if (!project) {
     return null
@@ -28,7 +34,7 @@ export function ArchitectureShowcaseTop({ slug }: ArchitectureShowcaseProps) {
   const otherProjectLabel = isOliverProject
     ? "View Luca Boutique"
     : "View Oliver Villa"
-  const backToProjectsHref = isOliverProject ? "/#oliver" : "/#luca"
+  const isLucaProject = project.slug === "lucas-boutique"
 
   const heroImage =
     project.slug === "oliver-boutique"
@@ -132,6 +138,20 @@ export function ArchitectureShowcaseTop({ slug }: ArchitectureShowcaseProps) {
                     className="object-cover transition-transform duration-700 group-hover:scale-[1.02]"
                     style={{ objectPosition: project.objectPosition }}
                   />
+
+                  {isLucaProject ? (
+                    <button
+                      type="button"
+                      className="absolute inset-0 z-20 cursor-zoom-in rounded-lg focus-visible:ring-4 focus-visible:ring-luxury-gold/60 focus-visible:outline-none"
+                      aria-label="Open enlarged Luca facade image"
+                      onClick={() => setIsHeroLightboxOpen(true)}
+                    >
+                      <span className="absolute bottom-3 right-3 inline-flex items-center gap-2 rounded-full border border-white/30 bg-black/55 px-3 py-1.5 text-xs font-medium text-white shadow-lg backdrop-blur-sm">
+                        <ZoomIn className="size-4" aria-hidden="true" />
+                        Enlarge
+                      </span>
+                    </button>
+                  ) : null}
 
                   {hoveredFeatureIdx === 0 && (
                     <div className="absolute left-[20%] top-[30%] right-[20%] h-8 rounded-sm border-2 border-dashed border-white bg-slate-900/45 px-2 py-0.5 text-center font-mono text-[9px] uppercase tracking-wider text-white backdrop-blur-sm">
@@ -252,6 +272,16 @@ export function ArchitectureShowcaseTop({ slug }: ArchitectureShowcaseProps) {
           </section>
         </div>
       </div>
+
+      {isLucaProject ? (
+        <ProjectImageLightbox
+          src={heroImage}
+          alt={`Expanded facade of ${project.title}`}
+          title={`${project.boardTitle} facade`}
+          isOpen={isHeroLightboxOpen}
+          onClose={() => setIsHeroLightboxOpen(false)}
+        />
+      ) : null}
     </section>
   )
 }
