@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useMemo, useRef, useState } from "react"
+import { createPortal } from "react-dom"
 import { ChevronLeft, ChevronRight, X } from "lucide-react"
 import Image from "next/image"
 
@@ -583,9 +584,9 @@ function GalleryModal({ onClose }: { onClose: () => void }) {
           </div>
         </div>
 
-        {expandedItem ? (
+        {expandedItem && typeof document !== "undefined" ? createPortal(
           <div
-            className="fixed inset-0 z-[60] flex items-center justify-center bg-foreground/85 px-3 py-4 backdrop-blur-sm sm:px-6"
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-foreground/85 px-3 py-4 backdrop-blur-sm sm:px-6"
             role="dialog"
             aria-modal="true"
             aria-labelledby="gallery-expanded-title"
@@ -653,7 +654,8 @@ function GalleryModal({ onClose }: { onClose: () => void }) {
                 </p>
               </div>
             </div>
-          </div>
+          </div>,
+          document.body,
         ) : null}
       </div>
     </div>

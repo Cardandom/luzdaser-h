@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useRef } from "react"
+import { createPortal } from "react-dom"
 import { X } from "lucide-react"
 import Image from "next/image"
 
@@ -48,13 +49,13 @@ export function ProjectImageLightbox({
     }
   }, [isOpen, onClose])
 
-  if (!isOpen) {
+  if (!isOpen || typeof document === "undefined") {
     return null
   }
 
-  return (
+  return createPortal(
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/90 p-3 backdrop-blur-md sm:p-6"
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/90 p-3 backdrop-blur-md sm:p-6"
       role="dialog"
       aria-modal="true"
       aria-label={`Expanded view of ${title}`}
@@ -89,6 +90,7 @@ export function ProjectImageLightbox({
           <X className="size-5" aria-hidden="true" />
         </button>
       </div>
-    </div>
+    </div>,
+    document.body,
   )
 }
