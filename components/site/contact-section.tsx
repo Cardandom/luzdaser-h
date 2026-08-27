@@ -1,5 +1,6 @@
 import { Mail, MapPin, Phone } from "lucide-react"
 
+import { ContactForm } from "@/components/site/contact-form"
 import { SectionHeading } from "@/components/site/section-heading"
 
 export function ContactSection() {
@@ -9,49 +10,11 @@ export function ContactSection() {
         <SectionHeading
           eyebrow="Contacts"
           title="Turn visual inspiration into a real investment opportunity"
-          description="This section closes the journey with a clear form, a high-impact card, and visual accessibility on small and medium screens."
+          description="Tell us what you're looking for and our team will follow up with project information and personalized guidance."
         />
 
         <div className="mt-8 grid gap-6 lg:grid-cols-2">
-          <form className="luxury-card rounded-3xl p-5 sm:p-6">
-            <div className="grid gap-4 sm:grid-cols-2">
-              <label className="grid gap-2 text-sm text-foreground/75">
-                Name
-                <input className="luxury-input" placeholder="Your name" />
-              </label>
-              <label className="grid gap-2 text-sm text-foreground/75">
-                Phone
-                <input className="luxury-input" placeholder="+297 000 0000" />
-              </label>
-              <label className="grid gap-2 text-sm text-foreground/75">
-                Email
-                <input className="luxury-input" placeholder="name@example.com" />
-              </label>
-              <label className="grid gap-2 text-sm text-foreground/75">
-                City
-                <input className="luxury-input" placeholder="Your city" />
-              </label>
-              <label className="grid gap-2 text-sm text-foreground/75 sm:col-span-2">
-                Comments
-                <textarea
-                  className="luxury-input min-h-36 resize-y"
-                  placeholder="Tell us what kind of villa you are interested in"
-                />
-              </label>
-            </div>
-
-            <div className="mt-5 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-              <p className="text-sm text-foreground/70">
-                We will respond with commercial information and personalized support.
-              </p>
-              <button
-                type="button"
-                className="inline-flex h-12 items-center justify-center rounded-full bg-linear-to-b from-luxury-gold-soft to-luxury-gold px-6 font-semibold text-stone-950 shadow-lg transition-transform hover:-translate-y-0.5"
-              >
-                Send request
-              </button>
-            </div>
-          </form>
+          <ContactForm />
 
           <aside className="luxury-card relative overflow-hidden rounded-3xl p-5 sm:p-6">
             <div className="absolute inset-0 bg-linear-to-br from-white via-stone-50 to-stone-100" />
@@ -63,28 +26,44 @@ export function ContactSection() {
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="rounded-3xl border border-black/10 bg-white p-4">
                   <p className="text-xs uppercase tracking-widest text-foreground/70">
-                    Returns
+                    Project Information
                   </p>
-                  <p className="mt-2 font-heading text-4xl text-luxury-gold-ink">30%</p>
-                  <p className="text-sm text-foreground/70">Of the initial deposit.</p>
+                  <p className="mt-2 font-heading text-2xl text-luxury-gold-ink">
+                    Models &amp; Availability
+                  </p>
+                  <p className="mt-2 text-sm text-foreground/70">
+                    Request current project details and available residence options.
+                  </p>
                 </div>
                 <div className="rounded-3xl border border-black/10 bg-white p-4">
                   <p className="text-xs uppercase tracking-widest text-foreground/70">
-                    Benefit
+                    Personalized Support
                   </p>
-                  <p className="mt-2 font-heading text-4xl text-luxury-gold-ink">100%</p>
-                  <p className="text-sm text-foreground/70">Tax exemption.</p>
+                  <p className="mt-2 font-heading text-2xl text-luxury-gold-ink">
+                    Next Steps
+                  </p>
+                  <p className="mt-2 text-sm text-foreground/70">
+                    Receive guidance on the purchasing process and verified commercial
+                    terms.
+                  </p>
                 </div>
               </div>
 
               <div className="space-y-3 rounded-3xl border border-black/10 bg-white p-4 text-sm text-foreground/75">
                 <div className="flex items-center gap-3">
                   <Phone className="size-4 text-luxury-gold" aria-hidden="true" />
-                  <span>+297 6992222</span>
+                  <a href="tel:+2976992222" className="text-inherit no-underline">
+                    +297 6992222
+                  </a>
                 </div>
                 <div className="flex items-center gap-3">
                   <Mail className="size-4 text-luxury-gold" aria-hidden="true" />
-                  <span>info@jbsseco.com</span>
+                  <a
+                    href="mailto:info@jbsseco.com"
+                    className="text-inherit no-underline"
+                  >
+                    info@jbsseco.com
+                  </a>
                 </div>
                 <div className="flex items-center gap-3">
                   <MapPin className="size-4 text-luxury-gold" aria-hidden="true" />

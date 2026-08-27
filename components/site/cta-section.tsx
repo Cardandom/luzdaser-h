@@ -21,7 +21,7 @@ const islandImages = {
     src: "/aruba/oranjestad-downtown.webp",
     alt: "Colorful architecture at Plaza Daniel Leo in downtown Oranjestad, Aruba",
     title: "Downtown Oranjestad",
-    descriptor: "Historic Waterfront & Urban Charm",
+    descriptor: "Historic Downtown & Caribbean Charm",
   },
 } as const
 
