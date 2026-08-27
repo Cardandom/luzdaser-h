@@ -25,8 +25,8 @@ const galleryImageFiles = [
   "Planta General.webp",
   "Planta Parque.webp",
   "Vista Frontal Calle,Esqina Parque Izq,Oliver Der,.webp",
-  "Vista frontal Calle,Lucas Izq, Oliver Der,.webp",
-  "Vista Frontal zona verde # 3, Lucas # 38  & Modelo 19.webp",
+  "Vista frontal Calle,Luca Izq, Oliver Der,.webp",
+  "Vista Frontal zona verde # 3, Luca # 38  & Modelo 19.webp",
   "Vista lateral Parque.webp",
 ] as const
 

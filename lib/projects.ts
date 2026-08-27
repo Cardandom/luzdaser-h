@@ -27,7 +27,7 @@
   type LucideIcon,
 } from "lucide-react"
 
-export type ProjectSlug = "lucas-boutique" | "oliver-boutique"
+export type ProjectSlug = "luca-boutique" | "oliver-boutique"
 
 export type ProjectFeature = {
   icon: LucideIcon
@@ -69,8 +69,8 @@ export type Project = {
 
 export const projects: Project[] = [
   {
-    slug: "lucas-boutique",
-    title: "Lucas Boutique House",
+    slug: "luca-boutique",
+    title: "Luca Boutique House",
     price: "$280,000 USD",
     picture: "/lucaDetails.webp",
     objectPosition: "center center",
@@ -81,7 +81,7 @@ export const projects: Project[] = [
     boardTitle: "Luca Boutique House",
     boardSubtitle: "Living by the sea",
     intro:
-      "Lucas Boutique House is designed as a calm, contemporary retreat with a clean frontage, intimate outdoor areas, and an easy indoor-outdoor rhythm.",
+      "Luca Boutique House is designed as a calm, contemporary retreat with a clean frontage, intimate outdoor areas, and an easy indoor-outdoor rhythm.",
     highlightsTitle: "Finishes and Comfort",
     features: [
       { icon: House, label: "80 m² House" },
@@ -152,28 +152,28 @@ export const projects: Project[] = [
       {
         title: "Front elevation",
         picture: "/frontHouse.webp",
-        alt: "Front elevation of Lucas Boutique House",
+        alt: "Front elevation of Luca Boutique House",
         objectPosition: "center center",
         caption: "Refined minimalist finishes",
       },
       {
         title: "Living mood",
         picture: "/livingroom.webp",
-        alt: "Living room interior for Lucas Boutique House",
+        alt: "Living room interior for Luca Boutique House",
         objectPosition: "center center",
         caption: "Light-filled interiors with a sense of tranquility",
       },
       {
         title: "Kitchen detail",
         picture: "/kitchen.webp",
-        alt: "Kitchen interior for Lucas Boutique House",
+        alt: "Kitchen interior for Luca Boutique House",
         objectPosition: "center center",
         caption: "Crisp finishes and an easy view back to the living area.",
       },
       {
         title: "Outdoor scene",
         picture: "/sunset.webp",
-        alt: "Outdoor sunset view for Lucas Boutique House",
+        alt: "Outdoor sunset view for Luca Boutique House",
         objectPosition: "center center",
         caption: "A vibrant Caribbean tropical ambiance",
       },

@@ -7,14 +7,10 @@ import * as Icons from "lucide-react"
 import {
   ArrowRight,
   ChevronLeft,
-  Compass,
-  Layers,
-  ZoomIn,
 } from "lucide-react"
 
 import { getProjectBySlug, type ProjectSlug } from "@/lib/projects"
 import { ArchitectureShowcaseTop } from "./ArchitectureShowcaseTop"
-import { ProjectImageLightbox } from "./ProjectImageLightbox"
 import {
   constructionSpecs,
   getIcon,
@@ -29,7 +25,6 @@ export function ArchitectureShowcase({ slug }: ArchitectureShowcaseProps) {
 
   const [hoveredElevationSpec, setHoveredElevationSpec] = useState<string | null>(null)
   const [isLightboxOpen, setIsLightboxOpen] = useState(false)
-  const [isPlanLightboxOpen, setIsPlanLightboxOpen] = useState(false)
 
   if (!project) {
     return null
@@ -37,8 +32,6 @@ export function ArchitectureShowcase({ slug }: ArchitectureShowcaseProps) {
 
   const backToProjectsHref = project.slug === "oliver-boutique" ? "/#oliver" : "/#luca"
   const daytimeImage = project.tiles[0]?.picture ?? project.picture
-  const sitePlanAlt = "Site plan for Oliver Villa"
-  const sitePlanSrc = "/planoOliver.webp"
 
   return (
     <section className="space-y-10">
@@ -85,141 +78,6 @@ export function ArchitectureShowcase({ slug }: ArchitectureShowcaseProps) {
               </figure>
             ))}
           </div>
-        </section>
-
-        <div className="flex items-center gap-2 my-14">
-          <span className="h-px flex-1 bg-slate-200" />
-          <h2 className="font-heading text-sm font-extrabold uppercase tracking-widest text-slate-500">
-            Interactive Blueprint Sheets
-          </h2>
-          <span className="h-px flex-1 bg-slate-200" />
-        </div>
-
-        <section className="grid grid-cols-1 gap-6 xl:grid-cols-2">
-            <article className="blueprint-grid flex h-full flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition-all duration-300 hover:shadow-md">
-              <div className="flex items-center justify-between border-b border-slate-100 p-4">
-                <div>
-                  <span className="text-[10px] font-mono uppercase tracking-widest text-slate-400 font-bold">
-                    Sheet A-101
-                  </span>
-                  <h3 className="font-heading text-sm font-bold uppercase tracking-wider text-slate-900">
-                    SITE PLAN
-                  </h3>
-                </div>
-                <div className="flex items-center gap-1.5 rounded border border-slate-200 bg-slate-100 px-2 py-1">
-                  <Compass className="h-3.5 w-3.5 text-slate-500" aria-hidden="true" />
-                  <span className="text-[9px] font-mono uppercase font-semibold text-slate-600">
-                    Site Scale 1 : 250
-                  </span>
-                </div>
-              </div>
-
-              <div className="flex flex-1 flex-col justify-between p-4">
-                <div className="relative overflow-hidden rounded-lg border border-stone-200/60 bg-stone-50 p-4">
-                  <button
-                    type="button"
-                    className="group relative block aspect-[3/2] w-full cursor-zoom-in overflow-hidden rounded-md bg-white focus-visible:ring-4 focus-visible:ring-luxury-gold/50 focus-visible:outline-none"
-                    aria-label="Open enlarged site plan"
-                    onClick={() => setIsPlanLightboxOpen(true)}
-                  >
-                    <Image
-                      src={sitePlanSrc}
-                      alt={sitePlanAlt}
-                      fill
-                      sizes="(min-width: 1280px) 38vw, (min-width: 1024px) 48vw, 100vw"
-                      className="object-contain p-2 transition-transform duration-300 group-hover:scale-105"
-                    />
-
-                    <span className="absolute bottom-3 right-3 inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/90 px-3 py-1.5 text-xs font-medium text-slate-800 shadow-lg backdrop-blur-sm">
-                      <ZoomIn className="size-4" aria-hidden="true" />
-                      Enlarge
-                    </span>
-                  </button>
-                </div>
-
-                <div className="mt-4 grid grid-cols-3 gap-2 text-center">
-                  <div className="rounded border border-slate-150 bg-slate-50 p-2">
-                    <span className="block text-[8px] font-mono font-bold uppercase tracking-widest text-slate-400">
-                      Residency Calc
-                    </span>
-                    <span className="block text-xs font-mono font-semibold text-slate-800">27.8% Plot Ratio</span>
-                  </div>
-                  <div className="rounded border border-slate-150 bg-slate-50 p-2">
-                    <span className="block text-[8px] font-mono font-bold uppercase tracking-widest text-slate-400">
-                      Hardscape Deck
-                    </span>
-                    <span className="block text-xs font-mono font-semibold text-slate-800">185 mÃƒâ€šÃ‚Â² Total</span>
-                  </div>
-                  <div className="rounded border border-slate-150 bg-slate-50 p-2">
-                    <span className="block text-[8px] font-mono font-bold uppercase tracking-widest text-slate-400">
-                      Permeable Land
-                    </span>
-                    <span className="block text-xs font-mono font-semibold text-slate-800">430 mÃƒâ€šÃ‚Â² (54%)</span>
-                  </div>
-                </div>
-              </div>
-            </article>
-
-            <article className="blueprint-grid flex h-full flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition-all duration-300 hover:shadow-md">
-              <div className="flex items-center justify-between border-b border-slate-100 p-4">
-                <div>
-                  <span className="text-[10px] font-mono uppercase tracking-widest text-slate-400 font-bold">
-                    Sheet A-105
-                  </span>
-                  <h3 className="font-heading text-sm font-bold uppercase tracking-wider text-slate-900">
-                    EXPLODED AXONOMETRIC
-                  </h3>
-                </div>
-                <div className="flex items-center gap-1.5 rounded border border-slate-200 bg-slate-100 px-2 py-1">
-                  <Layers className="h-3.5 w-3.5 text-slate-500" aria-hidden="true" />
-                  <span className="text-[9px] font-mono uppercase font-semibold text-slate-600">
-                    3D Vector Package
-                  </span>
-                </div>
-              </div>
-
-              <div className="p-4">
-                {project.slug === "oliver-boutique" ? (
-                  <div className="relative min-h-130 overflow-hidden rounded-lg border border-slate-100 bg-slate-50/40">
-                    <Image
-                      src="/oliverRender.webp"
-                      alt="Exploded axonometric render for Oliver Villa"
-                      fill
-                      sizes="(min-width: 1024px) 40vw, 100vw"
-                      className="object-contain p-4"
-                    />
-                  </div>
-                ) : (
-                  <div className="group/image relative min-h-130 overflow-hidden rounded-lg border border-slate-100 bg-slate-50/40">
-                    <Image
-                      src="/exploded-axonometric-1.png"
-                      alt="Exploded axonometric view, angle one"
-                      fill
-                      sizes="(min-width: 1024px) 40vw, 100vw"
-                      className="object-contain p-4 opacity-100 transition-all duration-700 ease-in-out group-hover/image:opacity-0 group-hover/image:scale-105 group-hover/image:blur-sm group-hover/image:brightness-95"
-                    />
-                    <Image
-                      src="/exploded-axonometric-2.png"
-                      alt="Exploded axonometric view, angle two"
-                      fill
-                      sizes="(min-width: 1024px) 40vw, 100vw"
-                      className="object-contain p-4 opacity-0 transition-all duration-700 ease-in-out group-hover/image:opacity-100 group-hover/image:scale-100"
-                    />
-
-                    <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-linear-to-t from-white/95 via-white/55 to-transparent p-4">
-                      <div className="flex items-center justify-between gap-4">
-                        <span className="font-mono text-[9px] uppercase tracking-[0.35em] text-slate-500">
-                          Hover to render the alternate view
-                        </span>
-                        <span className="rounded-full border border-slate-200 bg-white/90 px-2.5 py-1 font-mono text-[9px] font-semibold uppercase tracking-wider text-slate-600 shadow-sm">
-                          Interactive compare
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </article>
         </section>
 
         <div className="flex items-center gap-2 my-14">
@@ -345,14 +203,7 @@ export function ArchitectureShowcase({ slug }: ArchitectureShowcaseProps) {
         </section>
 
         <footer className="border-t border-slate-200 pt-6 text-center">
-          <span className="mb-1 block font-mono text-[9px] font-bold uppercase tracking-widest text-slate-400">
-            DISCLAIMER: Concept only. Subject to change. Architectural and structural parameters represent speculative visualization packages.
-          </span>
-          <span className="block font-mono text-[8px] text-slate-400">
-            Ãƒâ€šÃ‚Â© 2026 Modern Single-Storey Commission Group. Code generated with React 19 and Tailwind CSS.
-          </span>
-
-          <div className="mt-6 flex flex-col justify-center gap-3 sm:flex-row">
+          <div className="flex flex-col justify-center gap-3 sm:flex-row">
             <Link
               href={backToProjectsHref}
               className="inline-flex items-center justify-center gap-2 rounded-full border border-luxury-border bg-white px-5 py-3 text-sm font-medium text-foreground transition hover:border-luxury-gold hover:text-luxury-gold"
@@ -371,14 +222,6 @@ export function ArchitectureShowcase({ slug }: ArchitectureShowcaseProps) {
           </div>
         </footer>
       </div>
-
-      <ProjectImageLightbox
-        src={sitePlanSrc}
-        alt={`Expanded ${sitePlanAlt.toLowerCase()}`}
-        title="Site Plan"
-        isOpen={isPlanLightboxOpen}
-        onClose={() => setIsPlanLightboxOpen(false)}
-      />
 
       {isLightboxOpen ? (
         <div

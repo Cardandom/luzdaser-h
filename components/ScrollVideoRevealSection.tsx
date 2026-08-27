@@ -50,7 +50,7 @@ export function ScrollVideoRevealSection({
   const revealTitle =
     projectSlug === "oliver-boutique"
       ? "Oliver Villa"
-      : "Lucas House Boutique"
+      : "Luca Boutique House"
 
   useEffect(() => {
     const handlePrepareVideo = (event: Event) => {

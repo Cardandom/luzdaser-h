@@ -1,5 +1,5 @@
 import type { Metadata } from "next"
-import { notFound } from "next/navigation"
+import { notFound, permanentRedirect } from "next/navigation"
 
 import { getProjectBySlug, projects } from "@/lib/projects"
 import { ArchitectureShowcase } from "./_components/ArchitectureShowcase"
@@ -8,6 +8,15 @@ type ProjectPageProps = {
   params: Promise<{
     slug: string
   }>
+}
+
+const legacyLucaProjectSlug = "lucas-boutique"
+const lucaProjectSlug = "luca-boutique"
+
+function redirectLegacyLucaProject(slug: string) {
+  if (slug === legacyLucaProjectSlug) {
+    permanentRedirect(`/projects/${lucaProjectSlug}`)
+  }
 }
 
 export async function generateStaticParams() {
@@ -20,6 +29,7 @@ export async function generateMetadata({
   params,
 }: ProjectPageProps): Promise<Metadata> {
   const { slug } = await params
+  redirectLegacyLucaProject(slug)
   const project = getProjectBySlug(slug)
 
   if (!project) {
@@ -36,6 +46,7 @@ export async function generateMetadata({
 
 export default async function ProjectPage({ params }: ProjectPageProps) {
   const { slug } = await params
+  redirectLegacyLucaProject(slug)
   const project = getProjectBySlug(slug)
 
   if (!project) {

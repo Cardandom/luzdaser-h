@@ -22,6 +22,8 @@ export function ArchitectureShowcaseTop({
   const [hoveredFeatureIdx, setHoveredFeatureIdx] = useState<number | null>(null)
   const [hoveredHighlightIdx, setHoveredHighlightIdx] = useState<number | null>(null)
   const [isHeroLightboxOpen, setIsHeroLightboxOpen] = useState(false)
+  const [isLucaComplexSelected, setIsLucaComplexSelected] = useState(false)
+  const [isLucaComplexPreviewed, setIsLucaComplexPreviewed] = useState(false)
 
   if (!project) {
     return null
@@ -29,17 +31,19 @@ export function ArchitectureShowcaseTop({
 
   const isOliverProject = project.slug === "oliver-boutique"
   const otherProjectHref = isOliverProject
-    ? "/projects/lucas-boutique"
+    ? "/projects/luca-boutique"
     : "/projects/oliver-boutique"
   const otherProjectLabel = isOliverProject
     ? "View Luca Boutique"
     : "View Oliver Villa"
-  const isLucaProject = project.slug === "lucas-boutique"
+  const isLucaProject = project.slug === "luca-boutique"
+  const isLucaComplexHighlighted =
+    isLucaComplexSelected || isLucaComplexPreviewed
 
   const heroImage =
     project.slug === "oliver-boutique"
       ? "/front3DOliver.webp"
-      : project.slug === "lucas-boutique"
+      : project.slug === "luca-boutique"
         ? "/lucaPhotoMain.webp"
       : project.picture
 
@@ -183,26 +187,139 @@ export function ArchitectureShowcaseTop({
                   </div>
                 </div>
 
-                <div className="mt-3 flex items-center justify-between px-2 text-[10px] font-mono text-slate-500">
-                  <span className="flex items-center gap-1.5">
-                    <span className="h-3.5 w-3.5 rounded-full bg-slate-400" aria-hidden="true" />
-                    Structure Classification: High-grade RC-60
-                  </span>
+                <div className="mt-3 flex justify-end px-2 text-right text-[10px] font-mono text-slate-500">
                   <span>Project reference: {project.title}</span>
                 </div>
               </div>
 
-              {(project.slug === "lucas-boutique" || project.slug === "oliver-boutique") && (
+              {(project.slug === "luca-boutique" || project.slug === "oliver-boutique") && (
                 <div className="group relative overflow-hidden rounded-xl border border-slate-200 bg-white p-2 shadow-md transition-all duration-300 hover:shadow-xl">
                   <div className="relative aspect-video overflow-hidden rounded-lg bg-slate-100 xl:aspect-5/3">
-                    <Image
-                      src="/newComplex.webp"
-                      alt="Boutique House complex view"
-                      fill
-                      sizes="(min-width: 1280px) 50vw, 100vw"
-                      className="object-cover transition-transform duration-700 group-hover:scale-[1.02]"
-                      style={{ objectPosition: "center center" }}
-                    />
+                    <div className="absolute inset-0 transition-transform duration-700 group-hover:scale-[1.02]">
+                      <Image
+                        src="/newComplex.webp"
+                        alt="Boutique House complex view"
+                        fill
+                        sizes="(min-width: 1280px) 50vw, 100vw"
+                        className="object-cover"
+                        style={{ objectPosition: "center center" }}
+                      />
+
+                      {isLucaProject ? (
+                        <svg
+                          viewBox="0 0 2480 1654"
+                          preserveAspectRatio="xMidYMid slice"
+                          aria-hidden="true"
+                          className="pointer-events-none absolute inset-0 size-full"
+                        >
+                          <defs>
+                            <filter
+                              id="luca-complex-glow"
+                              x="-20%"
+                              y="-20%"
+                              width="140%"
+                              height="140%"
+                            >
+                              <feGaussianBlur stdDeviation="9" result="blur" />
+                              <feMerge>
+                                <feMergeNode in="blur" />
+                                <feMergeNode in="SourceGraphic" />
+                              </feMerge>
+                            </filter>
+                            <mask
+                              id="luca-complex-mask"
+                              maskUnits="userSpaceOnUse"
+                              x="0"
+                              y="0"
+                              width="2480"
+                              height="1654"
+                            >
+                              <rect width="2480" height="1654" fill="white" />
+                              <polygon
+                                points="555,720 2150,720 2180,1195 2120,1240 585,1240 530,1185 530,790"
+                                fill="black"
+                              />
+                            </mask>
+                          </defs>
+
+                          {isLucaComplexHighlighted ? (
+                            <rect
+                              width="2480"
+                              height="1654"
+                              fill="#2f1c3b"
+                              fillOpacity="0.46"
+                              mask="url(#luca-complex-mask)"
+                              pointerEvents="none"
+                            />
+                          ) : null}
+
+                          <polygon
+                            points="555,720 2150,720 2180,1195 2120,1240 585,1240 530,1185 530,790"
+                            fill="#dcb56d"
+                            fillOpacity={isLucaComplexHighlighted ? "0.32" : "0.07"}
+                            stroke="#f4ddb0"
+                            strokeOpacity={isLucaComplexHighlighted ? "1" : "0.58"}
+                            strokeWidth={isLucaComplexHighlighted ? "3" : "2"}
+                            filter={
+                              isLucaComplexHighlighted
+                                ? "url(#luca-complex-glow)"
+                                : undefined
+                            }
+                            vectorEffect="non-scaling-stroke"
+                            pointerEvents="none"
+                            className="transition-all duration-300 motion-reduce:transition-none"
+                          />
+                        </svg>
+                      ) : null}
+                    </div>
+
+                    {isLucaProject ? (
+                      <>
+                        <button
+                          type="button"
+                          aria-label="Highlight Luca units 19 through 38 on the project map"
+                          aria-describedby="luca-complex-instructions"
+                          aria-pressed={isLucaComplexSelected}
+                          className="absolute inset-0 z-10 cursor-pointer touch-manipulation rounded-lg focus-visible:ring-4 focus-visible:ring-inset focus-visible:ring-luxury-gold/60 focus-visible:outline-none"
+                          onPointerEnter={(event) => {
+                            if (event.pointerType === "mouse") {
+                              setIsLucaComplexPreviewed(true)
+                            }
+                          }}
+                          onPointerLeave={(event) => {
+                            if (event.pointerType === "mouse") {
+                              setIsLucaComplexPreviewed(false)
+                            }
+                          }}
+                          onFocus={(event) => {
+                            if (event.currentTarget.matches(":focus-visible")) {
+                              setIsLucaComplexPreviewed(true)
+                            }
+                          }}
+                          onBlur={() => setIsLucaComplexPreviewed(false)}
+                          onClick={() => {
+                            setIsLucaComplexSelected((isSelected) => !isSelected)
+                          }}
+                        />
+
+                        <span
+                          id="luca-complex-instructions"
+                          className="pointer-events-none absolute bottom-3 left-3 rounded-full border border-white/25 bg-stone-950/75 px-2.5 py-1.5 text-[9px] font-semibold uppercase tracking-wider text-white shadow-lg backdrop-blur-sm sm:text-[10px]"
+                        >
+                          <span className="sm:hidden">Tap Luca 19–38</span>
+                          <span className="hidden sm:inline">Explore Luca · Units 19–38</span>
+                        </span>
+
+                        {isLucaComplexHighlighted ? (
+                          <span className="pointer-events-none absolute right-3 top-3 rounded-xl border border-luxury-gold/50 bg-stone-950/80 px-3 py-2 text-white shadow-lg backdrop-blur-sm">
+                            <span className="block text-[10px] font-semibold uppercase tracking-widest text-luxury-gold-soft">
+                              Luca
+                            </span>
+                            <span className="block font-heading text-sm">Units 19–38</span>
+                          </span>
+                        ) : null}
+                      </>
+                    ) : null}
 
                     <div className="absolute left-3 top-3 rounded-full border border-white/20 bg-white/90 px-3 py-1.5 text-[0.65rem] font-semibold uppercase tracking-[0.3em] text-foreground shadow-lg backdrop-blur">
                       <span className="mr-2 inline-flex size-2 rounded-full bg-luxury-gold" />
@@ -210,11 +327,7 @@ export function ArchitectureShowcaseTop({
                     </div>
                   </div>
 
-                  <div className="mt-3 flex items-center justify-between px-2 text-[10px] font-mono text-slate-500">
-                    <span className="flex items-center gap-1.5">
-                      <span className="h-3.5 w-3.5 rounded-full bg-slate-400" aria-hidden="true" />
-                      Structure Classification: High-grade RC-60
-                    </span>
+                  <div className="mt-3 flex justify-end px-2 text-right text-[10px] font-mono text-slate-500">
                     <span>Project reference: {project.title}</span>
                   </div>
                 </div>
