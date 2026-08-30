@@ -27,7 +27,7 @@ export default function HomePage() {
       <ScrollVideoRevealSection
         id="oliver"
         videoSrc="/videos/scroll-oliver-desktop-g4-hq-v2.mp4"
-        mobileVideoSrc="/videos/scroll-oliver-mobile-g4-hq-v2.mp4"
+        mobileVideoSrc="/videos/scroll-oliver-mobile-g8-hq-v3.mp4"
         revealOnHashNavigation
       />
       <ScrollVideoRevealSection
@@ -35,7 +35,7 @@ export default function HomePage() {
         projectSlug="luca-boutique"
         posterSrc="/lucaPhotoMain.webp"
         videoSrc="/videos/scroll-luca-desktop-g4-hq-v2.mp4"
-        mobileVideoSrc="/videos/scroll-luca-mobile-g4-hq-v2.mp4"
+        mobileVideoSrc="/videos/scroll-luca-mobile-g8-hq-v3.mp4"
         revealOnHashNavigation
       />
       <CtaSection />

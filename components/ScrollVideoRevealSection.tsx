@@ -8,6 +8,7 @@ import { featuredProjects, type ProjectSlug } from "@/lib/projects"
 import {
   scrollVideoRevealActiveEvent,
   scrollVideoRevealPrepareEvent,
+  scrollVideoRevealReadyEvent,
 } from "@/components/site/home-video-load-coordinator"
 
 const videoPhaseEnd = 0.7
@@ -22,6 +23,42 @@ const mobileVideoCatchup = 0.3
 const desktopSeekThreshold = 1 / 48
 const mobileSeekThreshold = 1 / 30
 const seekFallbackDelayMs = 100
+const videoFullyBufferedToleranceSeconds = 0.25
+const videoReadyEvents = [
+  "progress",
+  "loadedmetadata",
+  "durationchange",
+  "loadeddata",
+  "canplay",
+  "suspend",
+] as const
+
+function isVideoAlmostFullyBuffered(video: HTMLVideoElement) {
+  const { buffered, duration } = video
+
+  if (!Number.isFinite(duration) || duration <= 0 || buffered.length === 0) {
+    return false
+  }
+
+  let coveredUntil = 0
+
+  for (let index = 0; index < buffered.length; index += 1) {
+    const bufferedStart = buffered.start(index)
+    const bufferedEnd = buffered.end(index)
+
+    if (bufferedStart > coveredUntil + videoFullyBufferedToleranceSeconds) {
+      return false
+    }
+
+    coveredUntil = Math.max(coveredUntil, bufferedEnd)
+
+    if (coveredUntil >= duration - videoFullyBufferedToleranceSeconds) {
+      return true
+    }
+  }
+
+  return false
+}
 
 type ScrollVideoRevealSectionProps = {
   id?: string
@@ -43,6 +80,7 @@ export function ScrollVideoRevealSection({
   const sectionRef = useRef<HTMLElement | null>(null)
   const videoRef = useRef<HTMLVideoElement | null>(null)
   const cardRef = useRef<HTMLDivElement | null>(null)
+  const readyVideoSourceKeyRef = useRef<string | null>(null)
   const [shouldLoadVideo, setShouldLoadVideo] = useState(false)
   const revealProject = featuredProjects.find(
     (project) => project.slug === projectSlug,
@@ -81,6 +119,9 @@ export function ScrollVideoRevealSection({
       return
     }
 
+    const rootMargin = window.matchMedia("(max-width: 767px)").matches
+      ? "15% 0px"
+      : "50% 0px"
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
@@ -88,7 +129,7 @@ export function ScrollVideoRevealSection({
           observer.disconnect()
         }
       },
-      { rootMargin: "50% 0px" },
+      { rootMargin },
     )
 
     observer.observe(section)
@@ -97,6 +138,51 @@ export function ScrollVideoRevealSection({
       observer.disconnect()
     }
   }, [shouldLoadVideo])
+
+  useEffect(() => {
+    const video = videoRef.current
+    const isMobile = window.matchMedia("(max-width: 767px)").matches
+
+    if (!isMobile || !shouldLoadVideo || !video) {
+      return
+    }
+
+    const readyVideo = video
+    const readyVideoSourceKey = `${id}:${mobileVideoSrc ?? videoSrc}`
+
+    function removeReadyListeners() {
+      for (const eventName of videoReadyEvents) {
+        readyVideo.removeEventListener(eventName, maybeDispatchReady)
+      }
+    }
+
+    function maybeDispatchReady() {
+      if (readyVideoSourceKeyRef.current === readyVideoSourceKey) {
+        removeReadyListeners()
+        return
+      }
+
+      if (!isVideoAlmostFullyBuffered(readyVideo)) {
+        return
+      }
+
+      readyVideoSourceKeyRef.current = readyVideoSourceKey
+      removeReadyListeners()
+      window.dispatchEvent(
+        new CustomEvent(scrollVideoRevealReadyEvent, {
+          detail: { id },
+        }),
+      )
+    }
+
+    for (const eventName of videoReadyEvents) {
+      readyVideo.addEventListener(eventName, maybeDispatchReady)
+    }
+
+    maybeDispatchReady()
+
+    return removeReadyListeners
+  }, [id, mobileVideoSrc, shouldLoadVideo, videoSrc])
 
   useEffect(() => {
     let cancelBoundarySeekFallback: (() => void) | null = null

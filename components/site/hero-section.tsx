@@ -46,12 +46,12 @@ export function HeroSection() {
             aria-hidden="true"
           >
             <source
-              src="/videos/hero-reina-mobile-hq-v2.mp4"
+              src="/videos/hero-reina-mobile-hq-v3.mp4"
               type="video/mp4"
               media="(max-width: 767px)"
             />
             <source
-              src="/videos/hero-reina-desktop-hq-v2.mp4"
+              src="/videos/hero-reina-desktop-hq-v3.mp4"
               type="video/mp4"
               media="(min-width: 768px)"
             />
@@ -83,8 +83,7 @@ export function HeroSection() {
               </p>
 
               <p className="mt-4 max-w-sm text-balance text-xs font-medium leading-6 text-foreground/90 sm:mt-6 sm:max-w-2xl sm:text-lg sm:leading-7">
-                We design and build exclusive residences in Aruba, blending
-                contemporary elegance with the serenity of the Caribbean.
+                Your Private Luxury Heaven in the Dutch Caribbean.
               </p>
 
               <div className="mt-5 flex justify-start sm:mt-8">
