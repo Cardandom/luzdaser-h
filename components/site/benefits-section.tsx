@@ -1,6 +1,8 @@
 import Image from "next/image"
 import { MapPin } from "lucide-react"
 
+import { ConsentManagedMap } from "@/components/site/consent-managed-map"
+
 const stats = [
   {
     value: "15 Min.",
@@ -96,24 +98,11 @@ export function BenefitsSection() {
             </div>
 
             <div className="mt-6 overflow-hidden rounded-3xl border border-luxury-border bg-white shadow-lg">
-              <div className="relative aspect-video min-h-80">
-                <iframe
-                  src={googleMapsEmbedUrl}
-                  title={`Google Maps location for ${locationAddress}`}
-                  className="absolute inset-0 size-full border-0"
-                  loading="lazy"
-                  referrerPolicy="no-referrer-when-downgrade"
-                />
-                <a
-                  href={googleMapsUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="absolute inset-0"
-                  aria-label={`Open ${locationAddress} in Google Maps`}
-                >
-                  <span className="sr-only">Open {locationAddress} in Google Maps</span>
-                </a>
-              </div>
+              <ConsentManagedMap
+                googleMapsEmbedUrl={googleMapsEmbedUrl}
+                googleMapsUrl={googleMapsUrl}
+                locationAddress={locationAddress}
+              />
             </div>
           </div>
         </div>
