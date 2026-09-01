@@ -10,6 +10,7 @@ type ContactPayload = {
   email: string
   city: string
   comments: string
+  marketingConsent: boolean
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -29,6 +30,11 @@ function readOptionalString(payload: Record<string, unknown>, key: string) {
   }
 
   return typeof value === "string" ? value.trim() : null
+}
+
+function readBoolean(payload: Record<string, unknown>, key: string) {
+  const value = payload[key]
+  return typeof value === "boolean" ? value : null
 }
 
 function isValidContact(payload: ContactPayload) {
@@ -56,9 +62,10 @@ function escapeHtml(value: string) {
   return value.replace(/[&<>"']/g, (character) => entities[character])
 }
 
-function renderHtmlEmail(payload: ContactPayload) {
+function renderHtmlEmail(payload: ContactPayload, submissionTimestamp: string) {
   const phone = payload.phone || "Not provided"
   const city = payload.city || "Not provided"
+  const marketingConsent = payload.marketingConsent ? "Yes" : "No"
 
   return `
     <!doctype html>
@@ -74,8 +81,10 @@ function renderHtmlEmail(payload: ContactPayload) {
               <tr><th scope="row" style="width:110px;padding:8px 12px 8px 0;text-align:left;vertical-align:top;">Phone</th><td style="padding:8px 0;">${escapeHtml(phone)}</td></tr>
               <tr><th scope="row" style="width:110px;padding:8px 12px 8px 0;text-align:left;vertical-align:top;">City</th><td style="padding:8px 0;">${escapeHtml(city)}</td></tr>
               <tr><th scope="row" style="width:110px;padding:8px 12px 8px 0;text-align:left;vertical-align:top;">Comments</th><td style="padding:8px 0;white-space:pre-wrap;">${escapeHtml(payload.comments)}</td></tr>
+              <tr><th scope="row" style="width:110px;padding:8px 12px 8px 0;text-align:left;vertical-align:top;">Marketing consent</th><td style="padding:8px 0;">${marketingConsent}</td></tr>
+              <tr><th scope="row" style="width:110px;padding:8px 12px 8px 0;text-align:left;vertical-align:top;">Submission timestamp</th><td style="padding:8px 0;">${submissionTimestamp}</td></tr>
             </table>
-            <p style="margin:24px 0 0;padding-top:20px;border-top:1px solid #e7e5e4;color:#78716c;font-size:13px;">Source: jbsseco.com contact form</p>
+            <p style="margin:24px 0 0;padding-top:20px;border-top:1px solid #e7e5e4;color:#78716c;font-size:13px;">Source: Website contact form</p>
           </div>
         </div>
       </body>
@@ -83,7 +92,7 @@ function renderHtmlEmail(payload: ContactPayload) {
   `.trim()
 }
 
-function renderTextEmail(payload: ContactPayload) {
+function renderTextEmail(payload: ContactPayload, submissionTimestamp: string) {
   return [
     "New Reina Sophia inquiry",
     "",
@@ -93,8 +102,10 @@ function renderTextEmail(payload: ContactPayload) {
     `City: ${payload.city || "Not provided"}`,
     "Comments:",
     payload.comments,
+    `Marketing consent: ${payload.marketingConsent ? "Yes" : "No"}`,
+    `Submission timestamp: ${submissionTimestamp}`,
     "",
-    "Source: jbsseco.com contact form",
+    "Source: Website contact form",
   ].join("\n")
 }
 
@@ -140,12 +151,20 @@ export async function POST(request: Request) {
   const email = readRequiredString(body, "email")
   const city = readOptionalString(body, "city")
   const comments = readRequiredString(body, "comments")
+  const marketingConsent = readBoolean(body, "marketingConsent")
 
-  if (name === null || phone === null || email === null || city === null || comments === null) {
+  if (
+    name === null ||
+    phone === null ||
+    email === null ||
+    city === null ||
+    comments === null ||
+    marketingConsent === null
+  ) {
     return invalidResponse()
   }
 
-  const payload = { name, phone, email, city, comments }
+  const payload = { name, phone, email, city, comments, marketingConsent }
 
   if (!isValidContact(payload)) {
     return invalidResponse()
@@ -163,6 +182,7 @@ export async function POST(request: Request) {
   const from =
     process.env.CONTACT_FROM_EMAIL?.trim() ||
     "Reina Sophia Website <website@jbsseco.com>"
+  const submissionTimestamp = new Date().toISOString()
 
   try {
     const { error } = await resend.emails.send({
@@ -170,8 +190,8 @@ export async function POST(request: Request) {
       to,
       replyTo: payload.email,
       subject: `New Reina Sophia inquiry — ${payload.name.replace(/[\r\n]+/g, " ")}`,
-      html: renderHtmlEmail(payload),
-      text: renderTextEmail(payload),
+      html: renderHtmlEmail(payload, submissionTimestamp),
+      text: renderTextEmail(payload, submissionTimestamp),
     })
 
     if (error) {

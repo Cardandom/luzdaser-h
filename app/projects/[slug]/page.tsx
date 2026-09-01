@@ -1,6 +1,7 @@
 import type { Metadata } from "next"
 import { notFound, permanentRedirect } from "next/navigation"
 
+import { SiteFooter } from "@/components/site/site-footer"
 import { getProjectBySlug, projects } from "@/lib/projects"
 import { ArchitectureShowcase } from "./_components/ArchitectureShowcase"
 
@@ -56,6 +57,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
   return (
     <main className="relative isolate overflow-hidden bg-white pb-6">
       <ArchitectureShowcase slug={project.slug} />
+      <SiteFooter />
     </main>
   )
 }

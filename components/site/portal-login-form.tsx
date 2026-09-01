@@ -1,6 +1,7 @@
 "use client"
 
 import { FormEvent, useEffect, useState } from "react"
+import Link from "next/link"
 import { useRouter } from "next/navigation"
 
 import {
@@ -275,6 +276,18 @@ export function PortalLoginForm({
             >
               {loading ? "Signing in..." : "Sign in"}
             </button>
+
+            <p className="text-center text-xs leading-5 text-slate-600">
+              Your account and authentication information are processed to provide
+              secure access to your Reina Sophia client portal. See our{" "}
+              <Link
+                href="/privacy-policy"
+                className="font-medium text-slate-900 underline underline-offset-4"
+              >
+                Privacy Policy
+              </Link>
+              .
+            </p>
           </form>
         </section>
       </div>

@@ -1,5 +1,6 @@
 "use client"
 
+import Link from "next/link"
 import { useState } from "react"
 import type { FormEvent } from "react"
 
@@ -39,6 +40,7 @@ export function ContactForm() {
           email: String(formData.get("email") ?? ""),
           city: String(formData.get("city") ?? ""),
           comments: String(formData.get("comments") ?? ""),
+          marketingConsent: formData.get("marketingConsent") === "on",
           website: String(formData.get("website") ?? ""),
         }),
       })
@@ -141,12 +143,32 @@ export function ContactForm() {
         </div>
       </div>
 
+      <label className="mt-5 flex items-start gap-3 text-sm leading-6 text-foreground/75">
+        <input
+          name="marketingConsent"
+          type="checkbox"
+          className="mt-1 size-4 shrink-0 accent-luxury-gold"
+        />
+        <span>
+          I would like to receive news, property availability updates and
+          promotional communications from Reina Sophia Residences.
+        </span>
+      </label>
+
       <div className="mt-5 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div className="space-y-2 text-sm text-foreground/70">
-          <p>We will respond with commercial information and personalized support.</p>
-          <p className="text-xs">
-            By submitting this form, you agree to be contacted regarding Reina Sophia
-            Residences.
+          <p className="max-w-3xl text-xs leading-5">
+            By submitting this form, you acknowledge that JBSSECO / Reina Sophia
+            Residences will process your personal information to respond to your
+            enquiry and provide information about the property or project you are
+            interested in. Please review our{" "}
+            <Link
+              href="/privacy-policy"
+              className="font-medium text-foreground underline underline-offset-4"
+            >
+              Privacy Policy
+            </Link>
+            .
           </p>
           <p
             id="contact-form-status"
