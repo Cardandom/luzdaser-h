@@ -4,7 +4,11 @@ import Link from "next/link"
 import Image from "next/image"
 import { useEffect, useRef, useState } from "react"
 
-import { featuredProjects, type ProjectSlug } from "@/lib/projects"
+import {
+  getHomeModelBySlug,
+  type HomeModelId,
+  type HomeModelProjectSlug,
+} from "@/lib/home-models"
 import {
   scrollVideoRevealActiveEvent,
   scrollVideoRevealPrepareEvent,
@@ -61,8 +65,8 @@ function isVideoAlmostFullyBuffered(video: HTMLVideoElement) {
 }
 
 type ScrollVideoRevealSectionProps = {
-  id?: string
-  projectSlug?: ProjectSlug
+  id?: HomeModelId
+  projectSlug?: HomeModelProjectSlug
   posterSrc?: string
   videoSrc?: string
   mobileVideoSrc?: string
@@ -82,13 +86,7 @@ export function ScrollVideoRevealSection({
   const cardRef = useRef<HTMLDivElement | null>(null)
   const readyVideoSourceKeyRef = useRef<string | null>(null)
   const [shouldLoadVideo, setShouldLoadVideo] = useState(false)
-  const revealProject = featuredProjects.find(
-    (project) => project.slug === projectSlug,
-  )
-  const revealTitle =
-    projectSlug === "oliver-boutique"
-      ? "Oliver Villa"
-      : "Luca Boutique House"
+  const revealModel = getHomeModelBySlug(projectSlug)
 
   useEffect(() => {
     const handlePrepareVideo = (event: Event) => {
@@ -692,15 +690,15 @@ export function ScrollVideoRevealSection({
           ref={cardRef}
           className="pointer-events-auto flex w-full max-w-xl flex-col items-center gap-5 text-center opacity-0"
         >
-          {revealProject && (
+          {revealModel && (
             <>
               <h2 className="font-heading text-4xl leading-tight text-white drop-shadow-lg sm:text-6xl">
-                {revealTitle}
+                {revealModel.title}
               </h2>
 
               <Link
-                href={`/projects/${revealProject.slug}`}
-                aria-label={`Open ${revealTitle} project board`}
+                href={revealModel.projectHref}
+                aria-label={`Open ${revealModel.title} project board`}
                 className="inline-flex h-11 items-center justify-center rounded-full bg-linear-to-b from-luxury-gold-soft to-luxury-gold px-6 text-sm font-semibold text-stone-950 shadow-lg transition-transform hover:-translate-y-0.5"
               >
                 Open Project Board

@@ -12,12 +12,13 @@ const navItems = [
   { label: "Gallery", href: "#gallery" },
   { label: "Oliver", href: "#oliver" },
   { label: "Luca", href: "#luca" },
+  { label: "Audrey", href: "#audrey" },
   { label: "Location", href: "#location" },
   { label: "Project Progress", href: "#project-progress" },
   { label: "Contacts", href: "#contacts" },
 ]
 
-const scrollVideoRevealHrefs = new Set(["#oliver", "#luca"])
+const scrollVideoRevealHrefs = new Set(["#oliver", "#luca", "#audrey"])
 
 export function SiteHeader() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)

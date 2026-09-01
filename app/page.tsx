@@ -9,7 +9,7 @@ import { HomeVideoLoadCoordinator } from "@/components/site/home-video-load-coor
 import { ScrollVideoRevealSection } from "@/components/ScrollVideoRevealSection"
 import { SiteFooter } from "@/components/site/site-footer"
 
-const homeScrollVideoProjectIds = ["oliver", "luca"] as const
+const homeScrollVideoProjectIds = ["oliver", "luca", "audrey"] as const
 
 export default function HomePage() {
   return (
@@ -36,6 +36,14 @@ export default function HomePage() {
         posterSrc="/lucaPhotoMain.webp"
         videoSrc="/videos/scroll-luca-desktop-g4-hq-v2.mp4"
         mobileVideoSrc="/videos/scroll-luca-mobile-g8-hq-v3.mp4"
+        revealOnHashNavigation
+      />
+      <ScrollVideoRevealSection
+        id="audrey"
+        projectSlug="audrey"
+        posterSrc="/audrey-scroll-poster.jpg"
+        videoSrc="/videos/scroll-audrey-desktop-g4-hq-v1.mp4"
+        mobileVideoSrc="/videos/scroll-audrey-mobile-g8-hq-v1.mp4"
         revealOnHashNavigation
       />
       <CtaSection />
