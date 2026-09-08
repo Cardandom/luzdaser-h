@@ -136,6 +136,9 @@ export function SiteHeader() {
               <Link
                 key={item.label}
                 href={getNavHref(item.href)}
+                scroll={
+                  scrollVideoRevealHrefs.has(item.href) ? false : undefined
+                }
                 className="transition-colors hover:text-luxury-gold"
                 onClick={(event) => handleNavClick(event, item.href)}
               >
@@ -176,6 +179,9 @@ export function SiteHeader() {
                 <Link
                   key={item.label}
                   href={getNavHref(item.href)}
+                  scroll={
+                    scrollVideoRevealHrefs.has(item.href) ? false : undefined
+                  }
                   className="rounded-2xl border border-transparent px-4 py-3 transition-colors hover:border-luxury-border hover:bg-stone-50 hover:text-luxury-gold"
                   onClick={(event) => handleNavClick(event, item.href)}
                 >

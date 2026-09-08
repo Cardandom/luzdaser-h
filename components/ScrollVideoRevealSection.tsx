@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from "react"
 
 import {
   getHomeModelBySlug,
+  homeModels,
   type HomeModelId,
   type HomeModelProjectSlug,
 } from "@/lib/home-models"
@@ -36,6 +37,164 @@ const videoReadyEvents = [
   "canplay",
   "suspend",
 ] as const
+
+type RegisteredScrollTrigger = {
+  end: number
+  start: number
+}
+
+type NavigationRuntime = {
+  sortAndRefresh: () => void
+}
+
+type PendingNavigation = {
+  id: HomeModelId
+  token: number
+}
+
+const homeModelIds = homeModels.map((model) => model.id)
+const registeredScrollTriggers = new Map<
+  HomeModelId,
+  RegisteredScrollTrigger
+>()
+
+let navigationRuntime: NavigationRuntime | null = null
+let navigationToken = 0
+let pendingNavigation: PendingNavigation | null = null
+
+function getHomeModelIndex(id: HomeModelId) {
+  return homeModelIds.indexOf(id)
+}
+
+function temporarilyDisableNativeSmoothScroll() {
+  const scrollingElement = document.scrollingElement
+  const scrollElement =
+    scrollingElement instanceof HTMLElement
+      ? scrollingElement
+      : document.documentElement
+  const style = scrollElement.style
+  const previousScrollBehavior = style.getPropertyValue("scroll-behavior")
+  const previousScrollBehaviorPriority =
+    style.getPropertyPriority("scroll-behavior")
+
+  style.setProperty("scroll-behavior", "auto", "important")
+
+  return () => {
+    if (previousScrollBehavior) {
+      style.setProperty(
+        "scroll-behavior",
+        previousScrollBehavior,
+        previousScrollBehaviorPriority,
+      )
+    } else {
+      style.removeProperty("scroll-behavior")
+    }
+  }
+}
+
+function advancePendingNavigation() {
+  const navigation = pendingNavigation
+
+  if (!navigation) {
+    return
+  }
+
+  const destinationIndex = getHomeModelIndex(navigation.id)
+  const missingRequiredId = homeModelIds
+    .slice(0, destinationIndex + 1)
+    .find((requiredId) => !registeredScrollTriggers.has(requiredId))
+
+  if (missingRequiredId) {
+    window.dispatchEvent(
+      new CustomEvent(scrollVideoRevealPrepareEvent, {
+        detail: { id: missingRequiredId },
+      }),
+    )
+    return
+  }
+
+  const runtime = navigationRuntime
+
+  if (!runtime) {
+    return
+  }
+
+  runtime.sortAndRefresh()
+
+  if (pendingNavigation?.token !== navigation.token) {
+    return
+  }
+
+  const trigger = registeredScrollTriggers.get(navigation.id)
+
+  if (!trigger) {
+    return
+  }
+
+  const destination =
+    trigger.start +
+    (trigger.end - trigger.start) * navigationRevealProgress
+
+  pendingNavigation = null
+  const restoreScrollBehavior = temporarilyDisableNativeSmoothScroll()
+
+  window.scrollTo({
+    top: destination,
+    behavior: "auto",
+  })
+  restoreScrollBehavior()
+}
+
+function requestRevealNavigation(id: HomeModelId) {
+  navigationToken += 1
+  pendingNavigation = { id, token: navigationToken }
+  advancePendingNavigation()
+}
+
+function cancelRevealNavigation(id: HomeModelId) {
+  if (pendingNavigation?.id !== id) {
+    return
+  }
+
+  navigationToken += 1
+  pendingNavigation = null
+}
+
+function registerRevealTrigger(
+  id: HomeModelId,
+  trigger: RegisteredScrollTrigger,
+  runtime: NavigationRuntime,
+) {
+  registeredScrollTriggers.set(id, trigger)
+  navigationRuntime = runtime
+
+  if (pendingNavigation) {
+    advancePendingNavigation()
+  } else {
+    runtime.sortAndRefresh()
+  }
+}
+
+function unregisterRevealTrigger(
+  id: HomeModelId,
+  trigger: RegisteredScrollTrigger,
+) {
+  if (registeredScrollTriggers.get(id) !== trigger) {
+    return
+  }
+
+  registeredScrollTriggers.delete(id)
+
+  const currentTargetId = pendingNavigation?.id
+
+  if (
+    currentTargetId &&
+    getHomeModelIndex(id) <= getHomeModelIndex(currentTargetId)
+  ) {
+    navigationToken += 1
+    pendingNavigation = null
+  }
+}
 
 function isVideoAlmostFullyBuffered(video: HTMLVideoElement) {
   const { buffered, duration } = video
@@ -183,6 +342,42 @@ export function ScrollVideoRevealSection({
   }, [id, mobileVideoSrc, shouldLoadVideo, videoSrc])
 
   useEffect(() => {
+    if (!revealOnHashNavigation) {
+      return
+    }
+
+    const handleRevealNavigation = (event: Event) => {
+      const navigationEvent = event as CustomEvent<{ id?: string }>
+
+      if (navigationEvent.detail?.id === id) {
+        requestRevealNavigation(id)
+      }
+    }
+
+    const handleHashChange = () => {
+      if (window.location.hash === `#${id}`) {
+        requestRevealNavigation(id)
+      }
+    }
+
+    window.addEventListener(
+      "scroll-video-reveal:navigate",
+      handleRevealNavigation,
+    )
+    window.addEventListener("hashchange", handleHashChange)
+    handleHashChange()
+
+    return () => {
+      window.removeEventListener(
+        "scroll-video-reveal:navigate",
+        handleRevealNavigation,
+      )
+      window.removeEventListener("hashchange", handleHashChange)
+      cancelRevealNavigation(id)
+    }
+  }, [id, revealOnHashNavigation])
+
+  useEffect(() => {
     let cancelBoundarySeekFallback: (() => void) | null = null
     let context: { revert: () => void } | null = null
     let removeVideoSeekListener: (() => void) | null = null
@@ -193,81 +388,11 @@ export function ScrollVideoRevealSection({
       kill: () => void
       start: number
     } | null = null
-    let navigationFrameId: number | null = null
     let isMounted = true
     let hasInitialized = false
 
-    const scrollToReveal = (behavior: ScrollBehavior) => {
-      if (!scrollTriggerInstance) {
-        return
-      }
-
-      const scrollDistance =
-        scrollTriggerInstance.end - scrollTriggerInstance.start
-
-      window.scrollTo({
-        top:
-          scrollTriggerInstance.start +
-          scrollDistance * navigationRevealProgress,
-        behavior,
-      })
-    }
-
-    const scheduleRevealNavigation = (behavior: ScrollBehavior) => {
-      if (navigationFrameId !== null) {
-        window.cancelAnimationFrame(navigationFrameId)
-      }
-
-      navigationFrameId = window.requestAnimationFrame(() => {
-        navigationFrameId = null
-        scrollToReveal(behavior)
-      })
-    }
-
-    const navigateToReveal = (behavior: ScrollBehavior) => {
-      if (scrollTriggerInstance) {
-        scheduleRevealNavigation(behavior)
-      } else {
-        setShouldLoadVideo(true)
-        sectionRef.current?.scrollIntoView({
-          behavior,
-          block: "start",
-        })
-      }
-    }
-
-    const handleRevealNavigation = (event: Event) => {
-      const navigationEvent = event as CustomEvent<{ id?: string }>
-
-      if (navigationEvent.detail?.id === id) {
-        navigateToReveal("smooth")
-      }
-    }
-
-    const handleHashChange = () => {
-      if (window.location.hash === `#${id}`) {
-        navigateToReveal("smooth")
-      }
-    }
-
-    if (revealOnHashNavigation) {
-      window.addEventListener(
-        "scroll-video-reveal:navigate",
-        handleRevealNavigation,
-      )
-      window.addEventListener("hashchange", handleHashChange)
-    }
-
     if (!shouldLoadVideo) {
-      return () => {
-        if (revealOnHashNavigation) {
-          window.removeEventListener(
-            "scroll-video-reveal:navigate",
-            handleRevealNavigation,
-          )
-          window.removeEventListener("hashchange", handleHashChange)
-        }
-      }
+      return
     }
 
     const initScrollAnimation = async () => {
@@ -316,6 +441,8 @@ export function ScrollVideoRevealSection({
         ? desktopSeekThreshold
         : mobileSeekThreshold
       const cardEase = gsap.parseEase("power3.out")
+      const modelIndex = getHomeModelIndex(id)
+      const refreshPriority = homeModelIds.length - modelIndex
       let targetTime = 0
       let currentTime = 0
       let boundarySeekFallbackId: number | null = null
@@ -556,6 +683,7 @@ export function ScrollVideoRevealSection({
           pin: true,
           anticipatePin: 1,
           invalidateOnRefresh: true,
+          refreshPriority,
           onToggle: (self) => {
             syncVideoTicker(self.isActive)
 
@@ -590,16 +718,18 @@ export function ScrollVideoRevealSection({
         })
       }, section)
 
-      ScrollTrigger.refresh()
+      if (!scrollTriggerInstance) {
+        return
+      }
+
+      registerRevealTrigger(id, scrollTriggerInstance, {
+        sortAndRefresh: () => {
+          ScrollTrigger.sort()
+          ScrollTrigger.refresh()
+        },
+      })
 
       syncVideoTicker(scrollTriggerInstance?.isActive ?? false)
-
-      if (
-        revealOnHashNavigation &&
-        window.location.hash === `#${id}`
-      ) {
-        scheduleRevealNavigation("auto")
-      }
     }
 
     const video = videoRef.current
@@ -619,23 +749,16 @@ export function ScrollVideoRevealSection({
     return () => {
       isMounted = false
       cancelBoundarySeekFallback?.()
-      if (navigationFrameId !== null) {
-        window.cancelAnimationFrame(navigationFrameId)
-      }
-      if (revealOnHashNavigation) {
-        window.removeEventListener(
-          "scroll-video-reveal:navigate",
-          handleRevealNavigation,
-        )
-        window.removeEventListener("hashchange", handleHashChange)
-      }
       video?.removeEventListener("loadedmetadata", handleLoadedMetadata)
       removeVideoTicker?.()
       removeVideoSeekListener?.()
+      if (scrollTriggerInstance) {
+        unregisterRevealTrigger(id, scrollTriggerInstance)
+      }
       scrollTriggerInstance?.kill()
       context?.revert()
     }
-  }, [id, revealOnHashNavigation, shouldLoadVideo, videoSrc])
+  }, [id, shouldLoadVideo, videoSrc])
 
   return (
     <section
