@@ -148,13 +148,13 @@ export function SiteHeader() {
           </nav>
 
           <div className="flex items-center gap-2">
-            <Link
+            <a
               href="/client-login"
               className="hidden items-center justify-center gap-2 rounded-full bg-linear-to-b from-luxury-gold-soft to-luxury-gold px-5 py-2.5 text-sm font-semibold text-stone-950 shadow-lg transition-transform hover:-translate-y-0.5 md:inline-flex"
               onClick={rememberClientLoginReturn}
             >
               Client Login
-            </Link>
+            </a>
 
             <button
               type="button"
@@ -188,7 +188,7 @@ export function SiteHeader() {
                   {item.label}
                 </Link>
               ))}
-              <Link
+              <a
                 href="/client-login"
                 className="mt-2 inline-flex items-center justify-center gap-2 rounded-full bg-linear-to-b from-luxury-gold-soft to-luxury-gold px-4 py-3 text-sm font-semibold text-stone-950 shadow-lg transition-transform hover:-translate-y-0.5"
                 onClick={() => {
@@ -197,7 +197,7 @@ export function SiteHeader() {
                 }}
               >
                 Client Login
-              </Link>
+              </a>
             </nav>
           </div>
         </div>
