@@ -1,12 +1,9 @@
 ﻿import {
-  Camera,
   DoorOpen,
   House,
   Sprout,
   LayoutPanelTop,
-  Ruler,
   CookingPot,
-  Sparkles,
   BedDouble,
   TreePine,
   Bath,
@@ -24,10 +21,12 @@
   RockingChair,
   Gem,
   Beef,
+  CarFront,
+  Ruler,
   type LucideIcon,
 } from "lucide-react"
 
-export type ProjectSlug = "luca-boutique" | "oliver-boutique"
+export type ProjectSlug = "luca-boutique" | "oliver-boutique" | "audrey"
 
 export type ProjectFeature = {
   icon: LucideIcon
@@ -43,15 +42,18 @@ export type ProjectTile = {
   caption: string
 }
 
-export type FeaturedProject = Pick<
-  Project,
-  "slug" | "title" | "price" | "picture" | "objectPosition"
->
+export type ProjectBlueprintSheet = {
+  picture: string
+  sheetNumber: string
+  title: string
+  badge: string
+  alt: string
+}
 
 export type Project = {
   slug: ProjectSlug
   title: string
-  price: string
+  price?: string
   picture: string
   objectPosition: string
   summary: string
@@ -64,6 +66,7 @@ export type Project = {
   features: ProjectFeature[]
   highlights: ProjectFeature[]
   highlightsNote?: ProjectFeature
+  blueprintSheets: ProjectBlueprintSheet[]
   tiles: ProjectTile[]
 }
 
@@ -148,6 +151,22 @@ export const projects: Project[] = [
       description:
         "It includes legal documentation, permits, and all the necessary elements for complete peace of mind. It also includes infrastructure for electricity, water, and internet services (ELMAR, WEB, and SETAR).",
     },
+    blueprintSheets: [
+      {
+        picture: "/projects/luca/luca-site-plan.webp",
+        sheetNumber: "Sheet A-101",
+        title: "Site Plan",
+        badge: "Plan Documentation",
+        alt: "Site plan for Luca Boutique House",
+      },
+      {
+        picture: "/projects/luca/luca-exploded-axonometric.webp",
+        sheetNumber: "Sheet A-105",
+        title: "Exploded Axonometric",
+        badge: "3D Visualization",
+        alt: "Exploded axonometric view of Luca Boutique House",
+      },
+    ],
     tiles: [
       {
         title: "Front elevation",
@@ -253,6 +272,22 @@ export const projects: Project[] = [
         description: "Individual septic tank of 12 m³.",
       },
     ],
+    blueprintSheets: [
+      {
+        picture: "/projects/oliver/oliver-site-plan.webp",
+        sheetNumber: "Sheet A-101",
+        title: "Site Plan",
+        badge: "Plan Documentation",
+        alt: "Site plan for Oliver Villa",
+      },
+      {
+        picture: "/projects/oliver/oliver-exploded-axonometric.webp",
+        sheetNumber: "Sheet A-105",
+        title: "Exploded Axonometric",
+        badge: "3D Visualization",
+        alt: "Exploded axonometric view of Oliver Villa",
+      },
+    ],
     tiles: [
       {
         title: "Arrival view",
@@ -284,17 +319,131 @@ export const projects: Project[] = [
       },
     ],
   },
+  {
+    slug: "audrey",
+    title: "Audrey Villa Model",
+    picture: "/projects/audrey/audrey-front-elevation.webp",
+    objectPosition: "center center",
+    summary:
+      "A two-level villa with four bedrooms, three bathrooms, and a refined minimalist character.",
+    badge: "Audrey Villa Model",
+    eyebrow: "Project dossier",
+    boardTitle: "Audrey Villa Model",
+    boardSubtitle: "Elegance and exclusivity",
+    intro:
+      "Audrey is a two-level villa designed for generous family living, with four bedrooms, three bathrooms, a luxury kitchen with appliances, and a private 18 m² pool framed by landscaping.",
+    highlightsTitle: "Comfort and Quality",
+    features: [
+      { icon: House, label: "160 m² House" },
+      { icon: LayoutPanelTop, label: "Two Floors" },
+      { icon: BedDouble, label: "Four Bedrooms" },
+      { icon: Bath, label: "Three Bathrooms" },
+      { icon: Sprout, label: "Minimalist Design" },
+      { icon: CookingPot, label: "Luxury Kitchen with Appliances" },
+      { icon: AirVent, label: "Air-Conditioning" },
+      { icon: WavesLadder, label: "18 m² Pool" },
+      { icon: CarFront, label: "Two Parking Spaces" },
+      { icon: Ruler, label: "12 m² Terrace" },
+      { icon: TreePine, label: "Landscaping" },
+    ],
+    highlights: [
+      {
+        icon: CookingPot,
+        label: "Equipped Kitchen",
+        description:
+          "A fully equipped kitchen with countertop, modern cabinets, and appliances included.",
+      },
+      {
+        icon: DoorOpen,
+        label: "Sliding Door",
+        description:
+          "Double-glazed sliding doors connect the interior with the pool area.",
+      },
+      {
+        icon: Bath,
+        label: "Luxury Bathrooms",
+        description:
+          "Porcelain finishes, durable faucets, and tempered-glass shower enclosures.",
+      },
+      {
+        icon: PanelTopOpen,
+        label: "PVC Windows",
+        description:
+          "Double glazing provides thermal and acoustic insulation with reinforced security.",
+      },
+      {
+        icon: DoorOpen,
+        label: "Quality Doors",
+        description:
+          "A multipoint-lock PVC entrance door and semi-solid interior doors with quality hardware.",
+      },
+      {
+        icon: Grid2x2,
+        label: "Quality Floors",
+        description:
+          "Porcelain flooring throughout, with non-slip ceramic in bathrooms and showers.",
+      },
+      {
+        icon: PlugZap,
+        label: "Safe Electrical Installation",
+        description:
+          "A NEN 1010 electrical system with 110V/220V service and TV points in living areas and bedrooms.",
+      },
+      {
+        icon: BrickWall,
+        label: "Robust Structure",
+        description:
+          "Solid concrete block construction with columns, tie beams, and a waterproofed wooden roof.",
+      },
+    ],
+    blueprintSheets: [
+      {
+        picture: "/projects/audrey/audrey-site-plan.webp",
+        sheetNumber: "Sheet A-101",
+        title: "Site Plan",
+        badge: "Plan Documentation",
+        alt: "Ground and first floor site plan for Audrey Villa Model",
+      },
+      {
+        picture: "/projects/audrey/audrey-exploded-axonometric.webp",
+        sheetNumber: "Sheet A-105",
+        title: "Exploded Axonometric",
+        badge: "3D Visualization",
+        alt: "Exploded axonometric ground and first floor view of Audrey Villa Model",
+      },
+    ],
+    tiles: [
+      {
+        title: "Signature facade",
+        picture: "/projects/audrey/audrey-front-elevation.webp",
+        alt: "Front elevation of Audrey Villa Model",
+        objectPosition: "center center",
+        caption: "Audrey's two-level minimalist profile.",
+      },
+      {
+        title: "Community setting",
+        picture: "/projects/audrey/audrey-community-streetscape.webp",
+        alt: "Two-level Audrey villas along a landscaped residential street",
+        objectPosition: "center center",
+        caption: "Two-level villas arranged along a landscaped residential street.",
+      },
+      {
+        title: "Evening arrival",
+        picture: "/projects/audrey/audrey-evening-arrival.webp",
+        alt: "Evening arrival view of Audrey Villa Model",
+        objectPosition: "center center",
+        caption: "Warm exterior lighting defines the main approach.",
+      },
+      {
+        title: "Villa collection",
+        picture: "/projects/audrey/audrey-villa-collection.webp",
+        alt: "Audrey villas presented as part of the residential community",
+        objectPosition: "center center",
+        caption: "Audrey residences within the wider private community.",
+      },
+    ],
+  },
 ]
-
-export const featuredProjects: FeaturedProject[] = projects.map(
-  ({ slug, title, price, picture, objectPosition }) => ({
-    slug,
-    title,
-    price,
-    picture,
-    objectPosition,
-  }),
-)
 
 export function getProjectBySlug(slug: string): Project | undefined {
   return projects.find((project) => project.slug === slug)

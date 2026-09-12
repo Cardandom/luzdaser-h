@@ -27,7 +27,7 @@ export const homeModels = [
   },
   {
     id: "audrey",
-    title: "Audrey",
+    title: "Audrey Villa Model",
     projectSlug: "audrey",
     projectHref: "/projects/audrey",
   },

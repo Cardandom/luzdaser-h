@@ -2,21 +2,27 @@
 
 import { useEffect, useRef } from "react"
 import { createPortal } from "react-dom"
-import { X } from "lucide-react"
+import { ChevronLeft, ChevronRight, X } from "lucide-react"
 import Image from "next/image"
 
 type ProjectImageLightboxProps = {
   alt: string
+  eyebrow?: string
   isOpen: boolean
   onClose: () => void
+  onNext?: () => void
+  onPrevious?: () => void
   src: string
   title: string
 }
 
 export function ProjectImageLightbox({
   alt,
+  eyebrow,
   isOpen,
   onClose,
+  onNext,
+  onPrevious,
   src,
   title,
 }: ProjectImageLightboxProps) {
@@ -36,6 +42,14 @@ export function ProjectImageLightbox({
       if (event.key === "Escape") {
         onClose()
       }
+
+      if (event.key === "ArrowLeft") {
+        onPrevious?.()
+      }
+
+      if (event.key === "ArrowRight") {
+        onNext?.()
+      }
     }
 
     document.body.style.overflow = "hidden"
@@ -47,7 +61,7 @@ export function ProjectImageLightbox({
       window.removeEventListener("keydown", handleKeyDown)
       previousActiveElement?.focus()
     }
-  }, [isOpen, onClose])
+  }, [isOpen, onClose, onNext, onPrevious])
 
   if (!isOpen || typeof document === "undefined") {
     return null
@@ -75,10 +89,37 @@ export function ProjectImageLightbox({
         />
 
         <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-linear-to-t from-black/75 via-black/25 to-transparent px-5 pb-5 pt-16 sm:px-7 sm:pb-7">
+          {eyebrow ? (
+            <p className="mb-1 text-[10px] font-semibold uppercase tracking-widest text-white/65 sm:text-xs">
+              {eyebrow}
+            </p>
+          ) : null}
           <p className="font-heading text-xl text-white drop-shadow-sm sm:text-2xl">
             {title}
           </p>
         </div>
+
+        {onPrevious ? (
+          <button
+            type="button"
+            className="absolute left-3 top-1/2 z-10 inline-flex size-11 -translate-y-1/2 items-center justify-center rounded-full border border-white/40 bg-black/60 text-white shadow-lg backdrop-blur-sm transition hover:border-white hover:bg-black/80 focus-visible:ring-4 focus-visible:ring-luxury-gold/40 focus-visible:outline-none sm:left-5"
+            aria-label="View previous project gallery image"
+            onClick={onPrevious}
+          >
+            <ChevronLeft className="size-6" aria-hidden="true" />
+          </button>
+        ) : null}
+
+        {onNext ? (
+          <button
+            type="button"
+            className="absolute right-3 top-1/2 z-10 inline-flex size-11 -translate-y-1/2 items-center justify-center rounded-full border border-white/40 bg-black/60 text-white shadow-lg backdrop-blur-sm transition hover:border-white hover:bg-black/80 focus-visible:ring-4 focus-visible:ring-luxury-gold/40 focus-visible:outline-none sm:right-5"
+            aria-label="View next project gallery image"
+            onClick={onNext}
+          >
+            <ChevronRight className="size-6" aria-hidden="true" />
+          </button>
+        ) : null}
 
         <button
           ref={closeButtonRef}

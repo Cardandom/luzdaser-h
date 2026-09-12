@@ -14,42 +14,136 @@ type GalleryItem = {
   objectPosition: string
 }
 
-const galleryImageFiles = [
-  "001 (1) (1).webp",
-  "001 (11).webp",
-  "001 (12).webp",
-  "001 (2).webp",
-  "Entrada Principal.webp",
-  "Panoramica Lateral Der, Proyecto.webp",
-  "Panoramica Parque.webp",
-  "Planta General.webp",
-  "Planta Parque.webp",
-  "Vista Frontal Calle,Esqina Parque Izq,Oliver Der,.webp",
-  "Vista frontal Calle,Luca Izq, Oliver Der,.webp",
-  "Vista Frontal zona verde # 3, Luca # 38  & Modelo 19.webp",
-  "Vista lateral Parque.webp",
-] as const
-
-function getGalleryTitle(fileName: string) {
-  return fileName
-    .replace(/\.[^.]+$/, "")
-    .replace(/\s+/g, " ")
-    .replace(/\s*,\s*/g, ", ")
-    .trim()
-}
-
-const galleryItems: GalleryItem[] = galleryImageFiles.map((fileName) => {
-  const title = getGalleryTitle(fileName)
-
-  return {
-    id: fileName,
-    src: `/gallery/${encodeURIComponent(fileName)}`,
-    title,
+const galleryItems: GalleryItem[] = [
+  {
+    id: "aerial-community-overview",
+    src: "/gallery/001%20(1)%20(1).webp",
+    title: "Aerial View of Reina Sophia Residences",
     description: "Reina Sophia Residences",
-    alt: `${title} at Reina Sophia Residences`,
+    alt: "Top-down aerial view of Reina Sophia Residences in Aruba",
     objectPosition: "center center",
-  }
-})
+  },
+  {
+    id: "community-playground",
+    src: "/gallery/001%20(11).webp",
+    title: "Community Playground",
+    description: "Reina Sophia Residences",
+    alt: "Elevated view of the community playground and surrounding homes",
+    objectPosition: "center center",
+  },
+  {
+    id: "landscaped-community-entrance",
+    src: "/gallery/001%20(12).webp",
+    title: "Landscaped Community Entrance",
+    description: "Reina Sophia Residences",
+    alt: "Landscaped entrance to Reina Sophia Residences in Aruba",
+    objectPosition: "center center",
+  },
+  {
+    id: "parkside-residential-streetscape",
+    src: "/gallery/001%20(2).webp",
+    title: "Parkside Residential Streetscape",
+    description: "Reina Sophia Residences",
+    alt: "Residential streetscape leading toward the community park",
+    objectPosition: "center center",
+  },
+  {
+    id: "gated-main-entrance",
+    src: "/gallery/Entrada%20Principal.webp",
+    title: "Gated Main Entrance",
+    description: "Reina Sophia Residences",
+    alt: "Gated main entrance to Reina Sophia Residences",
+    objectPosition: "center center",
+  },
+  {
+    id: "coastal-community-panorama",
+    src: "/gallery/Panoramica%20Lateral%20Der%2C%20Proyecto.webp",
+    title: "Coastal Community Panorama",
+    description: "Reina Sophia Residences",
+    alt: "Aerial panorama of Reina Sophia Residences near the Aruba coastline",
+    objectPosition: "center center",
+  },
+  {
+    id: "central-park-aerial-view",
+    src: "/gallery/Panoramica%20Parque.webp",
+    title: "Central Park Aerial View",
+    description: "Reina Sophia Residences",
+    alt: "Aerial view of the central park and surrounding residences",
+    objectPosition: "center center",
+  },
+  {
+    id: "community-master-plan",
+    src: "/gallery/Planta%20General.webp",
+    title: "Community Master Plan",
+    description: "Reina Sophia Residences",
+    alt: "Top-down master plan of Reina Sophia Residences",
+    objectPosition: "center center",
+  },
+  {
+    id: "central-park-layout",
+    src: "/gallery/Planta%20Parque.webp",
+    title: "Central Park Layout",
+    description: "Reina Sophia Residences",
+    alt: "Top-down view of the central park, pathways, and play areas",
+    objectPosition: "center center",
+  },
+  {
+    id: "parkside-corner-at-sunset",
+    src: "/gallery/Vista%20Frontal%20Calle%2CEsqina%20Parque%20Izq%2COliver%20Der%2C.webp",
+    title: "Parkside Corner at Sunset",
+    description: "Reina Sophia Residences",
+    alt: "Sunset view of a residential corner beside the community park",
+    objectPosition: "center center",
+  },
+  {
+    id: "residential-avenue-at-sunset",
+    src: "/gallery/Vista%20frontal%20Calle%2CLuca%20Izq%2C%20Oliver%20Der%2C.webp",
+    title: "Residential Avenue at Sunset",
+    description: "Reina Sophia Residences",
+    alt: "Sunset view along a tree-lined residential avenue",
+    objectPosition: "center center",
+  },
+  {
+    id: "landscaped-residential-green",
+    src: "/gallery/Vista%20Frontal%20zona%20verde%20%23%203%2C%20Luca%20%23%2038%20%20%26%20Modelo%2019.webp",
+    title: "Landscaped Residential Green",
+    description: "Reina Sophia Residences",
+    alt: "Landscaped residential green with palm trees and modern homes",
+    objectPosition: "center center",
+  },
+  {
+    id: "community-recreation-area",
+    src: "/gallery/Vista%20lateral%20Parque.webp",
+    title: "Community Recreation Area",
+    description: "Reina Sophia Residences",
+    alt: "Outdoor exercise and play equipment in the community park",
+    objectPosition: "center center",
+  },
+  {
+    id: "private-patio-plunge-pool",
+    src: "/gallery/amenities.webp",
+    title: "Private Patio with Plunge Pool",
+    description: "Reina Sophia Residences",
+    alt: "Private furnished patio with a compact plunge pool",
+    objectPosition: "center center",
+  },
+  {
+    id: "covered-outdoor-living-area",
+    src: "/gallery/amenities2.webp",
+    title: "Covered Outdoor Living Area",
+    description: "Reina Sophia Residences",
+    alt: "Covered outdoor living area with lounge and dining furniture",
+    objectPosition: "center center",
+  },
+  {
+    id: "contemporary-bathroom",
+    src: "/gallery/amenities3.webp",
+    title: "Contemporary Bathroom",
+    description: "Reina Sophia Residences",
+    alt: "Contemporary bathroom with a glass shower and warm wood finishes",
+    objectPosition: "center center",
+  },
+]
 
 const desktopVisibleGalleryCount = 5
 const mobileVisibleGalleryCount = 3

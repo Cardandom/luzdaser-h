@@ -74,16 +74,12 @@ export function HeroSection() {
                 Exclusive Real Estate in Aruba
               </p>
 
-              <p className="mt-4 max-w-md font-heading text-4xl italic leading-none tracking-tight text-foreground drop-shadow-sm sm:mt-5 sm:text-5xl lg:text-7xl">
-                Your Home in
+              <p className="mt-4 max-w-2xl font-heading text-4xl italic leading-none tracking-tight text-foreground drop-shadow-sm sm:mt-5 sm:text-5xl lg:max-w-3xl lg:text-7xl">
+                Your Private Luxury Heaven
               </p>
 
-              <p className="mt-1 max-w-md font-heading text-4xl italic leading-none tracking-tight text-[#201751] drop-shadow-sm sm:text-5xl lg:text-7xl">
-                Paradise
-              </p>
-
-              <p className="mt-4 max-w-sm text-balance text-xs font-medium leading-6 text-foreground/90 sm:mt-6 sm:max-w-2xl sm:text-lg sm:leading-7">
-                Your Private Luxury Heaven in the Dutch Caribbean.
+              <p className="mt-1 max-w-2xl font-heading text-4xl italic leading-none tracking-tight text-[#201751] drop-shadow-sm sm:text-5xl lg:max-w-3xl lg:text-7xl">
+                in the Dutch Caribbean
               </p>
 
               <div className="mt-5 flex justify-start sm:mt-8">

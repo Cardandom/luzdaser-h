@@ -9,8 +9,13 @@ import {
   ChevronLeft,
 } from "lucide-react"
 
-import { getProjectBySlug, type ProjectSlug } from "@/lib/projects"
+import {
+  getProjectBySlug,
+  type ProjectBlueprintSheet,
+  type ProjectSlug,
+} from "@/lib/projects"
 import { ArchitectureShowcaseTop } from "./ArchitectureShowcaseTop"
+import { ProjectImageLightbox } from "./ProjectImageLightbox"
 import {
   constructionSpecs,
   getIcon,
@@ -25,13 +30,42 @@ export function ArchitectureShowcase({ slug }: ArchitectureShowcaseProps) {
 
   const [hoveredElevationSpec, setHoveredElevationSpec] = useState<string | null>(null)
   const [isLightboxOpen, setIsLightboxOpen] = useState(false)
+  const [activeBlueprintSheet, setActiveBlueprintSheet] =
+    useState<ProjectBlueprintSheet | null>(null)
+  const [activeGalleryIndex, setActiveGalleryIndex] = useState<number | null>(null)
+  const galleryItemCount = project?.tiles.length ?? 0
+  const closeGalleryLightbox = () => {
+    setActiveGalleryIndex(null)
+  }
+  const showPreviousGalleryImage = () => {
+    setActiveGalleryIndex((currentIndex) =>
+      currentIndex === null || galleryItemCount === 0
+        ? currentIndex
+        : (currentIndex - 1 + galleryItemCount) % galleryItemCount,
+    )
+  }
+  const showNextGalleryImage = () => {
+    setActiveGalleryIndex((currentIndex) =>
+      currentIndex === null || galleryItemCount === 0
+        ? currentIndex
+        : (currentIndex + 1) % galleryItemCount,
+    )
+  }
 
   if (!project) {
     return null
   }
 
-  const backToProjectsHref = project.slug === "oliver-boutique" ? "/#oliver" : "/#luca"
+  const isAudreyProject = project.slug === "audrey"
+  const backToProjectsHref =
+    project.slug === "oliver-boutique"
+      ? "/#oliver"
+      : project.slug === "luca-boutique"
+        ? "/#luca"
+        : "/#audrey"
   const daytimeImage = project.tiles[0]?.picture ?? project.picture
+  const activeGalleryItem =
+    activeGalleryIndex === null ? null : project.tiles[activeGalleryIndex]
 
   return (
     <section className="space-y-10">
@@ -51,22 +85,31 @@ export function ArchitectureShowcase({ slug }: ArchitectureShowcaseProps) {
           </div>
 
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-            {project.tiles.map((tile) => (
+            {project.tiles.map((tile, tileIndex) => (
               <figure
                 key={tile.title}
                 className="overflow-hidden rounded-3xl border border-luxury-border bg-white shadow-lg"
               >
-                <div className="relative aspect-4/3 overflow-hidden">
+                <button
+                  type="button"
+                  className="group relative block aspect-4/3 w-full cursor-zoom-in overflow-hidden text-left focus-visible:ring-4 focus-visible:ring-inset focus-visible:ring-luxury-gold/60 focus-visible:outline-none"
+                  aria-label={`Open enlarged ${tile.title}: ${tile.caption}`}
+                  onClick={() => setActiveGalleryIndex(tileIndex)}
+                >
                   <Image
                     src={tile.picture}
                     alt={tile.alt}
                     fill
                     sizes="(min-width: 1280px) 22vw, (min-width: 768px) 50vw, 100vw"
-                    className="object-cover transition-transform duration-500 hover:scale-105"
+                    className="object-cover transition-transform duration-500 group-hover:scale-105"
                     style={{ objectPosition: tile.objectPosition }}
                   />
                   <div className="absolute inset-0 bg-linear-to-b from-black/0 via-black/0 to-black/30" />
-                </div>
+                  <span className="absolute bottom-3 right-3 inline-flex items-center gap-1.5 rounded-full border border-white/35 bg-black/55 px-2.5 py-1.5 text-[10px] font-medium text-white opacity-100 shadow-lg backdrop-blur-sm transition-opacity sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-visible:opacity-100">
+                    <Icons.ZoomIn className="size-3.5" aria-hidden="true" />
+                    Enlarge
+                  </span>
+                </button>
                 <figcaption className="space-y-2 px-4 py-4">
                   <p className="text-xs uppercase tracking-[0.3em] text-foreground/45">
                     {tile.title}
@@ -80,15 +123,90 @@ export function ArchitectureShowcase({ slug }: ArchitectureShowcaseProps) {
           </div>
         </section>
 
-        <div className="flex items-center gap-2 my-14">
-          <span className="h-px flex-1 bg-slate-200" />
-          <h2 className="font-heading text-sm font-extrabold uppercase tracking-widest text-slate-500">
-            Structural Envelopes & Concept Detail
-          </h2>
-          <span className="h-px flex-1 bg-slate-200" />
-        </div>
+        <section aria-labelledby="blueprint-sheets-heading">
+          <div className="my-14 flex items-center gap-2">
+            <span className="h-px flex-1 bg-slate-200" />
+            <h2
+              id="blueprint-sheets-heading"
+              className="font-heading text-sm font-extrabold uppercase tracking-widest text-slate-500"
+            >
+              Interactive Blueprint Sheets
+            </h2>
+            <span className="h-px flex-1 bg-slate-200" />
+          </div>
 
-        <section className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+            {project.blueprintSheets.map((sheet, index) => {
+              const SheetIcon = index === 0 ? Icons.Compass : Icons.Layers
+
+              return (
+                <article
+                  key={sheet.title}
+                  className="blueprint-grid flex h-full flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition-shadow duration-300 hover:shadow-md"
+                >
+                  <header className="flex flex-col items-start gap-3 border-b border-slate-100 px-3 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-4">
+                    <div>
+                      <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-slate-400">
+                        {sheet.sheetNumber}
+                      </p>
+                      <h3 className="font-heading text-sm font-bold uppercase tracking-wider text-slate-900">
+                        {sheet.title}
+                      </h3>
+                    </div>
+
+                    <div className="flex items-center gap-1.5 rounded border border-slate-200 bg-slate-100 px-2 py-1">
+                      <SheetIcon className="size-3.5 text-slate-500" aria-hidden="true" />
+                      <span className="font-mono text-[9px] font-semibold uppercase text-slate-600">
+                        {sheet.badge}
+                      </span>
+                    </div>
+                  </header>
+
+                  <div className="flex flex-1 flex-col p-2 sm:p-3">
+                    <div className="relative h-128 overflow-hidden rounded-lg border border-stone-200/60 bg-stone-50 sm:h-144 lg:h-160 xl:h-176">
+                      <Image
+                        src={sheet.picture}
+                        alt={sheet.alt}
+                        fill
+                        sizes="(min-width: 1024px) 48vw, 100vw"
+                        className="object-contain"
+                      />
+
+                      <button
+                        type="button"
+                        className="group absolute inset-0 cursor-zoom-in focus-visible:ring-4 focus-visible:ring-inset focus-visible:ring-luxury-gold/60 focus-visible:outline-none"
+                        aria-label={`Open enlarged ${sheet.title} for ${project.title}`}
+                        onClick={() => setActiveBlueprintSheet(sheet)}
+                      >
+                        <span className="absolute bottom-3 right-3 inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/90 px-3 py-1.5 text-xs font-medium text-slate-800 shadow-lg backdrop-blur-sm transition-transform group-hover:-translate-y-0.5">
+                          <Icons.ZoomIn className="size-4" aria-hidden="true" />
+                          Enlarge
+                        </span>
+                      </button>
+                    </div>
+
+                    <div className="mt-2 flex items-center justify-between gap-4 px-1 pb-1 font-mono text-[9px] uppercase tracking-wider text-slate-400">
+                      <span>Project reference: {project.title}</span>
+                      <span>Open full sheet</span>
+                    </div>
+                  </div>
+                </article>
+              )
+            })}
+          </div>
+        </section>
+
+        {!isAudreyProject ? (
+          <>
+            <div className="my-14 flex items-center gap-2">
+              <span className="h-px flex-1 bg-slate-200" />
+              <h2 className="font-heading text-sm font-extrabold uppercase tracking-widest text-slate-500">
+                Structural Envelopes & Concept Detail
+              </h2>
+              <span className="h-px flex-1 bg-slate-200" />
+            </div>
+
+            <section className="grid grid-cols-1 gap-6 lg:grid-cols-3">
             <article className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition-all duration-300 hover:shadow-md blueprint-grid">
               <div className="mb-4 flex items-center justify-between">
                 <h3 className="font-heading text-xs font-bold uppercase tracking-wider text-slate-900 flex items-center gap-2">
@@ -200,7 +318,9 @@ export function ArchitectureShowcase({ slug }: ArchitectureShowcaseProps) {
                 </p>
               </div>
             </article>
-        </section>
+            </section>
+          </>
+        ) : null}
 
         <footer className="border-t border-slate-200 pt-6 text-center">
           <div className="flex flex-col justify-center gap-3 sm:flex-row">
@@ -222,6 +342,25 @@ export function ArchitectureShowcase({ slug }: ArchitectureShowcaseProps) {
           </div>
         </footer>
       </div>
+
+      <ProjectImageLightbox
+        src={activeBlueprintSheet?.picture ?? project.blueprintSheets[0]?.picture ?? project.picture}
+        alt={`Expanded ${activeBlueprintSheet?.alt ?? `${project.title} blueprint sheet`}`}
+        title={activeBlueprintSheet?.title ?? "Blueprint Sheet"}
+        isOpen={activeBlueprintSheet !== null}
+        onClose={() => setActiveBlueprintSheet(null)}
+      />
+
+      <ProjectImageLightbox
+        src={activeGalleryItem?.picture ?? project.tiles[0]?.picture ?? project.picture}
+        alt={activeGalleryItem?.alt ?? project.title}
+        eyebrow={activeGalleryItem?.title}
+        title={activeGalleryItem?.caption ?? project.title}
+        isOpen={activeGalleryItem !== null}
+        onClose={closeGalleryLightbox}
+        onPrevious={showPreviousGalleryImage}
+        onNext={showNextGalleryImage}
+      />
 
       {isLightboxOpen ? (
         <div

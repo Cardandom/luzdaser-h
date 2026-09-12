@@ -30,15 +30,21 @@ export function ArchitectureShowcaseTop({
   }
 
   const isOliverProject = project.slug === "oliver-boutique"
+  const isLucaProject = project.slug === "luca-boutique"
+  const isAudreyProject = project.slug === "audrey"
   const otherProjectHref = isOliverProject
     ? "/projects/luca-boutique"
-    : "/projects/oliver-boutique"
+    : isLucaProject
+      ? "/projects/audrey"
+      : "/projects/oliver-boutique"
   const otherProjectLabel = isOliverProject
     ? "View Luca Boutique"
-    : "View Oliver Villa"
-  const isLucaProject = project.slug === "luca-boutique"
+    : isLucaProject
+      ? "View Audrey Villa"
+      : "View Oliver Villa"
   const isLucaComplexHighlighted =
     isLucaComplexSelected || isLucaComplexPreviewed
+  const canEnlargeHero = isLucaProject || isAudreyProject
 
   const heroImage =
     project.slug === "oliver-boutique"
@@ -143,11 +149,11 @@ export function ArchitectureShowcaseTop({
                     style={{ objectPosition: project.objectPosition }}
                   />
 
-                  {isLucaProject ? (
+                  {canEnlargeHero ? (
                     <button
                       type="button"
                       className="absolute inset-0 z-20 cursor-zoom-in rounded-lg focus-visible:ring-4 focus-visible:ring-luxury-gold/60 focus-visible:outline-none"
-                      aria-label="Open enlarged Luca facade image"
+                      aria-label={`Open enlarged facade image for ${project.title}`}
                       onClick={() => setIsHeroLightboxOpen(true)}
                     >
                       <span className="absolute bottom-3 right-3 inline-flex items-center gap-2 rounded-full border border-white/30 bg-black/55 px-3 py-1.5 text-xs font-medium text-white shadow-lg backdrop-blur-sm">
@@ -157,25 +163,27 @@ export function ArchitectureShowcaseTop({
                     </button>
                   ) : null}
 
-                  {hoveredFeatureIdx === 0 && (
+                  {!isAudreyProject && hoveredFeatureIdx === 0 && (
                     <div className="absolute left-[20%] top-[30%] right-[20%] h-8 rounded-sm border-2 border-dashed border-white bg-slate-900/45 px-2 py-0.5 text-center font-mono text-[9px] uppercase tracking-wider text-white backdrop-blur-sm">
                       Flat Parapet Roofline / Single-Level Circulation
                     </div>
                   )}
 
-                  {(hoveredFeatureIdx === 2 || hoveredHighlightIdx === 0) && (
+                  {!isAudreyProject &&
+                    (hoveredFeatureIdx === 2 || hoveredHighlightIdx === 0) && (
                     <div className="absolute left-[40%] top-[45%] right-[22%] bottom-[16%] rounded-md border-2 border-dashed border-sky-400 bg-sky-950/40 p-3 text-center font-mono text-[9px] uppercase tracking-wider text-sky-100 backdrop-blur-sm">
                       Floor-to-Ceiling Glazing / Light Inlets
                     </div>
                   )}
 
-                  {(hoveredFeatureIdx === 3 || hoveredHighlightIdx === 3) && (
+                  {!isAudreyProject &&
+                    (hoveredFeatureIdx === 3 || hoveredHighlightIdx === 3) && (
                     <div className="absolute bottom-[8%] left-[25%] right-[20%] h-14 rounded-md border-2 border-dashed border-sky-300 bg-sky-900/35 p-2 text-center font-mono text-[9px] uppercase tracking-wider text-sky-200 backdrop-blur-sm">
                       Quartz Swimming Pool Matrix / Evaporative Cooler Base
                     </div>
                   )}
 
-                  {hoveredHighlightIdx === 5 && (
+                  {!isAudreyProject && hoveredHighlightIdx === 5 && (
                     <div className="absolute bottom-[12%] left-[35%] right-[35%] h-12 rounded-md border-2 border-dashed border-orange-500 bg-orange-950/40 p-2 text-center font-mono text-[9px] uppercase tracking-wider text-orange-200 backdrop-blur-sm">
                       Concrete Sunken Fire Hearth Lounge
                     </div>
@@ -192,13 +200,16 @@ export function ArchitectureShowcaseTop({
                 </div>
               </div>
 
-              {(project.slug === "luca-boutique" || project.slug === "oliver-boutique") && (
-                <div className="group relative overflow-hidden rounded-xl border border-slate-200 bg-white p-2 shadow-md transition-all duration-300 hover:shadow-xl">
+              <div className="group relative overflow-hidden rounded-xl border border-slate-200 bg-white p-2 shadow-md transition-all duration-300 hover:shadow-xl">
                   <div className="relative aspect-video overflow-hidden rounded-lg bg-slate-100 xl:aspect-5/3">
                     <div className="absolute inset-0 transition-transform duration-700 group-hover:scale-[1.02]">
                       <Image
                         src="/newComplex.webp"
-                        alt="Boutique House complex view"
+                        alt={
+                          isAudreyProject
+                            ? "Aerial master plan for Audrey Villa Model"
+                            : "Boutique House complex view"
+                        }
                         fill
                         sizes="(min-width: 1280px) 50vw, 100vw"
                         className="object-cover"
@@ -323,7 +334,7 @@ export function ArchitectureShowcaseTop({
 
                     <div className="absolute left-3 top-3 rounded-full border border-white/20 bg-white/90 px-3 py-1.5 text-[0.65rem] font-semibold uppercase tracking-[0.3em] text-foreground shadow-lg backdrop-blur">
                       <span className="mr-2 inline-flex size-2 rounded-full bg-luxury-gold" />
-                      {project.badge}
+                      {isAudreyProject ? "Villa Collection" : project.badge}
                     </div>
                   </div>
 
@@ -331,7 +342,6 @@ export function ArchitectureShowcaseTop({
                     <span>Project reference: {project.title}</span>
                   </div>
                 </div>
-              )}
             </div>
 
             <aside className="xl:col-span-3 h-full overflow-hidden rounded-xl border border-slate-200/80 bg-white/50 shadow-sm backdrop-blur-sm transition-all duration-300 hover:shadow-md">
@@ -386,7 +396,7 @@ export function ArchitectureShowcaseTop({
         </div>
       </div>
 
-      {isLucaProject ? (
+      {canEnlargeHero ? (
         <ProjectImageLightbox
           src={heroImage}
           alt={`Expanded facade of ${project.title}`}
