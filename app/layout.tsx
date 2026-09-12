@@ -2,6 +2,7 @@ import type { Metadata } from "next"
 import type { ReactNode } from "react"
 import { Geist, Geist_Mono } from "next/font/google"
 import { AppChrome } from "@/components/site/app-chrome"
+import { GoogleConsentMode } from "@/components/site/google-consent-mode"
 import "./globals.css"
 
 const geistSans = Geist({
@@ -31,6 +32,7 @@ export default function RootLayout({
       data-scroll-behavior="smooth"
       className={`${geistSans.variable} ${geistMono.variable} scroll-smooth`}
     >
+      <GoogleConsentMode />
       <body className="min-h-screen bg-background text-foreground antialiased">
         <AppChrome />
         {children}

@@ -4,7 +4,6 @@ import { useEffect } from "react"
 import { usePathname } from "next/navigation"
 
 import { CookieConsent } from "@/components/site/cookie-consent"
-import { GoogleConsentMode } from "@/components/site/google-consent-mode"
 import { SiteHeader } from "@/components/site/site-header"
 import { WhatsAppButton } from "@/components/site/whatsapp-button"
 import { restoreQueuedClientLoginScroll } from "@/lib/client-login-return"
@@ -35,16 +34,11 @@ export function AppChrome() {
 
   const chromeIsHidden = shouldHideChrome(pathname)
 
-  return (
+  return chromeIsHidden ? null : (
     <>
-      <GoogleConsentMode enabled={!chromeIsHidden} />
-      {chromeIsHidden ? null : (
-        <>
-          <SiteHeader />
-          <WhatsAppButton />
-          <CookieConsent />
-        </>
-      )}
+      <SiteHeader />
+      <WhatsAppButton />
+      <CookieConsent />
     </>
   )
 }

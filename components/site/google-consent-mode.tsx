@@ -1,6 +1,7 @@
 "use client"
 
-import Script from "next/script"
+import { GoogleTagManager } from "@next/third-parties/google"
+import { usePathname } from "next/navigation"
 import { useEffect, useState } from "react"
 
 import {
@@ -18,23 +19,12 @@ type GoogleConsentState = {
   ad_personalization: GoogleConsentValue
 }
 
-type GoogleConsentModeProps = {
-  enabled?: boolean
-}
-
 declare global {
   interface Window {
-    dataLayer?: unknown[]
     gtag?: (...args: unknown[]) => void
     reinaSophiaGoogleConsentInitialized?: boolean
-    reinaSophiaGtmStarted?: boolean
   }
 }
-
-const configuredGtmId = process.env.NEXT_PUBLIC_GTM_ID?.trim() ?? ""
-const validGtmId = /^GTM-[A-Z0-9]+$/.test(configuredGtmId)
-  ? configuredGtmId
-  : null
 
 function mapGoogleConsent(consent: PrivacyConsent | null): GoogleConsentState {
   const analyticsStorage = consent?.analytics ? "granted" : "denied"
@@ -78,37 +68,26 @@ function consentAllowsGoogleTags(consent: PrivacyConsent | null) {
   return Boolean(consent?.analytics || consent?.advertising)
 }
 
-function queueGoogleTagManagerStart() {
-  if (window.reinaSophiaGtmStarted) {
-    return
-  }
+function isGtmExcludedPath(pathname: string | null) {
+  if (!pathname) return true
 
-  ensureGoogleCommandQueue()
-  window.dataLayer?.push({
-    "gtm.start": Date.now(),
-    event: "gtm.js",
-  })
-  window.reinaSophiaGtmStarted = true
+  return (
+    pathname === "/client" ||
+    pathname.startsWith("/client/") ||
+    pathname === "/admin" ||
+    pathname.startsWith("/admin/") ||
+    pathname === "/client-login" ||
+    pathname === "/admin-login"
+  )
 }
 
-export function GoogleConsentMode({ enabled = true }: GoogleConsentModeProps) {
+export function GoogleConsentMode() {
+  const pathname = usePathname()
+  const isExcludedRoute = isGtmExcludedPath(pathname)
   const [shouldLoadGtm, setShouldLoadGtm] = useState(false)
 
   useEffect(() => {
-    if (!enabled) {
-      if (
-        window.reinaSophiaGoogleConsentInitialized &&
-        typeof window.gtag === "function"
-      ) {
-        window.gtag("consent", "update", mapGoogleConsent(null))
-      }
-
-      return
-    }
-
-    if (!validGtmId) {
-      return
-    }
+    if (isExcludedRoute) return
 
     const currentConsent = readPrivacyConsent()
     let initializeGtm: number | undefined
@@ -116,7 +95,6 @@ export function GoogleConsentMode({ enabled = true }: GoogleConsentModeProps) {
     applyGoogleConsent(currentConsent)
 
     if (consentAllowsGoogleTags(currentConsent)) {
-      queueGoogleTagManagerStart()
       initializeGtm = window.setTimeout(() => {
         setShouldLoadGtm(true)
       }, 0)
@@ -128,7 +106,6 @@ export function GoogleConsentMode({ enabled = true }: GoogleConsentModeProps) {
       updateGoogleConsent(consent)
 
       if (consentAllowsGoogleTags(consent)) {
-        queueGoogleTagManagerStart()
         setShouldLoadGtm(true)
       }
     }
@@ -148,19 +125,11 @@ export function GoogleConsentMode({ enabled = true }: GoogleConsentModeProps) {
         handleConsentChanged,
       )
     }
-  }, [enabled])
+  }, [isExcludedRoute])
 
-  if (!enabled || !validGtmId || !shouldLoadGtm) {
+  if (isExcludedRoute || !shouldLoadGtm) {
     return null
   }
 
-  return (
-    <Script
-      id="reina-sophia-google-tag-manager"
-      src={`https://www.googletagmanager.com/gtm.js?id=${encodeURIComponent(
-        validGtmId,
-      )}`}
-      strategy="afterInteractive"
-    />
-  )
+  return <GoogleTagManager gtmId="GTM-KCXR38RF" />
 }

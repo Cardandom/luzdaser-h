@@ -58,7 +58,7 @@ The live Supabase project's effective Row Level Security and Storage configurati
 
 ## Tracking deployment safeguards
 
-- [ ] Before setting `NEXT_PUBLIC_GTM_ID`, configure GTM tags to require the appropriate built-in consent signals.
+- [ ] Before publishing tags in the GTM container, configure them to require the appropriate built-in consent signals.
 - [ ] Exclude `/client`, `/admin`, `/client-login`, and `/admin-login` (including their nested routes) from page-view, History Change, and other GTM triggers.
 - [ ] Confirm that Custom HTML and custom-event tags cannot bypass those consent and route exclusions.
 - [ ] Confirm that names, email addresses, phone numbers, cities, comments, authentication data, and other personal information are never pushed to `dataLayer`.
