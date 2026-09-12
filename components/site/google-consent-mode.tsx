@@ -42,9 +42,11 @@ function ensureGoogleCommandQueue() {
   window.dataLayer = window.dataLayer ?? []
   window.gtag =
     window.gtag ??
-    ((...args: unknown[]) => {
-      window.dataLayer?.push(args)
-    })
+    function gtag() {
+      // GTM recognizes gtag commands by their Arguments-object shape.
+      // eslint-disable-next-line prefer-rest-params
+      window.dataLayer?.push(arguments)
+    }
 }
 
 function applyGoogleConsent(consent: PrivacyConsent | null) {
