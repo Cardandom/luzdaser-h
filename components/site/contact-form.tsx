@@ -1,5 +1,6 @@
 "use client"
 
+import { sendGTMEvent } from "@next/third-parties/google"
 import Link from "next/link"
 import { useState } from "react"
 import type { FormEvent } from "react"
@@ -49,6 +50,9 @@ export function ContactForm() {
         throw new Error("Contact request failed")
       }
 
+      sendGTMEvent({
+        event: "lead_form_success",
+      })
       form.reset()
       setStatus("success")
     } catch {
