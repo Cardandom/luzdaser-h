@@ -1,7 +1,6 @@
 import { BenefitsSection } from "@/components/site/benefits-section"
 import { ContactSection } from "@/components/site/contact-section"
 import { CtaSection } from "@/components/site/cta-section"
-import { FeaturedProjectsSection } from "@/components/site/featured-projects-section"
 import { GallerySection } from "@/components/site/gallery-section"
 import { HeroSection } from "@/components/site/hero-section"
 import { HomeExperienceLoader } from "@/components/site/home-experience-loader"
@@ -47,7 +46,6 @@ export default function HomePage() {
         revealOnHashNavigation
       />
       <CtaSection />
-      <FeaturedProjectsSection />
       <BenefitsSection />
       <ContactSection />
       <SiteFooter />

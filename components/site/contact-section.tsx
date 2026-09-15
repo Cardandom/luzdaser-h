@@ -53,7 +53,7 @@ export function ContactSection() {
                 <div className="flex items-center gap-3">
                   <Phone className="size-4 text-luxury-gold" aria-hidden="true" />
                   <a href="tel:+2976992222" className="text-inherit no-underline">
-                    +297 6992222
+                    +297 699 2222
                   </a>
                 </div>
                 <div className="flex items-center gap-3">

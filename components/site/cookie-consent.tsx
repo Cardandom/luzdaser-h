@@ -145,70 +145,68 @@ export function CookieConsent() {
     <Dialog.Root open={open} onOpenChange={setOpen}>
       <Dialog.Portal>
         <Dialog.Backdrop className="fixed inset-0 z-80 bg-stone-950/50 backdrop-blur-sm transition-opacity duration-200 data-starting-style:opacity-0 data-ending-style:opacity-0" />
-        <Dialog.Viewport className="fixed inset-0 z-90 flex items-end justify-center overflow-y-auto p-3 sm:items-center sm:p-6">
+        <Dialog.Viewport className="fixed inset-0 z-90 flex items-end justify-center overflow-y-auto p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:items-center sm:p-6">
           <Dialog.Popup
             initialFocus={firstActionRef}
-            className="relative max-h-[calc(100dvh-1.5rem)] w-full max-w-2xl overflow-y-auto rounded-3xl border border-luxury-border bg-white p-5 text-foreground shadow-2xl outline-none transition duration-200 ease-out data-starting-style:translate-y-4 data-starting-style:opacity-0 data-ending-style:translate-y-4 data-ending-style:opacity-0 sm:max-h-[calc(100dvh-3rem)] sm:p-8"
+            className="relative max-h-full w-full max-w-lg overflow-y-auto rounded-3xl border border-luxury-border bg-white p-5 text-foreground shadow-2xl outline-none transition duration-200 ease-out data-starting-style:translate-y-4 data-starting-style:opacity-0 data-ending-style:translate-y-4 data-ending-style:opacity-0 sm:p-6"
           >
             <Dialog.Close
               className="absolute right-4 top-4 inline-flex size-10 items-center justify-center rounded-full border border-luxury-border bg-white text-foreground/70 transition hover:border-luxury-gold hover:text-foreground focus-visible:ring-4 focus-visible:ring-luxury-gold/30 focus-visible:outline-none"
-              aria-label="Close privacy choices"
+              aria-label="Close cookie preferences"
             >
               <X className="size-4" aria-hidden="true" />
             </Dialog.Close>
 
             {view === "overview" ? (
               <>
-                <Dialog.Title className="pr-12 font-heading text-3xl tracking-tight sm:text-4xl">
-                  Your Privacy Choices
+                <Dialog.Title className="pr-12 font-heading text-2xl tracking-tight sm:text-3xl">
+                  Cookie preferences
                 </Dialog.Title>
-                <Dialog.Description className="mt-4 text-sm leading-7 text-foreground/70 sm:text-base">
-                  We use necessary technologies to operate this website and its
-                  secure client features. With your permission, we may also use
-                  analytics and advertising technologies to understand website
-                  performance, measure our campaigns and improve your experience.
-                  You can accept all optional technologies, reject them, or manage
-                  your preferences.
+                <Dialog.Description className="mt-3 text-sm leading-6 text-foreground/70">
+                  We use essential technologies to operate this website. With
+                  your permission, we also use analytics and advertising tools
+                  to understand how visitors use the site, measure our campaigns
+                  and improve your experience.
                 </Dialog.Description>
 
-                <div className="mt-7 grid gap-3 sm:grid-cols-3">
+                <div className="mt-6 grid grid-cols-2 gap-3">
                   <button
                     ref={firstActionRef}
                     type="button"
                     className="inline-flex min-h-12 items-center justify-center rounded-full bg-foreground px-5 py-3 text-sm font-semibold text-white transition hover:bg-foreground/90 focus-visible:ring-4 focus-visible:ring-luxury-gold/40 focus-visible:outline-none"
                     onClick={handleAcceptAll}
                   >
-                    Accept All
+                    Accept all
                   </button>
                   <button
                     type="button"
                     className="inline-flex min-h-12 items-center justify-center rounded-full border border-foreground bg-white px-5 py-3 text-sm font-semibold text-foreground transition hover:bg-stone-100 focus-visible:ring-4 focus-visible:ring-luxury-gold/40 focus-visible:outline-none"
                     onClick={handleRejectAll}
                   >
-                    Reject All
+                    Essentials only
                   </button>
                   <button
                     type="button"
-                    className="inline-flex min-h-12 items-center justify-center rounded-full border border-foreground bg-white px-5 py-3 text-sm font-semibold text-foreground transition hover:bg-stone-100 focus-visible:ring-4 focus-visible:ring-luxury-gold/40 focus-visible:outline-none"
+                    className="col-span-2 inline-flex min-h-11 items-center justify-center rounded-full px-5 py-2 text-sm font-semibold text-foreground underline decoration-luxury-gold underline-offset-4 transition hover:bg-stone-100 focus-visible:ring-4 focus-visible:ring-luxury-gold/40 focus-visible:outline-none"
                     onClick={() => setView("preferences")}
                   >
-                    Manage Preferences
+                    Manage preferences
                   </button>
                 </div>
               </>
             ) : (
               <>
-                <Dialog.Title className="pr-12 font-heading text-3xl tracking-tight sm:text-4xl">
-                  Privacy Preferences
+                <Dialog.Title className="pr-12 font-heading text-2xl tracking-tight sm:text-3xl">
+                  Cookie preferences
                 </Dialog.Title>
-                <Dialog.Description className="mt-4 text-sm leading-7 text-foreground/70 sm:text-base">
+                <Dialog.Description className="mt-3 text-sm leading-6 text-foreground/70">
                   Choose which optional technologies may be used. Necessary
                   technologies remain enabled because the website and secure
                   client features depend on them.
                 </Dialog.Description>
 
-                <div className="mt-6 divide-y divide-luxury-border rounded-2xl border border-luxury-border">
-                  <div className="flex items-start justify-between gap-5 p-4 sm:p-5">
+                <div className="mt-5 divide-y divide-luxury-border rounded-2xl border border-luxury-border">
+                  <div className="flex items-start justify-between gap-4 p-4">
                     <div>
                       <p className="font-semibold text-foreground">Necessary</p>
                       <p className="mt-1 text-sm leading-6 text-foreground/65">
@@ -233,7 +231,7 @@ export function CookieConsent() {
                   {preferenceOptions.map((option) => (
                     <label
                       key={option.key}
-                      className="flex cursor-pointer items-start justify-between gap-5 p-4 sm:p-5"
+                      className="flex cursor-pointer items-start justify-between gap-4 p-4"
                     >
                       <span>
                         <span className="font-semibold text-foreground">
@@ -258,34 +256,34 @@ export function CookieConsent() {
                   ))}
                 </div>
 
-                <div className="mt-7 grid gap-3 sm:grid-cols-3">
+                <div className="mt-6 grid grid-cols-2 gap-3">
                   <button
                     ref={firstActionRef}
                     type="button"
-                    className="inline-flex min-h-12 items-center justify-center rounded-full bg-foreground px-5 py-3 text-sm font-semibold text-white transition hover:bg-foreground/90 focus-visible:ring-4 focus-visible:ring-luxury-gold/40 focus-visible:outline-none"
+                    className="col-span-2 inline-flex min-h-12 items-center justify-center rounded-full bg-foreground px-5 py-3 text-sm font-semibold text-white transition hover:bg-foreground/90 focus-visible:ring-4 focus-visible:ring-luxury-gold/40 focus-visible:outline-none"
                     onClick={handleSavePreferences}
                   >
-                    Save Preferences
+                    Save preferences
                   </button>
                   <button
                     type="button"
                     className="inline-flex min-h-12 items-center justify-center rounded-full border border-foreground bg-white px-5 py-3 text-sm font-semibold text-foreground transition hover:bg-stone-100 focus-visible:ring-4 focus-visible:ring-luxury-gold/40 focus-visible:outline-none"
                     onClick={handleRejectAll}
                   >
-                    Reject All
+                    Essentials only
                   </button>
                   <button
                     type="button"
                     className="inline-flex min-h-12 items-center justify-center rounded-full border border-foreground bg-white px-5 py-3 text-sm font-semibold text-foreground transition hover:bg-stone-100 focus-visible:ring-4 focus-visible:ring-luxury-gold/40 focus-visible:outline-none"
                     onClick={handleAcceptAll}
                   >
-                    Accept All
+                    Accept all
                   </button>
                 </div>
               </>
             )}
 
-            <p className="mt-6 text-xs leading-6 text-foreground/60">
+            <p className="mt-5 text-xs leading-5 text-foreground/60">
               Learn more in our{" "}
               <Link
                 href="/privacy-policy"

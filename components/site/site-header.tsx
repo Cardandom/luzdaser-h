@@ -14,7 +14,6 @@ const navItems = [
   { label: "Luca", href: "#luca" },
   { label: "Audrey", href: "#audrey" },
   { label: "Location", href: "#location" },
-  { label: "Project Progress", href: "#project-progress" },
   { label: "Contacts", href: "#contacts" },
 ]
 

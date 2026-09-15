@@ -1,15 +1,35 @@
+"use client"
+
+import { sendGTMEvent } from "@next/third-parties/google"
 import { MessageCircleMore } from "lucide-react"
 
-const WHATSAPP_URL =
-  "https://wa.me/2971234567?text=Hola%2C%20quiero%20m%C3%A1s%20informaci%C3%B3n%20sobre%20los%20proyectos."
+const whatsappUrl = new URL("https://wa.me/2976992222")
+whatsappUrl.searchParams.set(
+  "text",
+  "Hello, I'm interested in Reina Sophia Residences. I'd like more information.",
+)
+
+const WHATSAPP_URL = whatsappUrl.toString()
 
 export function WhatsAppButton() {
+  const handleWhatsAppClick = () => {
+    try {
+      sendGTMEvent({
+        event: "whatsapp_click",
+        cta_location: "floating_whatsapp",
+      })
+    } catch {
+      // Tracking must never prevent the visitor from opening WhatsApp.
+    }
+  }
+
   return (
     <a
       href={WHATSAPP_URL}
       target="_blank"
-      rel="noreferrer"
+      rel="noopener noreferrer"
       aria-label="Open WhatsApp chat"
+      onClick={handleWhatsAppClick}
       className="fixed bottom-5 right-5 z-50 inline-flex items-center gap-3 rounded-full border border-white/10 bg-green-700 px-4 py-3 text-white shadow-lg transition-transform hover:-translate-y-0.5 hover:shadow-xl sm:bottom-7 sm:right-7"
     >
       <span className="inline-flex size-10 items-center justify-center rounded-full bg-white/15">
