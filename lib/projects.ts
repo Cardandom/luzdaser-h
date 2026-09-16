@@ -26,7 +26,7 @@
   type LucideIcon,
 } from "lucide-react"
 
-export type ProjectSlug = "luca-boutique" | "oliver-boutique" | "audrey"
+export type ProjectSlug = "oliver" | "luca" | "audrey"
 
 export type ProjectFeature = {
   icon: LucideIcon
@@ -72,19 +72,19 @@ export type Project = {
 
 export const projects: Project[] = [
   {
-    slug: "luca-boutique",
-    title: "Luca Boutique House",
+    slug: "luca",
+    title: "Luca",
     price: "$280,000 USD",
     picture: "/lucaDetails.webp",
     objectPosition: "center center",
     summary:
       "A compact boutique residence with crisp lines, warm accents, and a private resort feel.",
-    badge: "luca boutique house",
+    badge: "Luca",
     eyebrow: "Project dossier",
-    boardTitle: "Luca Boutique House",
+    boardTitle: "Luca",
     boardSubtitle: "Living by the sea",
     intro:
-      "Luca Boutique House is designed as a calm, contemporary retreat with a clean frontage, intimate outdoor areas, and an easy indoor-outdoor rhythm.",
+      "Luca is designed as a calm, contemporary retreat with a clean frontage, intimate outdoor areas, and an easy indoor-outdoor rhythm.",
     highlightsTitle: "Finishes and Comfort",
     features: [
       { icon: House, label: "80 m² House" },
@@ -157,61 +157,61 @@ export const projects: Project[] = [
         sheetNumber: "Sheet A-101",
         title: "Site Plan",
         badge: "Plan Documentation",
-        alt: "Site plan for Luca Boutique House",
+        alt: "Site plan for Luca",
       },
       {
         picture: "/projects/luca/luca-exploded-axonometric.webp",
         sheetNumber: "Sheet A-105",
         title: "Exploded Axonometric",
         badge: "3D Visualization",
-        alt: "Exploded axonometric view of Luca Boutique House",
+        alt: "Exploded axonometric view of Luca",
       },
     ],
     tiles: [
       {
         title: "Front elevation",
         picture: "/frontHouse.webp",
-        alt: "Front elevation of Luca Boutique House",
+        alt: "Front elevation of Luca",
         objectPosition: "center center",
         caption: "Refined minimalist finishes",
       },
       {
         title: "Living mood",
         picture: "/livingroom.webp",
-        alt: "Living room interior for Luca Boutique House",
+        alt: "Living room interior for Luca",
         objectPosition: "center center",
         caption: "Light-filled interiors with a sense of tranquility",
       },
       {
         title: "Kitchen detail",
         picture: "/kitchen.webp",
-        alt: "Kitchen interior for Luca Boutique House",
+        alt: "Kitchen interior for Luca",
         objectPosition: "center center",
         caption: "Crisp finishes and an easy view back to the living area.",
       },
       {
         title: "Outdoor scene",
         picture: "/sunset.webp",
-        alt: "Outdoor sunset view for Luca Boutique House",
+        alt: "Outdoor sunset view for Luca",
         objectPosition: "center center",
         caption: "A vibrant Caribbean tropical ambiance",
       },
     ],
   },
   {
-    slug: "oliver-boutique",
-    title: "Oliver Villa",
+    slug: "oliver",
+    title: "Oliver",
     price: "$350,000 USD",
     picture: "/OliverHouse.webp",
     objectPosition: "center center",
     summary:
       "A more expansive villa composition with a softer palette, garden framing, and a relaxed outdoor rhythm.",
-    badge: "Villa collection",
+    badge: "Oliver",
     eyebrow: "Project dossier",
-    boardTitle: "Oliver Villa",
+    boardTitle: "Oliver",
     boardSubtitle: "Living by the sea",
     intro:
-      "Oliver Villa balances privacy and openness with generous outdoor living, a calm interior atmosphere, and a design that feels quietly refined throughout the day.",
+      "Oliver balances privacy and openness with generous outdoor living, a calm interior atmosphere, and a design that feels quietly refined throughout the day.",
     features: [
       { icon: House, label: "130 m² House" },
       { icon: BedDouble, label: "Three Bedrooms" },
@@ -278,42 +278,42 @@ export const projects: Project[] = [
         sheetNumber: "Sheet A-101",
         title: "Site Plan",
         badge: "Plan Documentation",
-        alt: "Site plan for Oliver Villa",
+        alt: "Site plan for Oliver",
       },
       {
         picture: "/projects/oliver/oliver-exploded-axonometric.webp",
         sheetNumber: "Sheet A-105",
         title: "Exploded Axonometric",
         badge: "3D Visualization",
-        alt: "Exploded axonometric view of Oliver Villa",
+        alt: "Exploded axonometric view of Oliver",
       },
     ],
     tiles: [
       {
         title: "Arrival view",
         picture: "/OliverHouse.webp",
-        alt: "Exterior evening view of Oliver Villa",
+        alt: "Exterior evening view of Oliver",
         objectPosition: "center center",
         caption: "Soft lighting and a resort-style welcome.",
       },
       {
         title: "Terrace life",
         picture: "/frontHouse1.webp",
-        alt: "Terrace and exterior view for Oliver Villa",
+        alt: "Terrace and exterior view for Oliver",
         objectPosition: "center center",
         caption: "A broad terrace that opens the home to the garden.",
       },
       {
         title: "Interior calm",
         picture: "/livingroom.webp",
-        alt: "Living room interior for Oliver Villa",
+        alt: "Living room interior for Oliver",
         objectPosition: "center center",
         caption: "Neutral interiors that keep the focus on comfort.",
       },
       {
         title: "Beach mood",
         picture: "/beachView.webp",
-        alt: "Beach view mood image for Oliver Villa",
+        alt: "Beach view mood image for Oliver",
         objectPosition: "center center",
         caption: "A coastal note that reinforces the Aruba lifestyle.",
       },
@@ -321,14 +321,14 @@ export const projects: Project[] = [
   },
   {
     slug: "audrey",
-    title: "Audrey Villa Model",
+    title: "Audrey",
     picture: "/projects/audrey/audrey-front-elevation.webp",
     objectPosition: "center center",
     summary:
       "A two-level villa with four bedrooms, three bathrooms, and a refined minimalist character.",
-    badge: "Audrey Villa Model",
+    badge: "Audrey",
     eyebrow: "Project dossier",
-    boardTitle: "Audrey Villa Model",
+    boardTitle: "Audrey",
     boardSubtitle: "Elegance and exclusivity",
     intro:
       "Audrey is a two-level villa designed for generous family living, with four bedrooms, three bathrooms, a luxury kitchen with appliances, and a private 18 m² pool framed by landscaping.",
@@ -402,42 +402,42 @@ export const projects: Project[] = [
         sheetNumber: "Sheet A-101",
         title: "Site Plan",
         badge: "Plan Documentation",
-        alt: "Ground and first floor site plan for Audrey Villa Model",
+        alt: "Ground and first floor site plan for Audrey",
       },
       {
         picture: "/projects/audrey/audrey-exploded-axonometric.webp",
         sheetNumber: "Sheet A-105",
         title: "Exploded Axonometric",
         badge: "3D Visualization",
-        alt: "Exploded axonometric ground and first floor view of Audrey Villa Model",
+        alt: "Exploded axonometric ground and first floor view of Audrey",
       },
     ],
     tiles: [
       {
         title: "Signature facade",
         picture: "/projects/audrey/audrey-front-elevation.webp",
-        alt: "Front elevation of Audrey Villa Model",
+        alt: "Front elevation of Audrey",
         objectPosition: "center center",
         caption: "Audrey's two-level minimalist profile.",
       },
       {
         title: "Community setting",
         picture: "/projects/audrey/audrey-community-streetscape.webp",
-        alt: "Two-level Audrey villas along a landscaped residential street",
+        alt: "Two-level Audrey residences along a landscaped residential street",
         objectPosition: "center center",
         caption: "Two-level villas arranged along a landscaped residential street.",
       },
       {
         title: "Evening arrival",
         picture: "/projects/audrey/audrey-evening-arrival.webp",
-        alt: "Evening arrival view of Audrey Villa Model",
+        alt: "Evening arrival view of Audrey",
         objectPosition: "center center",
         caption: "Warm exterior lighting defines the main approach.",
       },
       {
         title: "Villa collection",
         picture: "/projects/audrey/audrey-villa-collection.webp",
-        alt: "Audrey villas presented as part of the residential community",
+        alt: "Audrey residences presented as part of the residential community",
         objectPosition: "center center",
         caption: "Audrey residences within the wider private community.",
       },

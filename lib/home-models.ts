@@ -1,9 +1,6 @@
 export type HomeModelId = "oliver" | "luca" | "audrey"
 
-export type HomeModelProjectSlug =
-  | "oliver-boutique"
-  | "luca-boutique"
-  | "audrey"
+export type HomeModelProjectSlug = HomeModelId
 
 export type HomeModel = {
   id: HomeModelId
@@ -15,19 +12,19 @@ export type HomeModel = {
 export const homeModels = [
   {
     id: "oliver",
-    title: "Oliver Villa",
-    projectSlug: "oliver-boutique",
-    projectHref: "/projects/oliver-boutique",
+    title: "Oliver",
+    projectSlug: "oliver",
+    projectHref: "/projects/oliver",
   },
   {
     id: "luca",
-    title: "Luca Boutique House",
-    projectSlug: "luca-boutique",
-    projectHref: "/projects/luca-boutique",
+    title: "Luca",
+    projectSlug: "luca",
+    projectHref: "/projects/luca",
   },
   {
     id: "audrey",
-    title: "Audrey Villa Model",
+    title: "Audrey",
     projectSlug: "audrey",
     projectHref: "/projects/audrey",
   },

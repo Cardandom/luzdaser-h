@@ -31,7 +31,7 @@ export default function HomePage() {
       />
       <ScrollVideoRevealSection
         id="luca"
-        projectSlug="luca-boutique"
+        projectSlug="luca"
         posterSrc="/luca-scroll-poster-v4.jpg"
         videoSrc="/videos/scroll-luca-desktop-g4-hq-v4.mp4"
         mobileVideoSrc="/videos/scroll-luca-mobile-g8-hq-v4.mp4"

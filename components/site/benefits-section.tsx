@@ -18,11 +18,19 @@ const stats = [
   },
 ]
 
-const locationAddress = "Paradera 184, Aruba"
-const googleMapsUrl =
-  "https://www.google.com/maps/search/?api=1&query=Paradera%20184%2C%20Aruba"
-const googleMapsEmbedUrl =
-  "https://maps.google.com/maps?q=Paradera%20184%2C%20Aruba&output=embed"
+const REINA_SOPHIA_LOCATION = {
+  name: "Reina Sophia Residences Aruba",
+  latitude: 12.5271907,
+  longitude: -69.9995181,
+  mapMarkerPosition: {
+    left: "43.7%",
+    top: "48.3%",
+  },
+  googleMapsUrl:
+    "https://www.google.com/maps/place/Reina+Sophia+Residences+Aruba/@12.5271907,-69.9995181,17z/data=!4m6!3m5!1s0x8e8539eb0763154b:0x9420056828ec48b6!8m2!3d12.5271907!4d-69.9995181!16s%2Fg%2F11vds54393",
+  googleMapsEmbedUrl:
+    "https://maps.google.com/maps?q=Reina%20Sophia%20Residences%20Aruba&ll=12.5271907%2C-69.9995181&z=17&output=embed",
+} as const
 
 export function BenefitsSection() {
   return (
@@ -35,7 +43,7 @@ export function BenefitsSection() {
                 Exclusive Location
               </p>
               <p className="mt-3 text-xs uppercase tracking-widest text-luxury-gold-ink sm:text-sm">
-                Paradera 184, Aruba
+                {REINA_SOPHIA_LOCATION.name}
               </p>
             </div>
 
@@ -59,14 +67,24 @@ export function BenefitsSection() {
 
                   <div
                     className="absolute -translate-x-1/2 -translate-y-full"
-                    style={{ left: "42%", top: "46%" }}
+                    style={REINA_SOPHIA_LOCATION.mapMarkerPosition}
                   >
                     <div className="flex flex-col items-center">
                       <div className="flex items-center gap-2 rounded-full border border-luxury-gold/25 bg-white/95 px-3 py-1.5 text-xs font-medium text-foreground shadow-lg backdrop-blur">
                         <MapPin className="size-3.5 text-luxury-gold" aria-hidden="true" />
-                        Paradera 184
+                        {REINA_SOPHIA_LOCATION.name}
                       </div>
-                      <div className="mt-2 size-4 rounded-full bg-luxury-gold shadow-[0_0_0_8px_rgba(220,181,109,0.14)]" />
+                      <div
+                        className="relative mt-2 size-8 drop-shadow-lg sm:size-9"
+                        aria-hidden="true"
+                      >
+                        <MapPin
+                          viewBox="2 2 20 20"
+                          className="size-full fill-red-600 text-red-700"
+                          strokeWidth={1.5}
+                        />
+                        <span className="absolute left-1/2 top-3 size-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full border border-red-100 bg-white shadow-inner sm:top-3.5 sm:size-3" />
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -99,9 +117,9 @@ export function BenefitsSection() {
 
             <div className="mt-6 overflow-hidden rounded-3xl border border-luxury-border bg-white shadow-lg">
               <ConsentManagedMap
-                googleMapsEmbedUrl={googleMapsEmbedUrl}
-                googleMapsUrl={googleMapsUrl}
-                locationAddress={locationAddress}
+                googleMapsEmbedUrl={REINA_SOPHIA_LOCATION.googleMapsEmbedUrl}
+                googleMapsUrl={REINA_SOPHIA_LOCATION.googleMapsUrl}
+                locationAddress={REINA_SOPHIA_LOCATION.name}
               />
             </div>
           </div>

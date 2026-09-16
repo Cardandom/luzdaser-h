@@ -16,6 +16,9 @@ const geistMono = Geist_Mono({
 })
 
 export const metadata: Metadata = {
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_SITE_URL ?? "https://jbsseco.com",
+  ),
   title: "Reina Sophia Residences",
   description:
     "Premium landing page for real estate investment in Aruba, optimized for desktop, tablet, and mobile.",

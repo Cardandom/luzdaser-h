@@ -1,5 +1,5 @@
 import type { Metadata } from "next"
-import { notFound, permanentRedirect } from "next/navigation"
+import { notFound } from "next/navigation"
 
 import { SiteFooter } from "@/components/site/site-footer"
 import { getProjectBySlug, projects } from "@/lib/projects"
@@ -9,15 +9,6 @@ type ProjectPageProps = {
   params: Promise<{
     slug: string
   }>
-}
-
-const legacyLucaProjectSlug = "lucas-boutique"
-const lucaProjectSlug = "luca-boutique"
-
-function redirectLegacyLucaProject(slug: string) {
-  if (slug === legacyLucaProjectSlug) {
-    permanentRedirect(`/projects/${lucaProjectSlug}`)
-  }
 }
 
 export async function generateStaticParams() {
@@ -30,7 +21,6 @@ export async function generateMetadata({
   params,
 }: ProjectPageProps): Promise<Metadata> {
   const { slug } = await params
-  redirectLegacyLucaProject(slug)
   const project = getProjectBySlug(slug)
 
   if (!project) {
@@ -39,15 +29,43 @@ export async function generateMetadata({
     }
   }
 
+  const title = `${project.title} | Featured Project`
+  const canonicalPath = `/projects/${project.slug}`
+
   return {
-    title: `${project.title} | Featured Project`,
+    title,
     description: project.summary,
+    alternates: {
+      canonical: canonicalPath,
+    },
+    openGraph: {
+      type: "website",
+      url: canonicalPath,
+      title,
+      description: project.summary,
+      images: [
+        {
+          url: project.picture,
+          alt: project.title,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description: project.summary,
+      images: [
+        {
+          url: project.picture,
+          alt: project.title,
+        },
+      ],
+    },
   }
 }
 
 export default async function ProjectPage({ params }: ProjectPageProps) {
   const { slug } = await params
-  redirectLegacyLucaProject(slug)
   const project = getProjectBySlug(slug)
 
   if (!project) {

@@ -29,28 +29,28 @@ export function ArchitectureShowcaseTop({
     return null
   }
 
-  const isOliverProject = project.slug === "oliver-boutique"
-  const isLucaProject = project.slug === "luca-boutique"
+  const isOliverProject = project.slug === "oliver"
+  const isLucaProject = project.slug === "luca"
   const isAudreyProject = project.slug === "audrey"
   const otherProjectHref = isOliverProject
-    ? "/projects/luca-boutique"
+    ? "/projects/luca"
     : isLucaProject
       ? "/projects/audrey"
-      : "/projects/oliver-boutique"
+      : "/projects/oliver"
   const otherProjectLabel = isOliverProject
-    ? "View Luca Boutique"
+    ? "View Luca"
     : isLucaProject
-      ? "View Audrey Villa"
-      : "View Oliver Villa"
+      ? "View Audrey"
+      : "View Oliver"
   const isLucaComplexHighlighted =
     isLucaComplexSelected || isLucaComplexPreviewed
   const canEnlargeHero = isLucaProject || isAudreyProject
 
   const heroImage =
-    project.slug === "oliver-boutique"
+    project.slug === "oliver"
       ? "/front3DOliver.webp"
-      : project.slug === "luca-boutique"
-        ? "/lucaPhotoMain.webp"
+      : project.slug === "luca"
+        ? "/luca-scroll-poster-v4.jpg"
       : project.picture
 
   return (
@@ -207,8 +207,8 @@ export function ArchitectureShowcaseTop({
                         src="/newComplex.webp"
                         alt={
                           isAudreyProject
-                            ? "Aerial master plan for Audrey Villa Model"
-                            : "Boutique House complex view"
+                            ? "Aerial master plan for Audrey"
+                            : "Residential complex view"
                         }
                         fill
                         sizes="(min-width: 1280px) 50vw, 100vw"
@@ -334,7 +334,7 @@ export function ArchitectureShowcaseTop({
 
                     <div className="absolute left-3 top-3 rounded-full border border-white/20 bg-white/90 px-3 py-1.5 text-[0.65rem] font-semibold uppercase tracking-[0.3em] text-foreground shadow-lg backdrop-blur">
                       <span className="mr-2 inline-flex size-2 rounded-full bg-luxury-gold" />
-                      {isAudreyProject ? "Villa Collection" : project.badge}
+                      {project.badge}
                     </div>
                   </div>
 

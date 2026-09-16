@@ -58,9 +58,9 @@ export function ArchitectureShowcase({ slug }: ArchitectureShowcaseProps) {
 
   const isAudreyProject = project.slug === "audrey"
   const backToProjectsHref =
-    project.slug === "oliver-boutique"
+    project.slug === "oliver"
       ? "/#oliver"
-      : project.slug === "luca-boutique"
+      : project.slug === "luca"
         ? "/#luca"
         : "/#audrey"
   const daytimeImage = project.tiles[0]?.picture ?? project.picture

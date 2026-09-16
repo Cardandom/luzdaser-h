@@ -234,7 +234,7 @@ type ScrollVideoRevealSectionProps = {
 
 export function ScrollVideoRevealSection({
   id = "oliver",
-  projectSlug = "oliver-boutique",
+  projectSlug = "oliver",
   posterSrc = "/oliver-house-scroll-poster.jpg",
   videoSrc = "/videos/video_recortado_oliver.mp4",
   mobileVideoSrc,
