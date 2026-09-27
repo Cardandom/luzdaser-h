@@ -7,6 +7,8 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 
 import { rememberClientLoginReturn } from "@/lib/client-login-return"
+import { navigateToHomeModel } from "@/lib/home-model-navigation"
+import type { HomeModelId } from "@/lib/home-models"
 
 const navItems = [
   { label: "Gallery", href: "#gallery" },
@@ -17,7 +19,11 @@ const navItems = [
   { label: "Contacts", href: "#contacts" },
 ]
 
-const scrollVideoRevealHrefs = new Set(["#oliver", "#luca", "#audrey"])
+const scrollVideoRevealIds = new Map<string, HomeModelId>([
+  ["#oliver", "oliver"],
+  ["#luca", "luca"],
+  ["#audrey", "audrey"],
+])
 
 export function SiteHeader() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
@@ -78,21 +84,13 @@ export function SiteHeader() {
   ) => {
     closeMenu()
 
-    if (
-      !isHomePage ||
-      !scrollVideoRevealHrefs.has(href) ||
-      !document.getElementById(href.slice(1))
-    ) {
+    const modelId = scrollVideoRevealIds.get(href)
+
+    if (!isHomePage || !modelId) {
       return
     }
 
-    event.preventDefault()
-    window.history.pushState(null, "", href)
-    window.dispatchEvent(
-      new CustomEvent("scroll-video-reveal:navigate", {
-        detail: { id: href.slice(1) },
-      }),
-    )
+    navigateToHomeModel(event, modelId)
   }
 
   return (
@@ -135,9 +133,6 @@ export function SiteHeader() {
               <Link
                 key={item.label}
                 href={getNavHref(item.href)}
-                scroll={
-                  scrollVideoRevealHrefs.has(item.href) ? false : undefined
-                }
                 className="transition-colors hover:text-luxury-gold"
                 onClick={(event) => handleNavClick(event, item.href)}
               >
@@ -178,9 +173,6 @@ export function SiteHeader() {
                 <Link
                   key={item.label}
                   href={getNavHref(item.href)}
-                  scroll={
-                    scrollVideoRevealHrefs.has(item.href) ? false : undefined
-                  }
                   className="rounded-2xl border border-transparent px-4 py-3 transition-colors hover:border-luxury-border hover:bg-stone-50 hover:text-luxury-gold"
                   onClick={(event) => handleNavClick(event, item.href)}
                 >

@@ -11,32 +11,33 @@ import {
   type HomeModelProjectSlug,
 } from "@/lib/home-models"
 import {
+  homeModelNavigationEvent,
+  type HomeModelNavigationDetail,
+} from "@/lib/home-model-navigation"
+import {
   scrollVideoRevealActiveEvent,
   scrollVideoRevealPrepareEvent,
-  scrollVideoRevealReadyEvent,
 } from "@/components/site/home-video-load-coordinator"
 
-const videoPhaseEnd = 0.7
-const cardRevealStart = 0.7
-const cardRevealEnd = 0.85
+// Keep the previous desktop reveal cadence while removing most of its idle tail.
+const desktopVideoScrollDistance = 4550
+const desktopCardRevealScrollDistance = 975
+const desktopTrailingMargin = 225
+const desktopScrollDistance =
+  desktopVideoScrollDistance +
+  desktopCardRevealScrollDistance +
+  desktopTrailingMargin
+const videoPhaseEnd = desktopVideoScrollDistance / desktopScrollDistance
+const cardRevealStart = videoPhaseEnd
+const cardRevealEnd =
+  (desktopVideoScrollDistance + desktopCardRevealScrollDistance) /
+  desktopScrollDistance
 const navigationRevealProgress = 0.9
-const desktopScrollDistance = 6500
-const mobileScrollDistanceViewportRatio = 3.8
-const desktopVideoCatchup = 0.12
-const mobileVideoCatchup = 0.3
-// The sources are 24 FPS: use half a frame on desktop and a wider mobile tolerance.
-const desktopSeekThreshold = 1 / 48
-const mobileSeekThreshold = 1 / 30
+const navigationFallbackDelayMs = 4000
+const videoCatchup = 0.12
+// The desktop sources are 24 FPS, so half a frame avoids redundant seeks.
+const seekThreshold = 1 / 48
 const seekFallbackDelayMs = 100
-const videoFullyBufferedToleranceSeconds = 0.25
-const videoReadyEvents = [
-  "progress",
-  "loadedmetadata",
-  "durationchange",
-  "loadeddata",
-  "canplay",
-  "suspend",
-] as const
 
 type RegisteredScrollTrigger = {
   end: number
@@ -61,6 +62,7 @@ const registeredScrollTriggers = new Map<
 let navigationRuntime: NavigationRuntime | null = null
 let navigationToken = 0
 let pendingNavigation: PendingNavigation | null = null
+let navigationFallbackTimeoutId: number | null = null
 
 function getHomeModelIndex(id: HomeModelId) {
   return homeModelIds.indexOf(id)
@@ -92,10 +94,56 @@ function temporarilyDisableNativeSmoothScroll() {
   }
 }
 
+function clearNavigationFallback() {
+  if (navigationFallbackTimeoutId === null) {
+    return
+  }
+
+  window.clearTimeout(navigationFallbackTimeoutId)
+  navigationFallbackTimeoutId = null
+}
+
+function startNavigationFallback(navigation: PendingNavigation) {
+  clearNavigationFallback()
+  navigationFallbackTimeoutId = window.setTimeout(() => {
+    if (pendingNavigation?.token !== navigation.token) {
+      return
+    }
+
+    navigationFallbackTimeoutId = null
+    pendingNavigation = null
+
+    if (window.location.hash !== `#${navigation.id}`) {
+      return
+    }
+
+    const section = document.getElementById(navigation.id)
+
+    if (!section) {
+      return
+    }
+
+    const restoreScrollBehavior = temporarilyDisableNativeSmoothScroll()
+
+    section.scrollIntoView({
+      behavior: "auto",
+      block: "start",
+    })
+    restoreScrollBehavior()
+  }, navigationFallbackDelayMs)
+}
+
 function advancePendingNavigation() {
   const navigation = pendingNavigation
 
   if (!navigation) {
+    return
+  }
+
+  if (window.location.hash !== `#${navigation.id}`) {
+    navigationToken += 1
+    pendingNavigation = null
+    clearNavigationFallback()
     return
   }
 
@@ -136,6 +184,7 @@ function advancePendingNavigation() {
     (trigger.end - trigger.start) * navigationRevealProgress
 
   pendingNavigation = null
+  clearNavigationFallback()
   const restoreScrollBehavior = temporarilyDisableNativeSmoothScroll()
 
   window.scrollTo({
@@ -146,8 +195,16 @@ function advancePendingNavigation() {
 }
 
 function requestRevealNavigation(id: HomeModelId) {
+  if (pendingNavigation?.id === id) {
+    advancePendingNavigation()
+    return
+  }
+
   navigationToken += 1
-  pendingNavigation = { id, token: navigationToken }
+  const navigation = { id, token: navigationToken }
+
+  pendingNavigation = navigation
+  startNavigationFallback(navigation)
   advancePendingNavigation()
 }
 
@@ -158,6 +215,7 @@ function cancelRevealNavigation(id: HomeModelId) {
 
   navigationToken += 1
   pendingNavigation = null
+  clearNavigationFallback()
 }
 
 function registerRevealTrigger(
@@ -193,61 +251,128 @@ function unregisterRevealTrigger(
   ) {
     navigationToken += 1
     pendingNavigation = null
+    clearNavigationFallback()
   }
 }
 
-function isVideoAlmostFullyBuffered(video: HTMLVideoElement) {
-  const { buffered, duration } = video
+type MobileModelShowcaseProps = {
+  primaryImageAlt: string
+  primaryImageSrc: string
+  projectHref: string
+  secondaryImageAlt: string
+  secondaryImageSrc: string
+  title: string
+}
 
-  if (!Number.isFinite(duration) || duration <= 0 || buffered.length === 0) {
-    return false
-  }
+function MobileModelShowcase({
+  primaryImageAlt,
+  primaryImageSrc,
+  projectHref,
+  secondaryImageAlt,
+  secondaryImageSrc,
+  title,
+}: MobileModelShowcaseProps) {
+  return (
+    <div className="relative isolate flex min-h-svh overflow-hidden border-t border-stone-200 bg-black px-5 py-10 md:hidden">
+      <div
+        aria-hidden="true"
+        className="absolute inset-x-0 top-0 h-48 bg-linear-to-b from-luxury-gold/15 to-transparent"
+      />
 
-  let coveredUntil = 0
+      <div className="relative mx-auto flex w-full max-w-lg flex-1 flex-col justify-center">
+        <div className="relative z-10 aspect-4/3 w-11/12 self-start overflow-hidden border border-white/80 bg-stone-200 shadow-2xl">
+          <Image
+            src={primaryImageSrc}
+            alt={primaryImageAlt}
+            fill
+            sizes="(max-width: 767px) 84vw, 1px"
+            className="object-cover"
+          />
+          <div
+            aria-hidden="true"
+            className="absolute inset-0 bg-linear-to-b from-black/5 via-transparent to-black/20"
+          />
+        </div>
 
-  for (let index = 0; index < buffered.length; index += 1) {
-    const bufferedStart = buffered.start(index)
-    const bufferedEnd = buffered.end(index)
+        <div className="relative z-30 -my-8 flex w-5/6 flex-col items-center gap-5 self-center border border-luxury-border bg-white/95 px-5 py-6 text-center shadow-2xl backdrop-blur-sm">
+          <h2 className="font-heading text-4xl leading-tight text-foreground">
+            {title}
+          </h2>
 
-    if (bufferedStart > coveredUntil + videoFullyBufferedToleranceSeconds) {
-      return false
-    }
+          <Link
+            href={projectHref}
+            aria-label={`Open ${title} project board`}
+            className="inline-flex min-h-11 items-center justify-center rounded-full bg-linear-to-b from-luxury-gold-soft to-luxury-gold px-6 py-2 text-sm font-semibold text-stone-950 shadow-lg transition-transform hover:-translate-y-0.5"
+          >
+            Open Project Board
+          </Link>
+        </div>
 
-    coveredUntil = Math.max(coveredUntil, bufferedEnd)
-
-    if (coveredUntil >= duration - videoFullyBufferedToleranceSeconds) {
-      return true
-    }
-  }
-
-  return false
+        <div className="relative z-20 aspect-4/3 w-11/12 self-end overflow-hidden border border-white/80 bg-stone-200 shadow-2xl">
+          <Image
+            src={secondaryImageSrc}
+            alt={secondaryImageAlt}
+            fill
+            sizes="(max-width: 767px) 84vw, 1px"
+            className="object-cover"
+          />
+          <div
+            aria-hidden="true"
+            className="absolute inset-0 bg-linear-to-b from-black/5 via-transparent to-black/20"
+          />
+        </div>
+      </div>
+    </div>
+  )
 }
 
 type ScrollVideoRevealSectionProps = {
   id?: HomeModelId
+  mobilePrimaryImageAlt?: string
+  mobileSecondaryImageAlt?: string
+  mobileSecondaryImageSrc?: string
   projectSlug?: HomeModelProjectSlug
   posterSrc?: string
   videoSrc?: string
-  mobileVideoSrc?: string
   revealOnHashNavigation?: boolean
 }
 
 export function ScrollVideoRevealSection({
   id = "oliver",
+  mobilePrimaryImageAlt = "Front view of the Oliver residence",
+  mobileSecondaryImageAlt = "Oliver residence patio and pool",
+  mobileSecondaryImageSrc = "/Oliver.webp",
   projectSlug = "oliver",
   posterSrc = "/oliver-house-scroll-poster.jpg",
   videoSrc = "/videos/video_recortado_oliver.mp4",
-  mobileVideoSrc,
   revealOnHashNavigation = false,
 }: ScrollVideoRevealSectionProps) {
   const sectionRef = useRef<HTMLElement | null>(null)
   const videoRef = useRef<HTMLVideoElement | null>(null)
   const cardRef = useRef<HTMLDivElement | null>(null)
-  const readyVideoSourceKeyRef = useRef<string | null>(null)
+  const [isDesktopExperience, setIsDesktopExperience] = useState(false)
   const [shouldLoadVideo, setShouldLoadVideo] = useState(false)
   const revealModel = getHomeModelBySlug(projectSlug)
 
   useEffect(() => {
+    const desktopMediaQuery = window.matchMedia("(min-width: 768px)")
+    const syncDesktopExperience = () => {
+      setIsDesktopExperience(desktopMediaQuery.matches)
+    }
+
+    syncDesktopExperience()
+    desktopMediaQuery.addEventListener("change", syncDesktopExperience)
+
+    return () => {
+      desktopMediaQuery.removeEventListener("change", syncDesktopExperience)
+    }
+  }, [])
+
+  useEffect(() => {
+    if (!isDesktopExperience) {
+      return
+    }
+
     const handlePrepareVideo = (event: Event) => {
       const prepareEvent = event as CustomEvent<{ id?: string }>
 
@@ -267,18 +392,15 @@ export function ScrollVideoRevealSection({
         handlePrepareVideo,
       )
     }
-  }, [id])
+  }, [id, isDesktopExperience])
 
   useEffect(() => {
     const section = sectionRef.current
 
-    if (!section || shouldLoadVideo) {
+    if (!isDesktopExperience || !section || shouldLoadVideo) {
       return
     }
 
-    const rootMargin = window.matchMedia("(max-width: 767px)").matches
-      ? "15% 0px"
-      : "50% 0px"
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
@@ -286,7 +408,7 @@ export function ScrollVideoRevealSection({
           observer.disconnect()
         }
       },
-      { rootMargin },
+      { rootMargin: "50% 0px" },
     )
 
     observer.observe(section)
@@ -294,88 +416,42 @@ export function ScrollVideoRevealSection({
     return () => {
       observer.disconnect()
     }
-  }, [shouldLoadVideo])
+  }, [isDesktopExperience, shouldLoadVideo])
 
   useEffect(() => {
-    const video = videoRef.current
-    const isMobile = window.matchMedia("(max-width: 767px)").matches
-
-    if (!isMobile || !shouldLoadVideo || !video) {
-      return
-    }
-
-    const readyVideo = video
-    const readyVideoSourceKey = `${id}:${mobileVideoSrc ?? videoSrc}`
-
-    function removeReadyListeners() {
-      for (const eventName of videoReadyEvents) {
-        readyVideo.removeEventListener(eventName, maybeDispatchReady)
-      }
-    }
-
-    function maybeDispatchReady() {
-      if (readyVideoSourceKeyRef.current === readyVideoSourceKey) {
-        removeReadyListeners()
-        return
-      }
-
-      if (!isVideoAlmostFullyBuffered(readyVideo)) {
-        return
-      }
-
-      readyVideoSourceKeyRef.current = readyVideoSourceKey
-      removeReadyListeners()
-      window.dispatchEvent(
-        new CustomEvent(scrollVideoRevealReadyEvent, {
-          detail: { id },
-        }),
-      )
-    }
-
-    for (const eventName of videoReadyEvents) {
-      readyVideo.addEventListener(eventName, maybeDispatchReady)
-    }
-
-    maybeDispatchReady()
-
-    return removeReadyListeners
-  }, [id, mobileVideoSrc, shouldLoadVideo, videoSrc])
-
-  useEffect(() => {
-    if (!revealOnHashNavigation) {
+    if (!isDesktopExperience || !revealOnHashNavigation) {
       return
     }
 
     const handleRevealNavigation = (event: Event) => {
-      const navigationEvent = event as CustomEvent<{ id?: string }>
+      const navigationEvent =
+        event as CustomEvent<HomeModelNavigationDetail>
 
       if (navigationEvent.detail?.id === id) {
+        navigationEvent.preventDefault()
         requestRevealNavigation(id)
       }
     }
 
     const handleHashChange = () => {
-      if (window.location.hash === `#${id}`) {
-        requestRevealNavigation(id)
-      }
+      cancelRevealNavigation(id)
     }
 
     window.addEventListener(
-      "scroll-video-reveal:navigate",
+      homeModelNavigationEvent,
       handleRevealNavigation,
     )
     window.addEventListener("hashchange", handleHashChange)
-    handleHashChange()
 
     return () => {
       window.removeEventListener(
-        "scroll-video-reveal:navigate",
+        homeModelNavigationEvent,
         handleRevealNavigation,
       )
       window.removeEventListener("hashchange", handleHashChange)
       cancelRevealNavigation(id)
     }
-  }, [id, revealOnHashNavigation])
+  }, [id, isDesktopExperience, revealOnHashNavigation])
 
   useEffect(() => {
     let cancelBoundarySeekFallback: (() => void) | null = null
@@ -391,7 +467,7 @@ export function ScrollVideoRevealSection({
     let isMounted = true
     let hasInitialized = false
 
-    if (!shouldLoadVideo) {
+    if (!isDesktopExperience || !shouldLoadVideo) {
       return
     }
 
@@ -432,14 +508,6 @@ export function ScrollVideoRevealSection({
 
       gsap.registerPlugin(ScrollTrigger)
 
-      const isDesktop = window.matchMedia("(min-width: 768px)").matches
-      const scrollDistance = isDesktop
-        ? `+=${desktopScrollDistance}`
-        : () => `+=${Math.round(window.innerHeight * mobileScrollDistanceViewportRatio)}`
-      const videoCatchup = isDesktop ? desktopVideoCatchup : mobileVideoCatchup
-      const seekThreshold = isDesktop
-        ? desktopSeekThreshold
-        : mobileSeekThreshold
       const cardEase = gsap.parseEase("power3.out")
       const modelIndex = getHomeModelIndex(id)
       const refreshPriority = homeModelIds.length - modelIndex
@@ -617,9 +685,7 @@ export function ScrollVideoRevealSection({
           return
         }
 
-        const frameRatio = isDesktop ? 1 : gsap.ticker.deltaRatio(60)
-        const catchup = 1 - Math.pow(1 - videoCatchup, frameRatio)
-        currentTime += (targetTime - currentTime) * catchup
+        currentTime += (targetTime - currentTime) * videoCatchup
 
         if (isWithinSeekThreshold(targetTime, currentTime)) {
           currentTime = targetTime
@@ -679,7 +745,7 @@ export function ScrollVideoRevealSection({
         scrollTriggerInstance = ScrollTrigger.create({
           trigger: section,
           start: "top top",
-          end: scrollDistance,
+          end: `+=${desktopScrollDistance}`,
           pin: true,
           anticipatePin: 1,
           invalidateOnRefresh: true,
@@ -758,76 +824,76 @@ export function ScrollVideoRevealSection({
       scrollTriggerInstance?.kill()
       context?.revert()
     }
-  }, [id, shouldLoadVideo, videoSrc])
+  }, [id, isDesktopExperience, shouldLoadVideo, videoSrc])
 
   return (
     <section
       id={id}
       ref={sectionRef}
-      className="relative h-svh w-full overflow-hidden bg-black md:h-screen"
+      className="relative w-full bg-black md:h-screen md:overflow-hidden"
     >
-      <Image
-        src={posterSrc}
-        alt=""
-        fill
-        sizes="100vw"
-        className="object-cover"
-        aria-hidden="true"
-      />
+      {revealModel ? (
+        <MobileModelShowcase
+          primaryImageAlt={mobilePrimaryImageAlt}
+          primaryImageSrc={posterSrc}
+          projectHref={revealModel.projectHref}
+          secondaryImageAlt={mobileSecondaryImageAlt}
+          secondaryImageSrc={mobileSecondaryImageSrc}
+          title={revealModel.title}
+        />
+      ) : null}
 
-      <video
-        ref={videoRef}
-        className="absolute inset-0 h-full w-full object-cover"
-        muted
-        playsInline
-        preload="auto"
-        aria-hidden="true"
-      >
-        {shouldLoadVideo ? (
-          mobileVideoSrc ? (
-            <>
-              <source
-                src={mobileVideoSrc}
-                type="video/mp4"
-                media="(max-width: 767px)"
-              />
-              <source
-                src={videoSrc}
-                type="video/mp4"
-                media="(min-width: 768px)"
-              />
-            </>
-          ) : (
-            <source src={videoSrc} type="video/mp4" />
-          )
+      <div className="relative hidden h-full w-full overflow-hidden md:block">
+        <Image
+          src={posterSrc}
+          alt=""
+          fill
+          sizes="(min-width: 768px) 100vw, 1px"
+          className="object-cover"
+          aria-hidden="true"
+        />
+
+        {isDesktopExperience ? (
+          <video
+            ref={videoRef}
+            className="absolute inset-0 h-full w-full object-cover"
+            muted
+            playsInline
+            preload="auto"
+            aria-hidden="true"
+          >
+            {shouldLoadVideo ? (
+              <source src={videoSrc} type="video/mp4" />
+            ) : null}
+          </video>
         ) : null}
-      </video>
 
-      <div
-        aria-hidden="true"
-        className="absolute inset-0 bg-linear-to-b from-black/10 via-transparent to-black/35"
-      />
-
-      <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center px-5 py-10 sm:px-8">
         <div
-          ref={cardRef}
-          className="pointer-events-auto flex w-full max-w-xl flex-col items-center gap-5 text-center opacity-0"
-        >
-          {revealModel && (
-            <>
-              <h2 className="font-heading text-4xl leading-tight text-white drop-shadow-lg sm:text-6xl">
-                {revealModel.title}
-              </h2>
+          aria-hidden="true"
+          className="absolute inset-0 bg-linear-to-b from-black/10 via-transparent to-black/35"
+        />
 
-              <Link
-                href={revealModel.projectHref}
-                aria-label={`Open ${revealModel.title} project board`}
-                className="inline-flex h-11 items-center justify-center rounded-full bg-linear-to-b from-luxury-gold-soft to-luxury-gold px-6 text-sm font-semibold text-stone-950 shadow-lg transition-transform hover:-translate-y-0.5"
-              >
-                Open Project Board
-              </Link>
-            </>
-          )}
+        <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center px-8 py-10">
+          <div
+            ref={cardRef}
+            className="pointer-events-auto flex w-full max-w-xl flex-col items-center gap-5 text-center opacity-0"
+          >
+            {revealModel && (
+              <>
+                <h2 className="font-heading text-6xl leading-tight text-white drop-shadow-lg">
+                  {revealModel.title}
+                </h2>
+
+                <Link
+                  href={revealModel.projectHref}
+                  aria-label={`Open ${revealModel.title} project board`}
+                  className="inline-flex h-11 items-center justify-center rounded-full bg-linear-to-b from-luxury-gold-soft to-luxury-gold px-6 text-sm font-semibold text-stone-950 shadow-lg transition-transform hover:-translate-y-0.5"
+                >
+                  Open Project Board
+                </Link>
+              </>
+            )}
+          </div>
         </div>
       </div>
     </section>

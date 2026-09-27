@@ -22,27 +22,33 @@ export default function HomePage() {
       <HomeVideoLoadCoordinator projectIds={homeScrollVideoProjectIds} />
       <HeroSection />
       <GallerySection />
-      {/* Scroll-controlled video reveal section. Move this block if you want it elsewhere. */}
+      {/* Static model cards on mobile; scroll-controlled video reveals on desktop. */}
       <ScrollVideoRevealSection
         id="oliver"
+        mobilePrimaryImageAlt="Front view of the Oliver residence"
+        mobileSecondaryImageAlt="Oliver residence patio and pool"
+        mobileSecondaryImageSrc="/Oliver.webp"
         videoSrc="/videos/scroll-oliver-desktop-g4-hq-v2.mp4"
-        mobileVideoSrc="/videos/scroll-oliver-mobile-g8-hq-v3.mp4"
         revealOnHashNavigation
       />
       <ScrollVideoRevealSection
         id="luca"
+        mobilePrimaryImageAlt="Front view of the Luca residence"
+        mobileSecondaryImageAlt="Luca residence exterior at sunset"
+        mobileSecondaryImageSrc="/lucaSectionPhotp.webp"
         projectSlug="luca"
         posterSrc="/luca-scroll-poster-v4.jpg"
         videoSrc="/videos/scroll-luca-desktop-g4-hq-v4.mp4"
-        mobileVideoSrc="/videos/scroll-luca-mobile-g8-hq-v4.mp4"
         revealOnHashNavigation
       />
       <ScrollVideoRevealSection
         id="audrey"
+        mobilePrimaryImageAlt="Front view of the Audrey residence"
+        mobileSecondaryImageAlt="Audrey residence exterior at sunset"
+        mobileSecondaryImageSrc="/projects/audrey/audrey-evening-arrival.webp"
         projectSlug="audrey"
         posterSrc="/audrey-scroll-poster.jpg"
         videoSrc="/videos/scroll-audrey-desktop-g4-hq-v1.mp4"
-        mobileVideoSrc="/videos/scroll-audrey-mobile-g8-hq-v1.mp4"
         revealOnHashNavigation
       />
       <CtaSection />

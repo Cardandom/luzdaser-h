@@ -1,6 +1,8 @@
 import { ArrowRight, ChefHat, PlaySquare, ShieldCheck, Waves } from "lucide-react"
 import Image from "next/image"
 
+import { HomeModelLink } from "@/components/site/home-model-link"
+
 const heroFeatures = [
   {
     icon: ShieldCheck,
@@ -83,13 +85,13 @@ export function HeroSection() {
               </p>
 
               <div className="mt-5 flex justify-start sm:mt-8">
-                <a
-                  href="#featured-projects"
+                <HomeModelLink
+                  modelId="oliver"
                   className="inline-flex h-11 items-center justify-center gap-2 rounded-full bg-linear-to-b from-luxury-gold-soft to-luxury-gold px-6 text-xs font-semibold uppercase tracking-widest text-stone-950 shadow-lg transition-transform hover:-translate-y-0.5 sm:h-12 sm:px-7"
                 >
                   Explore Models
                   <ArrowRight className="size-4" aria-hidden="true" />
-                </a>
+                </HomeModelLink>
               </div>
             </div>
           </div>

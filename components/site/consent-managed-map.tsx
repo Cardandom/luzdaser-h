@@ -73,22 +73,22 @@ export function ConsentManagedMap({
   }
 
   return (
-    <div className="flex aspect-video min-h-80 items-center justify-center bg-linear-to-br from-stone-50 via-white to-luxury-gold/10 p-6 text-center sm:p-10">
-      <div className="max-w-lg">
+    <div className="flex w-full min-w-0 items-center justify-center bg-linear-to-br from-stone-50 via-white to-luxury-gold/10 px-4 py-10 text-center sm:aspect-video sm:min-h-80 sm:p-10">
+      <div className="w-full min-w-0 max-w-lg">
         <span className="mx-auto inline-flex size-12 items-center justify-center rounded-full border border-luxury-border bg-white text-luxury-gold-ink shadow-sm">
           <MapPin className="size-5" aria-hidden="true" />
         </span>
-        <h3 className="mt-5 font-heading text-3xl text-foreground">
+        <h3 className="mt-5 break-words font-heading text-2xl leading-tight text-foreground sm:text-3xl">
           Interactive map
         </h3>
-        <p className="mt-3 text-sm leading-7 text-foreground/70 sm:text-base">
+        <p className="mx-auto mt-3 max-w-md text-sm leading-6 text-foreground/70 sm:text-base sm:leading-7">
           Google Maps is provided by a third party and may process information
           about your device when loaded.
         </p>
-        <div className="mt-6 flex flex-col justify-center gap-3 sm:flex-row">
+        <div className="mt-6 flex w-full flex-col justify-center gap-3 sm:flex-row">
           <button
             type="button"
-            className="inline-flex min-h-12 items-center justify-center rounded-full bg-foreground px-6 py-3 text-sm font-semibold text-white transition hover:bg-foreground/90 focus-visible:ring-4 focus-visible:ring-luxury-gold/40 focus-visible:outline-none"
+            className="inline-flex min-h-12 w-full items-center justify-center rounded-full bg-foreground px-5 py-3 text-sm font-semibold text-white transition hover:bg-foreground/90 focus-visible:ring-4 focus-visible:ring-luxury-gold/40 focus-visible:outline-none sm:w-auto sm:px-6"
             onClick={() => {
               const consent = grantExternalMediaConsent()
               setExternalMediaAllowed(consent.externalMedia)
@@ -98,7 +98,7 @@ export function ConsentManagedMap({
           </button>
           <button
             type="button"
-            className="inline-flex min-h-12 items-center justify-center rounded-full border border-foreground bg-white px-6 py-3 text-sm font-semibold text-foreground transition hover:bg-stone-100 focus-visible:ring-4 focus-visible:ring-luxury-gold/40 focus-visible:outline-none"
+            className="inline-flex min-h-12 w-full items-center justify-center rounded-full border border-foreground bg-white px-5 py-3 text-sm font-semibold text-foreground transition hover:bg-stone-100 focus-visible:ring-4 focus-visible:ring-luxury-gold/40 focus-visible:outline-none sm:w-auto sm:px-6"
             onClick={openPrivacySettings}
           >
             Manage privacy settings

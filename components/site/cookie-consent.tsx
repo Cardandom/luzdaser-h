@@ -110,7 +110,7 @@ export function CookieConsent() {
   }, [])
 
   useEffect(() => {
-    if (!open) {
+    if (!open || view !== "preferences") {
       return
     }
 
@@ -142,58 +142,95 @@ export function CookieConsent() {
   }
 
   return (
-    <Dialog.Root open={open} onOpenChange={setOpen}>
+    <Dialog.Root
+      open={open}
+      modal={view === "preferences"}
+      onOpenChange={setOpen}
+    >
       <Dialog.Portal>
-        <Dialog.Backdrop className="fixed inset-0 z-80 bg-stone-950/50 backdrop-blur-sm transition-opacity duration-200 data-starting-style:opacity-0 data-ending-style:opacity-0" />
-        <Dialog.Viewport className="fixed inset-0 z-90 flex items-end justify-center overflow-y-auto p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:items-center sm:p-6">
+        {view === "preferences" ? (
+          <Dialog.Backdrop className="fixed inset-0 z-80 bg-stone-950/50 backdrop-blur-sm transition-opacity duration-200 data-starting-style:opacity-0 data-ending-style:opacity-0" />
+        ) : null}
+        <Dialog.Viewport
+          className={
+            view === "preferences"
+              ? "fixed inset-0 z-90 flex items-end justify-center overflow-y-auto p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:items-center sm:p-6"
+              : "pointer-events-none fixed inset-x-0 bottom-0 z-90 flex items-end justify-center p-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] sm:p-6"
+          }
+        >
           <Dialog.Popup
-            initialFocus={firstActionRef}
-            className="relative max-h-full w-full max-w-lg overflow-y-auto rounded-3xl border border-luxury-border bg-white p-5 text-foreground shadow-2xl outline-none transition duration-200 ease-out data-starting-style:translate-y-4 data-starting-style:opacity-0 data-ending-style:translate-y-4 data-ending-style:opacity-0 sm:p-6"
+            initialFocus={view === "preferences" ? firstActionRef : false}
+            className={
+              view === "preferences"
+                ? "relative max-h-full w-full max-w-lg overflow-y-auto rounded-3xl border border-luxury-border bg-white p-5 text-foreground shadow-2xl outline-none transition duration-200 ease-out data-starting-style:translate-y-4 data-starting-style:opacity-0 data-ending-style:translate-y-4 data-ending-style:opacity-0 sm:p-6"
+                : "pointer-events-auto relative w-full max-w-5xl overflow-y-auto rounded-2xl border border-luxury-border bg-luxury-surface-strong p-4 text-foreground shadow-xl outline-none transition duration-200 ease-out data-starting-style:translate-y-4 data-starting-style:opacity-0 data-ending-style:translate-y-4 data-ending-style:opacity-0 sm:p-5"
+            }
           >
             <Dialog.Close
-              className="absolute right-4 top-4 inline-flex size-10 items-center justify-center rounded-full border border-luxury-border bg-white text-foreground/70 transition hover:border-luxury-gold hover:text-foreground focus-visible:ring-4 focus-visible:ring-luxury-gold/30 focus-visible:outline-none"
+              className={
+                view === "preferences"
+                  ? "absolute right-4 top-4 inline-flex size-10 items-center justify-center rounded-full border border-luxury-border bg-white text-foreground/70 transition hover:border-luxury-gold hover:text-foreground focus-visible:ring-4 focus-visible:ring-luxury-gold/30 focus-visible:outline-none"
+                  : "absolute right-3 top-3 inline-flex size-11 items-center justify-center rounded-full border border-luxury-border bg-white/80 text-foreground/70 transition hover:border-luxury-gold hover:text-foreground focus-visible:ring-4 focus-visible:ring-luxury-gold/30 focus-visible:outline-none sm:right-4 sm:top-4"
+              }
               aria-label="Close cookie preferences"
             >
               <X className="size-4" aria-hidden="true" />
             </Dialog.Close>
 
             {view === "overview" ? (
-              <>
-                <Dialog.Title className="pr-12 font-heading text-2xl tracking-tight sm:text-3xl">
-                  Cookie preferences
-                </Dialog.Title>
-                <Dialog.Description className="mt-3 text-sm leading-6 text-foreground/70">
-                  We use essential technologies to operate this website. With
-                  your permission, we also use analytics and advertising tools
-                  to understand how visitors use the site, measure our campaigns
-                  and improve your experience.
-                </Dialog.Description>
+              <div className="md:flex md:items-center md:gap-6">
+                <div className="min-w-0 flex-1">
+                  <Dialog.Title className="pr-12 font-heading text-xl tracking-tight sm:text-2xl">
+                    Cookie preferences
+                  </Dialog.Title>
+                  <Dialog.Description className="mt-1 pr-12 text-sm leading-5 text-foreground/70 md:pr-0">
+                    We use cookies to improve your experience and understand how
+                    our website is used.
+                  </Dialog.Description>
+                  <p className="mt-2 text-xs leading-5 text-foreground/60">
+                    Read our{" "}
+                    <Link
+                      href="/privacy-policy"
+                      className="font-medium text-foreground underline decoration-luxury-gold underline-offset-4"
+                    >
+                      Privacy Policy
+                    </Link>{" "}
+                    and{" "}
+                    <Link
+                      href="/cookie-policy"
+                      className="font-medium text-foreground underline decoration-luxury-gold underline-offset-4"
+                    >
+                      Cookie Policy
+                    </Link>
+                    .
+                  </p>
+                </div>
 
-                <div className="mt-6 grid grid-cols-2 gap-3">
+                <div className="mt-4 grid shrink-0 grid-cols-2 gap-2 md:mt-0 md:mr-14 md:w-96">
                   <button
                     ref={firstActionRef}
                     type="button"
-                    className="inline-flex min-h-12 items-center justify-center rounded-full bg-foreground px-5 py-3 text-sm font-semibold text-white transition hover:bg-foreground/90 focus-visible:ring-4 focus-visible:ring-luxury-gold/40 focus-visible:outline-none"
+                    className="inline-flex min-h-11 items-center justify-center rounded-full bg-linear-to-b from-luxury-gold-soft to-luxury-gold px-3 py-2 text-xs font-semibold text-stone-950 shadow-md transition hover:-translate-y-0.5 focus-visible:ring-4 focus-visible:ring-luxury-gold/40 focus-visible:outline-none sm:text-sm"
                     onClick={handleAcceptAll}
                   >
                     Accept all
                   </button>
                   <button
                     type="button"
-                    className="inline-flex min-h-12 items-center justify-center rounded-full border border-foreground bg-white px-5 py-3 text-sm font-semibold text-foreground transition hover:bg-stone-100 focus-visible:ring-4 focus-visible:ring-luxury-gold/40 focus-visible:outline-none"
+                    className="inline-flex min-h-11 items-center justify-center rounded-full border border-foreground bg-white px-3 py-2 text-xs font-semibold text-foreground transition hover:bg-stone-100 focus-visible:ring-4 focus-visible:ring-luxury-gold/40 focus-visible:outline-none sm:text-sm"
                     onClick={handleRejectAll}
                   >
                     Essentials only
                   </button>
                   <button
                     type="button"
-                    className="col-span-2 inline-flex min-h-11 items-center justify-center rounded-full px-5 py-2 text-sm font-semibold text-foreground underline decoration-luxury-gold underline-offset-4 transition hover:bg-stone-100 focus-visible:ring-4 focus-visible:ring-luxury-gold/40 focus-visible:outline-none"
+                    className="col-span-2 inline-flex min-h-11 items-center justify-center rounded-full px-4 py-2 text-sm font-semibold text-foreground underline decoration-luxury-gold underline-offset-4 transition hover:bg-white/70 focus-visible:ring-4 focus-visible:ring-luxury-gold/40 focus-visible:outline-none"
                     onClick={() => setView("preferences")}
                   >
                     Manage preferences
                   </button>
                 </div>
-              </>
+              </div>
             ) : (
               <>
                 <Dialog.Title className="pr-12 font-heading text-2xl tracking-tight sm:text-3xl">
@@ -283,23 +320,25 @@ export function CookieConsent() {
               </>
             )}
 
-            <p className="mt-5 text-xs leading-5 text-foreground/60">
-              Learn more in our{" "}
-              <Link
-                href="/privacy-policy"
-                className="font-medium text-foreground underline decoration-luxury-gold underline-offset-4"
-              >
-                Privacy Policy
-              </Link>{" "}
-              and{" "}
-              <Link
-                href="/cookie-policy"
-                className="font-medium text-foreground underline decoration-luxury-gold underline-offset-4"
-              >
-                Cookie Policy
-              </Link>
-              .
-            </p>
+            {view === "preferences" ? (
+              <p className="mt-5 text-xs leading-5 text-foreground/60">
+                Learn more in our{" "}
+                <Link
+                  href="/privacy-policy"
+                  className="font-medium text-foreground underline decoration-luxury-gold underline-offset-4"
+                >
+                  Privacy Policy
+                </Link>{" "}
+                and{" "}
+                <Link
+                  href="/cookie-policy"
+                  className="font-medium text-foreground underline decoration-luxury-gold underline-offset-4"
+                >
+                  Cookie Policy
+                </Link>
+                .
+              </p>
+            ) : null}
 
             <span className="sr-only" aria-live="polite">
               {savedConsent ? "Privacy choices are saved." : ""}

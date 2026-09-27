@@ -1,20 +1,9 @@
 "use client"
 
-import { useEffect, useRef } from "react"
+import { useEffect, useRef, useState } from "react"
 
 export const scrollVideoRevealPrepareEvent = "scroll-video-reveal:prepare"
 export const scrollVideoRevealActiveEvent = "scroll-video-reveal:active"
-export const scrollVideoRevealReadyEvent = "scroll-video-reveal:ready"
-
-const MOBILE_HERO_BUFFER_SECONDS = 12
-const HERO_FULLY_BUFFERED_TOLERANCE_SECONDS = 0.25
-const mobileHeroBufferEvents = [
-  "loadeddata",
-  "loadedmetadata",
-  "progress",
-  "canplay",
-  "timeupdate",
-] as const
 
 type ScrollVideoRevealEventDetail = {
   id?: string
@@ -24,46 +13,32 @@ type HomeVideoLoadCoordinatorProps = {
   projectIds: readonly string[]
 }
 
-function hasSufficientMobileHeroBuffer(video: HTMLVideoElement) {
-  const { buffered, currentTime, duration } = video
-  let lastBufferedEnd = 0
-
-  for (let index = 0; index < buffered.length; index += 1) {
-    const bufferedStart = buffered.start(index)
-    const bufferedEnd = buffered.end(index)
-
-    lastBufferedEnd = Math.max(lastBufferedEnd, bufferedEnd)
-
-    if (
-      bufferedStart <= currentTime &&
-      currentTime <= bufferedEnd &&
-      bufferedEnd - currentTime >= MOBILE_HERO_BUFFER_SECONDS
-    ) {
-      return true
-    }
-  }
-
-  return (
-    Number.isFinite(duration) &&
-    duration > 0 &&
-    lastBufferedEnd > 0 &&
-    lastBufferedEnd >= duration - HERO_FULLY_BUFFERED_TOLERANCE_SECONDS
-  )
-}
-
 export function HomeVideoLoadCoordinator({
   projectIds,
 }: HomeVideoLoadCoordinatorProps) {
   const preparedProjectIdsRef = useRef(new Set<string>())
+  const [isDesktopExperience, setIsDesktopExperience] = useState(false)
+
+  useEffect(() => {
+    const desktopMediaQuery = window.matchMedia("(min-width: 768px)")
+    const syncDesktopExperience = () => {
+      setIsDesktopExperience(desktopMediaQuery.matches)
+    }
+
+    syncDesktopExperience()
+    desktopMediaQuery.addEventListener("change", syncDesktopExperience)
+
+    return () => {
+      desktopMediaQuery.removeEventListener("change", syncDesktopExperience)
+    }
+  }, [])
 
   useEffect(() => {
     let hasScheduledFirstProject = false
     let heroVisibilityObserver: IntersectionObserver | null = null
     let idleCallbackId: number | null = null
     let isMounted = true
-    let removeMobileHeroBufferListeners: (() => void) | null = null
     let timeoutId: number | null = null
-    const isMobile = window.matchMedia("(max-width: 767px)").matches
 
     const prepareProject = (id: string | undefined) => {
       if (!id || preparedProjectIdsRef.current.has(id)) {
@@ -115,23 +90,12 @@ export function HomeVideoLoadCoordinator({
       prepareProject(projectIds[projectIndex + 1])
     }
 
-    const handleActiveProject = (event: Event) => {
-      if (!isMobile) {
-        prepareNextProject(event)
-      }
+    if (isDesktopExperience) {
+      window.addEventListener(
+        scrollVideoRevealActiveEvent,
+        prepareNextProject,
+      )
     }
-
-    const handleReadyProject = (event: Event) => {
-      if (isMobile) {
-        prepareNextProject(event)
-      }
-    }
-
-    window.addEventListener(
-      scrollVideoRevealActiveEvent,
-      handleActiveProject,
-    )
-    window.addEventListener(scrollVideoRevealReadyEvent, handleReadyProject)
 
     const heroVideo = document.querySelector<HTMLVideoElement>(
       "video[data-home-hero-video]",
@@ -145,47 +109,18 @@ export function HomeVideoLoadCoordinator({
           }
         } else {
           heroVideo.pause()
-
-          if (isMobile) {
-            removeMobileHeroBufferListeners?.()
-            removeMobileHeroBufferListeners = null
-            prepareFirstProject()
-          }
         }
       })
       heroVisibilityObserver.observe(heroVideo)
 
-      if (isMobile) {
-        const maybePrepareFirstProject = () => {
-          if (
-            hasScheduledFirstProject ||
-            !hasSufficientMobileHeroBuffer(heroVideo)
-          ) {
-            return
-          }
-
-          removeMobileHeroBufferListeners?.()
-          removeMobileHeroBufferListeners = null
+      if (isDesktopExperience) {
+        if (heroVideo.readyState >= 2) {
           prepareFirstProject()
+        } else {
+          heroVideo.addEventListener("loadeddata", prepareFirstProject, {
+            once: true,
+          })
         }
-
-        for (const eventName of mobileHeroBufferEvents) {
-          heroVideo.addEventListener(eventName, maybePrepareFirstProject)
-        }
-
-        removeMobileHeroBufferListeners = () => {
-          for (const eventName of mobileHeroBufferEvents) {
-            heroVideo.removeEventListener(eventName, maybePrepareFirstProject)
-          }
-        }
-
-        maybePrepareFirstProject()
-      } else if (heroVideo.readyState >= 2) {
-        prepareFirstProject()
-      } else {
-        heroVideo.addEventListener("loadeddata", prepareFirstProject, {
-          once: true,
-        })
       }
     }
 
@@ -200,16 +135,14 @@ export function HomeVideoLoadCoordinator({
         window.clearTimeout(timeoutId)
       }
 
-      removeMobileHeroBufferListeners?.()
       heroVisibilityObserver?.disconnect()
       window.removeEventListener(
         scrollVideoRevealActiveEvent,
-        handleActiveProject,
+        prepareNextProject,
       )
-      window.removeEventListener(scrollVideoRevealReadyEvent, handleReadyProject)
       heroVideo?.removeEventListener("loadeddata", prepareFirstProject)
     }
-  }, [projectIds])
+  }, [isDesktopExperience, projectIds])
 
   return null
 }
