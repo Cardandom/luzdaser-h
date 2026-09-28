@@ -202,7 +202,7 @@ export const projects: Project[] = [
     slug: "oliver",
     title: "Oliver",
     price: "$350,000 USD",
-    picture: "/OliverHouse.webp",
+    picture: "/front3DOliver.webp",
     objectPosition: "center center",
     summary:
       "A more expansive villa composition with a softer palette, garden framing, and a relaxed outdoor rhythm.",
@@ -291,14 +291,14 @@ export const projects: Project[] = [
     tiles: [
       {
         title: "Arrival view",
-        picture: "/OliverHouse.webp",
+        picture: "/front3DOliver.webp",
         alt: "Exterior evening view of Oliver",
         objectPosition: "center center",
         caption: "Soft lighting and a resort-style welcome.",
       },
       {
         title: "Terrace life",
-        picture: "/frontHouse1.webp",
+        picture: "/projects/oliver/oliver-front-view-02.webp",
         alt: "Terrace and exterior view for Oliver",
         objectPosition: "center center",
         caption: "A broad terrace that opens the home to the garden.",

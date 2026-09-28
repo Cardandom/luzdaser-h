@@ -341,9 +341,9 @@ export function ScrollVideoRevealSection({
   id = "oliver",
   mobilePrimaryImageAlt = "Front view of the Oliver residence",
   mobileSecondaryImageAlt = "Oliver residence patio and pool",
-  mobileSecondaryImageSrc = "/Oliver.webp",
+  mobileSecondaryImageSrc = "/projects/oliver/oliver-front-view-02.webp",
   projectSlug = "oliver",
-  posterSrc = "/oliver-house-scroll-poster.jpg",
+  posterSrc = "/front3DOliver.webp",
   videoSrc = "/videos/video_recortado_oliver.mp4",
   revealOnHashNavigation = false,
 }: ScrollVideoRevealSectionProps) {

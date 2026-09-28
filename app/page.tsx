@@ -27,7 +27,8 @@ export default function HomePage() {
         id="oliver"
         mobilePrimaryImageAlt="Front view of the Oliver residence"
         mobileSecondaryImageAlt="Oliver residence patio and pool"
-        mobileSecondaryImageSrc="/Oliver.webp"
+        mobileSecondaryImageSrc="/projects/oliver/oliver-front-view-02.webp"
+        posterSrc="/front3DOliver.webp"
         videoSrc="/videos/scroll-oliver-desktop-g4-hq-v2.mp4"
         revealOnHashNavigation
       />
