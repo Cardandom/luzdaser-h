@@ -90,7 +90,7 @@ export function MobileFunnelActions({ whatsappHref }: { whatsappHref: string }) 
           data-cta-location="mobile-sticky"
           className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full border border-luxury-border px-3 text-sm font-medium"
         >
-          <MessageCircleMore className="size-4" aria-hidden="true" /> WhatsApp
+          <MessageCircleMore className="size-4 text-[#25D366]" aria-hidden="true" /> WhatsApp
         </a>
       </div>
     </nav>

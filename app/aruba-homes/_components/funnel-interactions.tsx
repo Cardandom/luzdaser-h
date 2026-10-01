@@ -250,7 +250,7 @@ export function FunnelForm({
           data-cta-location={`${id}-${status}`}
           className="mt-2 inline-flex min-h-11 items-center gap-2 text-sm font-semibold underline underline-offset-4"
         >
-          <MessageCircleMore className="size-4" aria-hidden="true" />
+          <MessageCircleMore className="size-4 text-[#25D366]" aria-hidden="true" />
           Continue on WhatsApp
         </a>
       )}

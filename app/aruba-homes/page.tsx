@@ -68,17 +68,16 @@ export default function ArubaHomesPage() {
         <a href="#funnel-main" className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:rounded-full focus:bg-white focus:p-4">
           Skip to content
         </a>
-        <header className="border-b border-luxury-border bg-white">
-          <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-5 py-4 sm:px-8 lg:px-10">
-            <a href="#funnel-main" aria-label="Reina Sophia Residences" className="flex items-center gap-2.5 sm:gap-3">
-              <Image src="/Logo_Icono_Dorado.png" alt="" width={44} height={44} className="size-10 rounded-full border border-luxury-border sm:size-11" />
-              <span>
-                <span className="block font-heading text-lg leading-tight tracking-wide sm:text-2xl">Reina Sophia</span>
-                <span className="mt-0.5 block text-xs uppercase tracking-widest text-muted-foreground">Residences</span>
+        <header className="border-b border-white/10 bg-foreground text-white">
+          <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-5 py-3 sm:px-8 lg:px-10">
+            <div className="min-w-0 flex-1 border-l border-luxury-gold/70 pl-3">
+              <p className="font-heading text-base leading-tight tracking-wide text-white sm:text-lg">Secure Your Residence</p>
+              <p className="mt-0.5 text-xs leading-tight text-white/65">Initial reservation deposit · Construction payments by project milestones</p>
+            </div>
+            <a href={whatsappHref} target="_blank" rel="noopener noreferrer" data-funnel-event="funnel_whatsapp_click" data-cta-location="header" className="inline-flex min-h-11 shrink-0 items-center gap-2 rounded-full border border-white/10 bg-green-700 py-1.5 pr-3 pl-1.5 text-xs font-semibold text-white shadow-lg transition-transform hover:-translate-y-0.5 hover:shadow-xl sm:gap-3 sm:py-2 sm:pr-4 sm:pl-2 sm:text-sm">
+              <span className="inline-flex size-8 items-center justify-center rounded-full bg-white/15">
+                <MessageCircleMore className="size-4" aria-hidden="true" />
               </span>
-            </a>
-            <a href={whatsappHref} target="_blank" rel="noopener noreferrer" data-funnel-event="funnel_whatsapp_click" data-cta-location="header" className="inline-flex min-h-11 items-center gap-2 rounded-full border border-luxury-border px-4 text-xs font-medium transition-colors hover:bg-stone-100 sm:px-5 sm:text-sm">
-              <MessageCircleMore className="size-4" aria-hidden="true" />
               WhatsApp
             </a>
           </div>
@@ -86,7 +85,7 @@ export default function ArubaHomesPage() {
 
         <main id="funnel-main">
           <section id="funnel-hero" data-funnel-block="hero" aria-labelledby="hero-title" className="mx-auto grid max-w-7xl items-center gap-6 px-5 py-6 sm:gap-8 sm:px-8 sm:py-8 lg:grid-cols-12 lg:gap-10 lg:px-10">
-            <div className="lg:col-span-5">
+            <div className="order-2 lg:order-1 lg:col-span-5">
               <p className="luxury-eyebrow">New Homes for Sale in Aruba</p>
               <h1 id="hero-title" className="mt-4 font-heading text-5xl leading-none tracking-tight sm:text-6xl lg:text-5xl xl:text-6xl">
                 Own Your Place<br />in <span className="italic text-luxury-gold-ink">Aruba.</span>
@@ -99,17 +98,16 @@ export default function ArubaHomesPage() {
                   Get Prices &amp; Availability <ArrowDown className="size-4" aria-hidden="true" />
                 </a>
                 <a href={whatsappHref} target="_blank" rel="noopener noreferrer" data-funnel-event="funnel_whatsapp_click" data-cta-location="hero" className="inline-flex min-h-11 w-full items-center justify-center gap-2 text-sm font-medium sm:w-auto sm:px-4">
-                  <MessageCircleMore className="size-4" aria-hidden="true" /> WhatsApp Us
+                  <MessageCircleMore className="size-4 text-[#25D366]" aria-hidden="true" /> WhatsApp Us
                 </a>
               </div>
             </div>
 
-            <figure className="relative aspect-video overflow-hidden rounded-3xl bg-stone-200 lg:col-span-7 lg:aspect-4/3">
+            <figure className="relative order-1 aspect-7/5 overflow-hidden rounded-3xl bg-stone-200 lg:order-2 lg:col-span-7 lg:aspect-4/3">
               <FunnelHeroVideo />
               <div className="absolute inset-x-0 bottom-0 h-1/2 bg-linear-to-t from-black/80 to-transparent" />
               <figcaption className="absolute inset-x-0 bottom-0 p-5 text-white sm:p-8">
                 <p className="text-xs uppercase tracking-widest text-luxury-gold-soft">Paradera, Aruba</p>
-                <p className="mt-2 text-xs text-white/80">Oliver residence · Architectural render</p>
               </figcaption>
             </figure>
 
@@ -174,7 +172,7 @@ export default function ArubaHomesPage() {
               </div>
               <div className="flex flex-col gap-3 lg:col-span-5 lg:items-end">
                 <a href="#request-prices" data-funnel-event="funnel_primary_cta" data-cta-location="conversion-banner" className={primaryButtonClass}>Get Prices &amp; Availability <ArrowRight className="size-4" aria-hidden="true" /></a>
-                <a href={whatsappHref} target="_blank" rel="noopener noreferrer" data-funnel-event="funnel_whatsapp_click" data-cta-location="conversion-banner" className="inline-flex min-h-11 items-center justify-center gap-2 px-5 text-sm text-white underline underline-offset-4"><MessageCircleMore className="size-4" aria-hidden="true" />WhatsApp Us</a>
+                <a href={whatsappHref} target="_blank" rel="noopener noreferrer" data-funnel-event="funnel_whatsapp_click" data-cta-location="conversion-banner" className="inline-flex min-h-11 items-center justify-center gap-2 px-5 text-sm text-white underline underline-offset-4"><MessageCircleMore className="size-4 text-[#25D366]" aria-hidden="true" />WhatsApp Us</a>
               </div>
             </div>
             <div className="mx-auto max-w-7xl px-5 sm:px-8 lg:px-10">
@@ -190,7 +188,13 @@ export default function ArubaHomesPage() {
         <footer id="funnel-footer" className="mx-auto max-w-7xl px-5 py-6 sm:px-8 lg:px-10">
           <div className="flex flex-col justify-between gap-6 sm:flex-row">
             <div>
-              <p className="font-heading text-xl">{brandName}</p>
+              <div className="flex items-center gap-2.5 sm:gap-3">
+                <Image src="/Logo_Icono_Dorado.png" alt="" width={44} height={44} className="size-10 rounded-full border border-luxury-border sm:size-11" />
+                <span>
+                  <span className="block font-heading text-lg leading-tight tracking-wide sm:text-2xl">Reina Sophia</span>
+                  <span className="mt-0.5 block text-xs uppercase tracking-widest text-muted-foreground">Residences</span>
+                </span>
+              </div>
               <p className="mt-2 text-xs text-muted-foreground">{legalEntityName}</p>
               <p className="mt-1 text-xs text-muted-foreground">{registeredAddress}</p>
               <div className="mt-2 flex flex-wrap gap-x-5">
