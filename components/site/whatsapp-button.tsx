@@ -2,14 +2,9 @@
 
 import { sendGTMEvent } from "@next/third-parties/google"
 import { MessageCircleMore } from "lucide-react"
+import { getWhatsAppUrl } from "@/lib/contact-config"
 
-const whatsappUrl = new URL("https://wa.me/2976992222")
-whatsappUrl.searchParams.set(
-  "text",
-  "Hello, I'm interested in Reina Sophia Residences. I'd like more information.",
-)
-
-const WHATSAPP_URL = whatsappUrl.toString()
+const WHATSAPP_URL = getWhatsAppUrl()
 
 export function WhatsAppButton() {
   const handleWhatsAppClick = () => {

@@ -33,11 +33,12 @@ export function AppChrome() {
   }
 
   const chromeIsHidden = shouldHideChrome(pathname)
+  const isArubaHomes = pathname === "/aruba-homes"
 
   return chromeIsHidden ? null : (
     <>
-      <SiteHeader />
-      <WhatsAppButton />
+      {!isArubaHomes && <SiteHeader />}
+      {!isArubaHomes && <WhatsAppButton />}
       <CookieConsent />
     </>
   )

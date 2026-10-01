@@ -1,0 +1,34 @@
+.page :is(a, button, input):focus-visible {
+  outline: 2px solid var(--luxury-gold-ink);
+  outline-offset: 4px;
+}
+
+:global(html):has(.page) {
+  scroll-padding-top: 1.5rem;
+}
+
+.page section[id] {
+  scroll-margin-top: 1.5rem;
+}
+
+.mobileActions {
+  padding: 0.75rem max(1.25rem, env(safe-area-inset-right))
+    calc(0.75rem + env(safe-area-inset-bottom)) max(1.25rem, env(safe-area-inset-left));
+}
+
+@media (max-width: 767px) {
+  /* Reserve room from the initial render; showing the bar never changes layout. */
+  .page {
+    padding-bottom: calc(5rem + env(safe-area-inset-bottom));
+  }
+
+  :global(html):has(.page) {
+    scroll-padding-bottom: calc(5rem + env(safe-area-inset-bottom));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :global(html):has(.page) {
+    scroll-behavior: auto;
+  }
+}
