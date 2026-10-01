@@ -210,17 +210,17 @@ export function CookieConsent() {
                   <button
                     ref={firstActionRef}
                     type="button"
-                    className="inline-flex min-h-11 items-center justify-center rounded-full bg-linear-to-b from-luxury-gold-soft to-luxury-gold px-3 py-2 text-xs font-semibold text-stone-950 shadow-md transition hover:-translate-y-0.5 focus-visible:ring-4 focus-visible:ring-luxury-gold/40 focus-visible:outline-none sm:text-sm"
-                    onClick={handleAcceptAll}
-                  >
-                    Accept all
-                  </button>
-                  <button
-                    type="button"
                     className="inline-flex min-h-11 items-center justify-center rounded-full border border-foreground bg-white px-3 py-2 text-xs font-semibold text-foreground transition hover:bg-stone-100 focus-visible:ring-4 focus-visible:ring-luxury-gold/40 focus-visible:outline-none sm:text-sm"
                     onClick={handleRejectAll}
                   >
                     Essentials only
+                  </button>
+                  <button
+                    type="button"
+                    className="inline-flex min-h-11 items-center justify-center rounded-full bg-linear-to-b from-luxury-gold-soft to-luxury-gold px-3 py-2 text-xs font-semibold text-stone-950 shadow-md transition hover:-translate-y-0.5 focus-visible:ring-4 focus-visible:ring-luxury-gold/40 focus-visible:outline-none sm:text-sm"
+                    onClick={handleAcceptAll}
+                  >
+                    Accept all
                   </button>
                   <button
                     type="button"
