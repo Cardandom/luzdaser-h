@@ -28,12 +28,34 @@ const residences = (["oliver", "luca", "audrey"] as const).map((slug) => {
   }
 })
 
-// Sources: the existing hero, model records, and Paradera context in benefits-section.tsx.
 const benefits = [
-  { title: "Private residential setting", copy: "A private community with a children's park." },
-  { title: "Contemporary home models", copy: "Minimalist homes with two, three or four bedrooms." },
-  { title: "Outdoor living", copy: "Private swimming pools and outdoor spaces." },
-  { title: "Central location in Aruba", copy: "Paradera, with access to shops, restaurants and schools." },
+  {
+    title: "Freehold Land Ownership",
+    copy:
+      "Own your residence and the land it stands on — private eigendom ownership, not government leasehold.",
+  },
+  {
+    title: "A More Sheltered Caribbean Setting",
+    copy:
+      "Aruba sits on the southern fringe of the Caribbean hurricane belt, with historically infrequent significant tropical-cyclone impacts.",
+  },
+  {
+    title: "Everyday Convenience Nearby",
+    copy:
+      "Supermarkets, banking, local dining and everyday services are close by in Paradera.",
+  },
+  {
+    title: "Central Aruba Location",
+    copy:
+      "Live in a quiet residential setting in central Aruba with convenient access across the island.",
+  },
+]
+
+const nearbyPlaces = [
+  "Cheng Xing Supermarket",
+  "Banco Di Caribe ATM",
+  "Paradera's Local Experience",
+  "Sunday Food Mart",
 ]
 
 const steps = ["Request Information", "Receive Current Options", "Speak With the Reina Sophia Team"]
@@ -116,7 +138,7 @@ export default function ArubaHomesPage() {
           <section data-funnel-block="request" aria-labelledby="request-prices-title" className="mx-auto max-w-7xl px-5 sm:px-8 lg:px-10">
             <FunnelForm id="request-prices" submitLabel="Send Me Prices & Availability" whatsappHref={whatsappHref}>
               <ul aria-label="Project at a glance" className="mt-5 grid grid-cols-2 gap-x-4 gap-y-3 border-t border-luxury-border pt-4 text-center text-xs leading-5 text-muted-foreground md:grid-cols-4">
-                {["Paradera, Aruba", "Private Residential Project", "Three Home Models", "Direct Project Information"].map((item) => <li key={item}>{item}</li>)}
+                {["Paradera, Aruba", "Freehold (Eigendom) Land", "Southern Caribbean Location", "Three Home Models"].map((item) => <li key={item}>{item}</li>)}
               </ul>
             </FunnelForm>
           </section>
@@ -161,6 +183,18 @@ export default function ArubaHomesPage() {
                   </li>
                 ))}
               </ul>
+              <div className="mt-6 border-t border-luxury-border pt-4">
+                <p className="text-xs font-medium uppercase tracking-widest text-luxury-gold-ink">Nearby in Paradera</p>
+                <p className="mt-1 text-sm text-muted-foreground">Everyday essentials and local favorites close to Reina Sophia.</p>
+                <ul className="mt-3 grid grid-cols-2 gap-2 lg:grid-cols-4">
+                  {nearbyPlaces.map((place) => (
+                    <li key={place} className="flex min-h-10 items-center justify-center rounded-full border border-luxury-border bg-stone-50 px-3 py-2 text-center text-xs leading-4">
+                      {place}
+                    </li>
+                  ))}
+                </ul>
+                <p className="mt-2 text-xs text-muted-foreground">Nearby places shown for general location reference.</p>
+              </div>
             </div>
           </section>
 
