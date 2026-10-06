@@ -58,9 +58,9 @@ const galleryItems: GalleryItem[] = [
   {
     id: "coastal-community-panorama",
     src: "/gallery/Panoramica%20Lateral%20Der%2C%20Proyecto.webp",
-    title: "Coastal Community Panorama",
+    title: "Residential Community Panorama",
     description: "Reina Sophia Residences",
-    alt: "Aerial panorama of Reina Sophia Residences near the Aruba coastline",
+    alt: "Aerial panorama of Reina Sophia Residences in Paradera, central Aruba",
     objectPosition: "center center",
   },
   {

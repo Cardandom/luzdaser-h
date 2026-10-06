@@ -53,7 +53,7 @@ export type ProjectBlueprintSheet = {
 export type Project = {
   slug: ProjectSlug
   title: string
-  price?: string
+  price: string
   picture: string
   objectPosition: string
   summary: string
@@ -62,6 +62,8 @@ export type Project = {
   boardTitle: string
   boardSubtitle: string
   intro: string
+  comparisonFeatures: ProjectFeature[]
+  comparisonNote?: string
   highlightsTitle?: string
   features: ProjectFeature[]
   highlights: ProjectFeature[]
@@ -70,11 +72,14 @@ export type Project = {
   tiles: ProjectTile[]
 }
 
+export const priceListNote =
+  "Starting package prices from the August 27, 2026 price list, valid through December 2026 or while current phase availability lasts. Request current availability."
+
 export const projects: Project[] = [
   {
     slug: "luca",
     title: "Luca",
-    price: "$280,000 USD",
+    price: "From AWG 1,140,545",
     picture: "/lucaDetails.webp",
     objectPosition: "center center",
     summary:
@@ -82,9 +87,16 @@ export const projects: Project[] = [
     badge: "Luca",
     eyebrow: "Project dossier",
     boardTitle: "Luca",
-    boardSubtitle: "Living by the sea",
+    boardSubtitle: "Boutique Living in Central Aruba",
     intro:
       "Luca is designed as a calm, contemporary retreat with a clean frontage, intimate outdoor areas, and an easy indoor-outdoor rhythm.",
+    comparisonFeatures: [
+      { icon: House, label: "80 m² Home" },
+      { icon: BedDouble, label: "2 Bedrooms" },
+      { icon: Bath, label: "2 Bathrooms" },
+      { icon: Ruler, label: "227 m² Lot" },
+      { icon: WavesLadder, label: "Private Pool" },
+    ],
     highlightsTitle: "Finishes and Comfort",
     features: [
       { icon: House, label: "80 m² House" },
@@ -93,7 +105,7 @@ export const projects: Project[] = [
       { icon: CookingPot, label: "Luxury Kitchen With Electricity" },
       { icon: Sprout, label: "Minimalist Design" },
       { icon: AirVent, label: "Air Conditioning" },
-      { icon: WavesLadder, label: "11 m² Pool Area" },
+      { icon: WavesLadder, label: "Private Pool · Approx. 11–12 m²" },
       { icon: ShieldCheckIcon, label: "Quality" },
       { icon: RockingChair, label: "Confort" },
       { icon: Gem, label: "Exclusiveness" }
@@ -201,7 +213,7 @@ export const projects: Project[] = [
   {
     slug: "oliver",
     title: "Oliver",
-    price: "$350,000 USD",
+    price: "From AWG 1,804,539",
     picture: "/front3DOliver.webp",
     objectPosition: "center center",
     summary:
@@ -209,12 +221,21 @@ export const projects: Project[] = [
     badge: "Oliver",
     eyebrow: "Project dossier",
     boardTitle: "Oliver",
-    boardSubtitle: "Living by the sea",
+    boardSubtitle: "Private Villa Living in Central Aruba",
     intro:
-      "Oliver balances privacy and openness with generous outdoor living, a calm interior atmosphere, and a design that feels quietly refined throughout the day.",
+      "Oliver balances privacy and openness with generous outdoor living and a calm interior atmosphere. Its 130 m² home can be configured with three or four bedrooms according to buyer preference, with three bathrooms, a private 18 m² pool, a terrace and a private garden.",
+    comparisonFeatures: [
+      { icon: House, label: "130 m² Home" },
+      { icon: BedDouble, label: "3–4 Bedrooms" },
+      { icon: Bath, label: "3 Bathrooms" },
+      { icon: WavesLadder, label: "Private 18 m² Pool" },
+      { icon: TreePine, label: "Private Garden" },
+    ],
+    comparisonNote:
+      "3 or 4 bedroom configuration available depending on buyer preference.",
     features: [
       { icon: House, label: "130 m² House" },
-      { icon: BedDouble, label: "Three Bedrooms" },
+      { icon: BedDouble, label: "Three or Four Bedrooms" },
       { icon: Bath, label: "Three bathrooms" },
       { icon: CookingPot, label: "Dual Luxury Kitchen" },
       { icon: Sprout, label: "Minimalist Design" },
@@ -311,17 +332,18 @@ export const projects: Project[] = [
         caption: "Neutral interiors that keep the focus on comfort.",
       },
       {
-        title: "Beach mood",
-        picture: "/beachView.webp",
-        alt: "Beach view mood image for Oliver",
+        title: "Residential setting",
+        picture: "/newComplex.webp",
+        alt: "Reina Sophia residential community in Paradera, central Aruba",
         objectPosition: "center center",
-        caption: "A coastal note that reinforces the Aruba lifestyle.",
+        caption: "Private community living in central Aruba.",
       },
     ],
   },
   {
     slug: "audrey",
     title: "Audrey",
+    price: "From AWG 2,189,211",
     picture: "/projects/audrey/audrey-front-elevation.webp",
     objectPosition: "center center",
     summary:
@@ -329,9 +351,16 @@ export const projects: Project[] = [
     badge: "Audrey",
     eyebrow: "Project dossier",
     boardTitle: "Audrey",
-    boardSubtitle: "Elegance and exclusivity",
+    boardSubtitle: "Two-Level Villa in Central Aruba",
     intro:
       "Audrey is a two-level villa designed for generous family living, with four bedrooms, three bathrooms, a luxury kitchen with appliances, and a private 18 m² pool framed by landscaping.",
+    comparisonFeatures: [
+      { icon: House, label: "160 m² Home" },
+      { icon: BedDouble, label: "4 Bedrooms" },
+      { icon: Bath, label: "3 Bathrooms" },
+      { icon: LayoutPanelTop, label: "Two Floors" },
+      { icon: WavesLadder, label: "Private 18 m² Pool" },
+    ],
     highlightsTitle: "Comfort and Quality",
     features: [
       { icon: House, label: "160 m² House" },

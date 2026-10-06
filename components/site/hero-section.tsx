@@ -1,4 +1,4 @@
-import { ArrowRight, ChefHat, PlaySquare, ShieldCheck, Waves } from "lucide-react"
+import { ArrowRight, House, MapPin, ShieldCheck, Waves } from "lucide-react"
 import Image from "next/image"
 
 import { HomeModelLink } from "@/components/site/home-model-link"
@@ -6,25 +6,25 @@ import { HomeModelLink } from "@/components/site/home-model-link"
 const heroFeatures = [
   {
     icon: ShieldCheck,
-    label: "Private community",
+    label: "Freehold Land",
   },
   {
-    icon: PlaySquare,
-    label: "Playground Area",
+    icon: House,
+    label: "Private Residence",
   },
   {
     icon: Waves,
-    label: "Private Swimming Pool",
+    label: "Private Pool",
   },
   {
-    icon: ChefHat,
-    label: "Luxurious kitchen finishes",
+    icon: MapPin,
+    label: "Central Aruba",
   },
 ]
 
 export function HeroSection() {
   return (
-    <section id="home" className="h-dvh w-full">
+    <section id="home" className="h-dvh min-h-180 w-full">
       <div className="relative h-full w-full overflow-hidden bg-white shadow-2xl">
         <div className="relative h-full min-h-0">
           <Image
@@ -64,7 +64,7 @@ export function HeroSection() {
           <div className="absolute inset-x-0 top-0 h-px bg-black/10" />
           <div className="absolute inset-x-0 bottom-0 h-px bg-black/10" />
 
-          <div className="relative z-10 flex h-full items-start px-12 pt-40 pb-44 sm:items-center sm:px-16 sm:py-8 lg:px-20">
+          <div className="relative z-10 flex h-full items-start px-6 pt-32 pb-36 sm:items-center sm:px-16 sm:py-8 lg:px-20">
             <div className="w-full max-w-4xl text-left text-foreground lg:max-w-3xl">
               <p
                 className="max-w-md text-xs font-semibold uppercase tracking-widest text-[#201751] drop-shadow-sm"
@@ -73,25 +73,34 @@ export function HeroSection() {
                     '"TT Commons Pro Expanded", "TT_Commons_Pro_Expanded", var(--font-geist-sans), sans-serif',
                 }}
               >
-                Exclusive Real Estate in Aruba
+                Freehold Residences in Paradera, Aruba
               </p>
 
-              <p className="mt-4 max-w-2xl font-heading text-4xl italic leading-none tracking-tight text-foreground drop-shadow-sm sm:mt-5 sm:text-5xl lg:max-w-3xl lg:text-7xl">
-                Your Private Luxury Heaven
+              <h1 className="mt-4 max-w-2xl font-heading text-4xl italic leading-none tracking-tight text-foreground drop-shadow-sm sm:mt-5 sm:text-5xl lg:max-w-3xl lg:text-7xl">
+                <span className="block">Your own home.</span>
+                <span className="mt-1 block">Your own land.</span>
+                <span className="mt-1 block text-[#201751]">In the heart of Aruba.</span>
+              </h1>
+
+              <p className="mt-4 max-w-xl text-sm leading-6 text-foreground drop-shadow-sm sm:text-base">
+                Contemporary private residences with individual lots, private pools
+                and modern finishes inside a residential community in central Aruba.
               </p>
 
-              <p className="mt-1 max-w-2xl font-heading text-4xl italic leading-none tracking-tight text-[#201751] drop-shadow-sm sm:text-5xl lg:max-w-3xl lg:text-7xl">
-                in the Dutch Caribbean
-              </p>
-
-              <div className="mt-5 flex justify-start sm:mt-8">
+              <div className="mt-5 flex flex-wrap justify-start gap-3 sm:mt-8">
                 <HomeModelLink
                   modelId="oliver"
                   className="inline-flex h-11 items-center justify-center gap-2 rounded-full bg-linear-to-b from-luxury-gold-soft to-luxury-gold px-6 text-xs font-semibold uppercase tracking-widest text-stone-950 shadow-lg transition-transform hover:-translate-y-0.5 sm:h-12 sm:px-7"
                 >
-                  Explore Models
+                  Explore Residences
                   <ArrowRight className="size-4" aria-hidden="true" />
                 </HomeModelLink>
+                <a
+                  href="/aruba-homes#request-prices"
+                  className="inline-flex h-11 items-center justify-center rounded-full border border-foreground/25 bg-white/85 px-6 text-xs font-semibold uppercase tracking-widest text-foreground shadow-sm transition-transform hover:-translate-y-0.5 sm:h-12 sm:px-7"
+                >
+                  Request Current Prices
+                </a>
               </div>
             </div>
           </div>

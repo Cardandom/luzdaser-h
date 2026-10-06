@@ -3,7 +3,6 @@ import { preload } from "react-dom"
 const posterSrc = "/videos/reina-sophia-funnel-hero-v3-poster.webp"
 
 export function FunnelHeroVideo() {
-  // Prioritize only the small still image, never preload a complete video file.
   preload(posterSrc, { as: "image", fetchPriority: "high" })
 
   return (

@@ -1,5 +1,6 @@
 import { BenefitsSection } from "@/components/site/benefits-section"
 import { ContactSection } from "@/components/site/contact-section"
+import { ConstructionProgressSection } from "@/components/site/construction-progress-section"
 import { CtaSection } from "@/components/site/cta-section"
 import { GallerySection } from "@/components/site/gallery-section"
 import { HeroSection } from "@/components/site/hero-section"
@@ -54,6 +55,7 @@ export default function HomePage() {
       />
       <CtaSection />
       <BenefitsSection />
+      <ConstructionProgressSection />
       <ContactSection />
       <SiteFooter />
     </main>

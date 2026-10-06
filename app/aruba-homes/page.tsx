@@ -1,84 +1,60 @@
 import type { Metadata } from "next"
 import Image from "next/image"
 import Link from "next/link"
-import { ArrowDown, ArrowRight, MessageCircleMore } from "lucide-react"
+import { ArrowDown, ArrowRight, BedDouble, MapPin, MessageCircleMore, ShieldCheck, Waves } from "lucide-react"
 
+import { BuyerPackVisual } from "./_components/buyer-pack-visual"
+import { BuyingProcess } from "./_components/buying-process"
+import { FreeholdOwnership } from "./_components/freehold-ownership"
 import { CookieSettingsButton } from "@/components/site/cookie-settings-button"
+import { ConstructionProgressSection } from "@/components/site/construction-progress-section"
+import { LifestyleBento } from "./_components/lifestyle-bento"
+import { LocationStory } from "./_components/location-story"
 import { contactPhone, contactPhoneDisplay, getWhatsAppUrl } from "@/lib/contact-config"
 import { brandName, legalEntityName, privacyEmail, registeredAddress } from "@/lib/legal-config"
-import { getProjectBySlug } from "@/lib/projects"
-import { FunnelForm, FunnelProvider, RequestAvailabilityLink } from "./_components/funnel-interactions"
+import { getProjectBySlug, priceListNote } from "@/lib/projects"
+import { FunnelForm, FunnelProvider, VideoConsultationRequest } from "./_components/funnel-interactions"
 import { MobileFunnelActions } from "./_components/mobile-funnel-actions"
 import { FunnelHeroVideo } from "./_components/funnel-hero-video"
+import { ResidenceShowcase } from "./_components/residence-showcase"
 import styles from "./funnel.module.css"
 
 const whatsappHref = getWhatsAppUrl(
   "Hi, I'm interested in Reina Sophia Residences. I'd like to receive current pricing and availability.",
 )
 
-const residences = (["oliver", "luca", "audrey"] as const).map((slug) => {
+const residences = (["luca", "oliver", "audrey"] as const).map((slug) => {
   const project = getProjectBySlug(slug)
   if (!project) throw new Error(`Missing residence: ${slug}`)
-  return {
-    ...project,
-    // Keep commercial specifications tied to the approved project record.
-    cardFeatures: project.features.filter(({ label }) =>
-      /m² House|Bedrooms|Pool/i.test(label),
-    ).slice(0, 3),
-  }
+  return project
 })
 
-const benefits = [
-  {
-    title: "Freehold Land Ownership",
-    copy:
-      "Own your residence and the land it stands on — private eigendom ownership, not government leasehold.",
-  },
-  {
-    title: "A More Sheltered Caribbean Setting",
-    copy:
-      "Aruba sits on the southern fringe of the Caribbean hurricane belt, with historically infrequent significant tropical-cyclone impacts.",
-  },
-  {
-    title: "Everyday Convenience Nearby",
-    copy:
-      "Supermarkets, banking, local dining and everyday services are close by in Paradera.",
-  },
-  {
-    title: "Central Aruba Location",
-    copy:
-      "Live in a quiet residential setting in central Aruba with convenient access across the island.",
-  },
+const projectPillars = [
+  { label: "Freehold Land", icon: ShieldCheck },
+  { label: "Private Pool", icon: Waves },
+  { label: "2–4 Bedrooms", icon: BedDouble },
+  { label: "Central Aruba", icon: MapPin },
 ]
-
-const nearbyPlaces = [
-  "Cheng Xing Supermarket",
-  "Banco Di Caribe ATM",
-  "Paradera's Local Experience",
-  "Sunday Food Mart",
-]
-
-const steps = ["Request Information", "Receive Current Options", "Speak With the Reina Sophia Team"]
 
 const primaryButtonClass = "inline-flex min-h-12 items-center justify-center gap-3 rounded-full bg-linear-to-b from-luxury-gold-soft to-luxury-gold px-6 py-3 text-sm font-semibold text-stone-950 shadow-sm transition-shadow hover:shadow-md motion-reduce:transition-none"
 
 export const metadata: Metadata = {
   title: "Homes in Aruba | Reina Sophia Residences",
   description:
-    "Explore Oliver, Luca and Audrey at Reina Sophia Residences in Paradera, Aruba. Request current pricing and availability from our team.",
+    "Explore freehold homes with private pools at Reina Sophia Residences in Paradera, central Aruba. Request the current Buyer Pack, pricing and availability.",
   robots: { index: false, follow: true },
   alternates: { canonical: "/aruba-homes" },
   openGraph: {
     type: "website",
     url: "/aruba-homes",
-    title: "Own Your Place in Aruba. | Reina Sophia Residences",
-    description: "Explore our home models in Paradera and request current pricing and availability.",
+    title: "Own the home. Own the land. | Reina Sophia Residences",
+    description: "Freehold homes with private pools in Paradera, central Aruba. Request current prices, floorplans and availability.",
     images: [{ url: "/front3DOliver.webp", alt: "Architectural render of the Oliver residence at sunset" }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Own Your Place in Aruba. | Reina Sophia Residences",
-    description: "Explore our home models in Paradera and request current pricing and availability.",
+    title: "Own the home. Own the land. | Reina Sophia Residences",
+    description: "Freehold homes with private pools in Paradera, central Aruba. Request current prices, floorplans and availability.",
     images: ["/front3DOliver.webp"],
   },
 }
@@ -106,115 +82,99 @@ export default function ArubaHomesPage() {
         </header>
 
         <main id="funnel-main">
-          <section id="funnel-hero" data-funnel-block="hero" aria-labelledby="hero-title" className="mx-auto grid max-w-7xl items-center gap-6 px-5 py-6 sm:gap-8 sm:px-8 sm:py-8 lg:grid-cols-12 lg:gap-10 lg:px-10">
-            <div className="order-2 lg:order-1 lg:col-span-5">
-              <p className="luxury-eyebrow">New Homes for Sale in Aruba</p>
-              <h1 id="hero-title" className="mt-4 font-heading text-5xl leading-none tracking-tight sm:text-6xl lg:text-5xl xl:text-6xl">
-                Own Your Place<br />in <span className="italic text-luxury-gold-ink">Aruba.</span>
-              </h1>
-              <p className="mt-5 max-w-md text-base leading-7 text-muted-foreground">
-                Discover Reina Sophia Residences in Paradera and request current pricing and availability.
-              </p>
-              <div className="mt-6 flex flex-col items-start gap-2">
-                <a href="#request-prices" data-funnel-event="funnel_primary_cta" data-cta-location="hero" className={`${primaryButtonClass} w-full sm:w-auto`}>
-                  Get Prices &amp; Availability <ArrowDown className="size-4" aria-hidden="true" />
-                </a>
-                <a href={whatsappHref} target="_blank" rel="noopener noreferrer" data-funnel-event="funnel_whatsapp_click" data-cta-location="hero" className="inline-flex min-h-11 w-full items-center justify-center gap-2 text-sm font-medium sm:w-auto sm:px-4">
-                  <MessageCircleMore className="size-4 text-[#25D366]" aria-hidden="true" /> WhatsApp Us
-                </a>
-              </div>
-            </div>
-
-            <figure className="relative order-1 aspect-7/5 overflow-hidden rounded-3xl bg-stone-200 lg:order-2 lg:col-span-7 lg:aspect-4/3">
+          <section id="funnel-hero" data-funnel-block="hero" aria-labelledby="hero-title" className="mx-auto grid max-w-7xl items-center gap-4 px-5 pt-4 pb-5 sm:gap-8 sm:px-8 sm:py-8 lg:grid-cols-12 lg:gap-10 lg:px-10">
+            <figure className="relative order-1 aspect-square overflow-hidden rounded-3xl bg-stone-200 lg:order-2 lg:col-span-7 lg:aspect-4/3">
               <FunnelHeroVideo />
               <div className="absolute inset-x-0 bottom-0 h-1/2 bg-linear-to-t from-black/80 to-transparent" />
-              <figcaption className="absolute inset-x-0 bottom-0 p-5 text-white sm:p-8">
-                <p className="text-xs uppercase tracking-widest text-luxury-gold-soft">Paradera, Aruba</p>
+              <figcaption className="absolute inset-x-0 bottom-0 flex items-end justify-between p-4 text-white sm:p-8">
+                <span className="rounded-full border border-white/20 bg-black/25 px-3 py-1.5 text-xs font-medium text-white backdrop-blur-sm">Paradera · Aruba</span>
               </figcaption>
             </figure>
-
-          </section>
-
-          <section data-funnel-block="request" aria-labelledby="request-prices-title" className="mx-auto max-w-7xl px-5 sm:px-8 lg:px-10">
-            <FunnelForm id="request-prices" submitLabel="Send Me Prices & Availability" whatsappHref={whatsappHref}>
-              <ul aria-label="Project at a glance" className="mt-5 grid grid-cols-2 gap-x-4 gap-y-3 border-t border-luxury-border pt-4 text-center text-xs leading-5 text-muted-foreground md:grid-cols-4">
-                {["Paradera, Aruba", "Freehold (Eigendom) Land", "Southern Caribbean Location", "Three Home Models"].map((item) => <li key={item}>{item}</li>)}
-              </ul>
-            </FunnelForm>
-          </section>
-
-          <section data-funnel-block="models" aria-labelledby="residences-title" className="mx-auto max-w-7xl px-5 py-10 sm:px-8 sm:py-12 lg:px-10">
-            <div>
-              <p className="luxury-eyebrow">The Residences</p>
-              <h2 id="residences-title" className="luxury-title-sm mt-3">Choose Your Residence</h2>
+            <div className="relative z-10 order-2 -mt-8 mx-2 rounded-3xl border border-luxury-border bg-white p-4 shadow-lg sm:mx-0 sm:p-6 lg:order-1 lg:col-span-5 lg:mt-0 lg:rounded-none lg:border-0 lg:bg-transparent lg:p-0 lg:shadow-none">
+              <p className="luxury-eyebrow">New Freehold Homes in Central Aruba</p>
+              <h1 id="hero-title" className="mt-3 font-heading text-4xl leading-none tracking-tight sm:text-5xl lg:text-5xl xl:text-6xl">
+                Own the home.<br /><span className="italic text-luxury-gold-ink">Own the land.</span>
+              </h1>
+              <p className="mt-3 max-w-md text-sm leading-6 text-muted-foreground sm:text-base sm:leading-7">
+                Private residences in Paradera with freehold land, private pools and the privacy of a residential community in central Aruba.
+              </p>
+              <p className="mt-3 text-lg font-semibold text-foreground">{residences[0].price.replace(/^From /, "Homes from ")}</p>
+              <div className="mt-3 flex flex-col items-start gap-1 sm:mt-4 sm:gap-2">
+                <a href="#request-prices" data-funnel-event="funnel_primary_cta" data-cta-location="hero" className={`${primaryButtonClass} w-full sm:w-auto`}>
+                  <span>Get Prices &amp; Availability</span> <ArrowDown className="size-4 shrink-0" aria-hidden="true" />
+                </a>
+                <a href={whatsappHref} target="_blank" rel="noopener noreferrer" data-funnel-event="funnel_whatsapp_click" data-cta-location="hero" className="inline-flex min-h-11 w-full items-center justify-center gap-2 text-sm font-medium sm:w-auto sm:px-4">
+                  <MessageCircleMore className="size-4 shrink-0 text-[#25D366]" aria-hidden="true" /> WhatsApp Us
+                </a>
+              </div>
             </div>
-
-            <div className="mt-6 grid gap-5 md:grid-cols-3">
-              {residences.map((project) => (
-                <article key={project.slug} aria-labelledby={`residence-${project.slug}`} className="flex min-w-0 flex-col overflow-hidden rounded-3xl border border-luxury-border bg-white">
-                  <div className="relative aspect-video bg-stone-200">
-                    <Image src={project.picture} alt={`Architectural render of the ${project.title} residence`} fill sizes="(min-width: 1280px) 385px, (min-width: 768px) 30vw, (min-width: 640px) calc(100vw - 64px), calc(100vw - 40px)" className="object-cover" style={{ objectPosition: project.objectPosition }} />
-                  </div>
-                  <div className="flex flex-1 flex-col p-5">
-                    <h3 id={`residence-${project.slug}`} className="font-heading text-2xl uppercase tracking-wide">{project.title}</h3>
-                    <ul className="mt-3 flex flex-wrap gap-x-4 gap-y-2 text-xs leading-5">
-                      {project.cardFeatures.map(({ label, icon: Icon }) => (
-                        <li key={label} className="flex items-center gap-2"><Icon className="size-4 shrink-0 text-luxury-gold-ink" aria-hidden="true" />{label}</li>
-                      ))}
-                    </ul>
-                    <div className="mt-auto pt-4">
-                      <RequestAvailabilityLink residence={project.title as "Oliver" | "Luca" | "Audrey"} />
-                    </div>
-                  </div>
-                </article>
-              ))}
-            </div>
+            <ul aria-label="Project at a glance" className="order-3 grid grid-cols-2 gap-x-4 gap-y-3 border-t border-luxury-border pt-4 md:grid-cols-4 lg:col-span-12">
+              {projectPillars.map(({ label, icon: Icon }) => <li key={label} className="flex items-center justify-center gap-2 text-xs leading-5 text-muted-foreground"><Icon className="size-4 shrink-0 text-luxury-gold-ink" aria-hidden="true" />{label}</li>)}
+            </ul>
           </section>
 
-          <section data-funnel-block="reasons" aria-labelledby="why-title" className="border-t border-luxury-border bg-white py-10 sm:py-12">
+          <section data-funnel-block="models" aria-labelledby="residences-title" className="bg-white py-8 sm:py-12">
             <div className="mx-auto max-w-7xl px-5 sm:px-8 lg:px-10">
-              <p className="luxury-eyebrow">Why Reina Sophia</p>
-              <h2 id="why-title" className="luxury-title-sm mt-3">A place of your own <span className="italic text-luxury-gold-ink">in Aruba.</span></h2>
-              <ul className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-                {benefits.map((benefit) => (
-                  <li key={benefit.title} className="border-l-2 border-luxury-gold/60 pl-4">
-                    <h3 className="font-heading text-lg">{benefit.title}</h3>
-                    <p className="mt-1 text-sm leading-6 text-muted-foreground">{benefit.copy}</p>
-                  </li>
-                ))}
-              </ul>
-              <div className="mt-6 border-t border-luxury-border pt-4">
-                <p className="text-xs font-medium uppercase tracking-widest text-luxury-gold-ink">Nearby in Paradera</p>
-                <p className="mt-1 text-sm text-muted-foreground">Everyday essentials and local favorites close to Reina Sophia.</p>
-                <ul className="mt-3 grid grid-cols-2 gap-2 lg:grid-cols-4">
-                  {nearbyPlaces.map((place) => (
-                    <li key={place} className="flex min-h-10 items-center justify-center rounded-full border border-luxury-border bg-stone-50 px-3 py-2 text-center text-xs leading-4">
-                      {place}
-                    </li>
-                  ))}
-                </ul>
-                <p className="mt-2 text-xs text-muted-foreground">Nearby places shown for general location reference.</p>
+              <div className="flex flex-wrap items-end justify-between gap-2">
+                <div>
+                  <p className="luxury-eyebrow">The Residences</p>
+                  <h2 id="residences-title" className="luxury-title-sm mt-3">Choose Your Residence</h2>
+                </div>
+                <p className="pb-1 text-xs text-muted-foreground lg:hidden">Swipe to compare <span aria-hidden="true">→</span></p>
+              </div>
+              <div aria-label="Residence cards. Scroll horizontally to compare." tabIndex={0} className="-mx-5 mt-5 flex snap-x snap-mandatory gap-4 overflow-x-auto px-5 pb-4 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-luxury-gold-ink sm:-mx-8 sm:px-8 lg:mx-0 lg:grid lg:grid-cols-3 lg:gap-5 lg:overflow-visible lg:px-0 lg:pb-0">
+                {residences.map((project) => <ResidenceShowcase key={project.slug} project={project} />)}
+              </div>
+              <details className="group mt-4 border-t border-luxury-border pt-2">
+                <summary className="flex min-h-11 cursor-pointer list-none items-center gap-2 text-xs font-medium text-muted-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-luxury-gold-ink [&::-webkit-details-marker]:hidden">
+                  About prices &amp; current availability
+                  <span aria-hidden="true" className="transition-transform group-open:rotate-45 motion-reduce:transition-none">+</span>
+                </summary>
+                <p className="pb-2 text-xs leading-5 text-muted-foreground">{priceListNote}</p>
+              </details>
+            </div>
+          </section>
+
+          <FreeholdOwnership />
+
+          <section data-funnel-block="request" aria-labelledby="request-prices-title" className="bg-white">
+            <div className="mx-auto grid max-w-7xl items-center gap-3 px-5 py-8 sm:px-8 sm:py-10 lg:grid-cols-12 lg:gap-10 lg:px-10">
+              <div className="lg:col-span-5"><BuyerPackVisual /></div>
+              <div className="lg:col-span-7">
+                <FunnelForm id="request-prices" submitLabel="Send Me the Buyer Pack" whatsappHref={whatsappHref} />
               </div>
             </div>
           </section>
 
-          <section id="funnel-closing" data-funnel-block="conversion" aria-labelledby="options-title" className="bg-foreground text-white">
+          <BuyingProcess />
+
+          <ConstructionProgressSection />
+
+          <LocationStory />
+          <LifestyleBento />
+
+          <section data-funnel-block="consultation" aria-labelledby="consultation-title" className="bg-foreground text-white">
+            <div className="mx-auto max-w-7xl px-5 py-8 sm:px-8 sm:py-10 lg:px-10">
+              <p className="text-xs font-medium uppercase tracking-widest text-luxury-gold-soft">Personal Guidance</p>
+              <h2 id="consultation-title" className="mt-3 font-heading text-3xl leading-tight sm:text-4xl">Prefer to speak with someone first?</h2>
+              <p className="mt-3 max-w-2xl text-sm leading-6 text-white/75">Schedule a private video consultation with the Reina Sophia team to discuss your options and next steps.</p>
+              <ul aria-label="Topics for the consultation" className="mt-5 flex flex-wrap gap-x-5 gap-y-2 text-xs text-white/85 sm:text-sm">
+                {["Residence Options", "Current Pricing", "Buying Process"].map((item) => <li key={item} className="flex items-center gap-2"><span aria-hidden="true" className="size-1.5 rounded-full bg-luxury-gold-soft" />{item}</li>)}
+              </ul>
+              <VideoConsultationRequest whatsappHref={whatsappHref} />
+            </div>
+          </section>
+
+          <section id="funnel-closing" data-funnel-block="conversion" aria-labelledby="options-title" className="bg-white">
             <div className="mx-auto grid max-w-7xl gap-6 px-5 pt-10 pb-8 sm:px-8 lg:grid-cols-12 lg:items-center lg:px-10">
               <div className="lg:col-span-7">
                 <h2 id="options-title" className="font-heading text-3xl leading-tight sm:text-4xl">Ready to Discover Your Options?</h2>
-                <p className="mt-3 max-w-lg text-sm leading-6 text-white/80">Request current pricing and availability for Reina Sophia Residences.</p>
+                <p className="mt-3 max-w-lg text-sm leading-6 text-muted-foreground">Request current pricing and availability for Reina Sophia Residences.</p>
               </div>
               <div className="flex flex-col gap-3 lg:col-span-5 lg:items-end">
                 <a href="#request-prices" data-funnel-event="funnel_primary_cta" data-cta-location="conversion-banner" className={primaryButtonClass}>Get Prices &amp; Availability <ArrowRight className="size-4" aria-hidden="true" /></a>
-                <a href={whatsappHref} target="_blank" rel="noopener noreferrer" data-funnel-event="funnel_whatsapp_click" data-cta-location="conversion-banner" className="inline-flex min-h-11 items-center justify-center gap-2 px-5 text-sm text-white underline underline-offset-4"><MessageCircleMore className="size-4 text-[#25D366]" aria-hidden="true" />WhatsApp Us</a>
+                <a href={whatsappHref} target="_blank" rel="noopener noreferrer" data-funnel-event="funnel_whatsapp_click" data-cta-location="conversion-banner" className="inline-flex min-h-11 items-center justify-center gap-2 px-5 text-sm text-foreground underline underline-offset-4"><MessageCircleMore className="size-4 text-[#25D366]" aria-hidden="true" />WhatsApp Us</a>
               </div>
-            </div>
-            <div className="mx-auto max-w-7xl px-5 sm:px-8 lg:px-10">
-              <ol aria-label="What happens next" className="grid gap-4 border-t border-white/20 py-6 text-xs text-white/85 sm:grid-cols-3">
-                {steps.map((step, index) => (
-                  <li key={step} className="flex items-center gap-3"><span className="text-luxury-gold-soft">0{index + 1}</span>{step}</li>
-                ))}
-              </ol>
             </div>
           </section>
         </main>

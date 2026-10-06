@@ -65,6 +65,7 @@ for (const residence of [null, "Oliver", "Luca", "Audrey"]) {
   assert.equal((await response.json()).success, true)
   const message = deliveries.at(-1)
   assert.equal(message.replyTo, "visitor@example.com")
+  assert.ok(message.text.includes("Buyer Pack requested for Reina Sophia Residences."))
   assert.ok(message.text.includes(`Interested in: ${residence ?? "All residence models"}.`))
   assert.ok(message.text.includes("Marketing consent: No"))
   assert.ok(message.text.includes("Source: /aruba-homes (request-prices)."))
@@ -72,12 +73,26 @@ for (const residence of [null, "Oliver", "Luca", "Audrey"]) {
 
 const selectedPayload = createFunnelContactPayload(fields, "Audrey", "request-prices")
 
+const consultationPayload = createFunnelContactPayload(fields, "Oliver", "consultation-form", "video-consultation")
+assert.equal(consultationPayload.marketingConsent, false)
+assert.equal(consultationPayload.website, "")
+assert.equal(consultationPayload.comments, [
+  "Private video consultation requested.",
+  "Interested in: Oliver.",
+  "Source: /aruba-homes (video-consultation).",
+].join("\n"))
+assert.equal((await POST(request(consultationPayload))).status, 200)
+assert.ok(deliveries.at(-1).text.includes(consultationPayload.comments))
+assert.ok(deliveries.at(-1).text.includes("Marketing consent: No"))
+
 const sentBeforeInvalid = deliveries.length
 assert.equal((await POST(request({ ...selectedPayload, email: "invalid" }))).status, 400)
 assert.equal((await POST(request({ ...selectedPayload, name: " " }))).status, 400)
 assert.equal(deliveries.length, sentBeforeInvalid)
 assert.equal((await POST(request({ ...selectedPayload, website: "spam.example" }))).status, 200)
 assert.equal(deliveries.length, sentBeforeInvalid, "Honeypot must not send email")
+assert.equal((await POST(request({ ...consultationPayload, website: "spam.example" }))).status, 200)
+assert.equal(deliveries.length, sentBeforeInvalid, "Consultation honeypot must not send email")
 
 transportError = true
 assert.equal((await POST(request(selectedPayload))).status, 502)
@@ -99,6 +114,93 @@ const funnelUrl = new URL(getWhatsAppUrl(funnelMessage))
 assert.equal(funnelUrl.pathname, "/2976992222")
 assert.equal(funnelUrl.searchParams.get("text"), funnelMessage)
 console.log("PASS: short form contract, all models, validation, honeypot, delivery errors, existing form and WhatsApp compatibility. No email sent.")
+
+// Run the actual client submit handler with controlled hooks and a fake fetch.
+// This checks API-success/event ordering without a browser or network transport.
+function createFormHarness({ requestType = "buyer-pack", response, trackingThrows = false } = {}) {
+  const events = []
+  const statuses = []
+  const submissions = []
+  const selections = []
+  const fakeForm = { resetCount: 0, reset() { this.resetCount++ } }
+  const jsx = (type, props) => ({ type, props })
+  const { FunnelForm, RequestAvailabilityLink } = loadTypeScript("app/aruba-homes/_components/funnel-interactions.tsx", {
+    react: {
+      createContext() { return {} },
+      useContext() { return { residence: "Audrey", selectResidence: value => selections.push(value) } },
+      useState(initial) { return [initial, value => statuses.push(value)] },
+      useRef(initial) { return { current: initial } },
+    },
+    "react/jsx-runtime": { jsx, jsxs: jsx },
+    "lucide-react": { ArrowRight() {}, Check() {}, ChevronDown() {}, MessageCircleMore() {} },
+    "@next/third-parties/google": {
+      sendGTMEvent({ event }) {
+        events.push(event)
+        if (trackingThrows && event === "lead_form_success") throw new Error("Tracking unavailable")
+      },
+    },
+    "../_lib/contact-payload": { createFunnelContactPayload },
+  }, {
+    AbortSignal: { timeout() { return undefined } },
+    FormData: class {
+      constructor(form) {
+        assert.equal(form, fakeForm)
+        return fields
+      }
+    },
+    async fetch(url, options) {
+      assert.equal(url, "/api/contact")
+      assert.equal(options.method, "POST")
+      submissions.push(JSON.parse(options.body))
+      return typeof response === "function" ? response() : response
+    },
+  })
+  const form = FunnelForm({ id: requestType === "buyer-pack" ? "request-prices" : "video-consultation", requestType, whatsappHref: funnelUrl.toString() })
+  assert.equal(form.type, "form")
+  const cardLink = RequestAvailabilityLink({ residence: "Luca" })
+  assert.equal(cardLink.props.href, "#request-prices")
+  cardLink.props.onClick()
+  assert.deepEqual(selections, ["Luca"])
+  return {
+    events, statuses, submissions, fakeForm,
+    submit: () => form.props.onSubmit({ preventDefault() {}, currentTarget: fakeForm }),
+  }
+}
+
+const buyerSuccess = createFormHarness({ response: Response.json({ success: true }) })
+await buyerSuccess.submit()
+assert.deepEqual(buyerSuccess.events, ["lead_form_success"])
+assert.deepEqual(buyerSuccess.statuses, ["submitting", "success"])
+assert.equal(buyerSuccess.fakeForm.resetCount, 1)
+assert.ok(buyerSuccess.submissions[0].comments.includes("Buyer Pack requested for Reina Sophia Residences."))
+assert.ok(buyerSuccess.submissions[0].comments.includes("Interested in: Audrey."))
+assert.equal(buyerSuccess.submissions[0].marketingConsent, false)
+
+for (const response of [Response.json({ error: "Delivery failed" }, { status: 502 }), Response.json({ success: false })]) {
+  const failure = createFormHarness({ response })
+  await failure.submit()
+  assert.deepEqual(failure.events, [], "Unconfirmed requests must not report conversion success")
+  assert.deepEqual(failure.statuses, ["submitting", "error"])
+  assert.equal(failure.fakeForm.resetCount, 0)
+}
+
+const consultationSuccess = createFormHarness({ requestType: "video-consultation", response: Response.json({ success: true }), trackingThrows: true })
+await consultationSuccess.submit()
+assert.deepEqual(consultationSuccess.events, ["lead_form_success", "video_consultation_request"])
+assert.deepEqual(consultationSuccess.statuses, ["submitting", "success"], "Tracking failures must not change a successful delivery into an error")
+assert.ok(consultationSuccess.submissions[0].comments.includes("Private video consultation requested."))
+assert.ok(consultationSuccess.submissions[0].comments.includes("Source: /aruba-homes (video-consultation)."))
+
+let resolveSubmission
+const deferredResponse = new Promise(resolve => { resolveSubmission = resolve })
+const lockedSubmission = createFormHarness({ response: () => deferredResponse })
+const pendingSubmission = lockedSubmission.submit()
+await lockedSubmission.submit()
+assert.equal(lockedSubmission.submissions.length, 1, "A second click during a pending request must not send a duplicate")
+resolveSubmission(Response.json({ success: true }))
+await pendingSubmission
+assert.deepEqual(lockedSubmission.events, ["lead_form_success"])
+console.log("PASS: actual Buyer Pack/consultation submit handlers, selected model, backend-success gating, independent conversion events and duplicate-submission lock. No network requests.")
 
 // Exercise the actual visibility effect with controlled observer entries.
 // This validates logic and cleanup; it does not claim browser/layout coverage.
@@ -205,6 +307,9 @@ if (process.argv[2]) {
     const response = await fetch(new URL(route, baseUrl))
     assert.equal(response.status, 200, route)
     const html = await response.text()
+    const visibleMarkup = html.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, "").replace(/<style\b[^>]*>[\s\S]*?<\/style>/gi, "")
+    assert.doesNotMatch(visibleMarkup, /beachfront|oceanfront|living by the sea/i, `Misleading location copy on ${route}`)
+    assert.doesNotMatch(html, /id="construction-progress"/, "Construction section must stay hidden without assigned photos")
     if (route === "/aruba-homes") {
       assert.match(html, /name="robots" content="noindex, follow"/)
       assert.doesNotMatch(html, /<iframe\b/)
@@ -213,30 +318,68 @@ if (process.argv[2]) {
       assert.match(heroVideos[0][0], /poster="\/videos\/reina-sophia-funnel-hero-v3-poster.webp"/)
       assert.match(heroVideos[0][0], /preload="metadata"/)
       assert.doesNotMatch(heroVideos[0][0], /\ssrc=/, "Viewport selection must happen through source media")
-      assert.match(html, /src="\/videos\/reina-sophia-funnel-hero-mobile.mp4"[^>]*media="\(prefers-reduced-motion: no-preference\) and \(max-width: 767px\)"/)
+      assert.doesNotMatch(html, /src="\/videos\/reina-sophia-funnel-hero-mobile.mp4"/, "Mobile hero must not load interior video frames")
+      assert.match(visibleMarkup, /alt="Exterior sunset render of the Oliver residence at Reina Sophia"/, "Mobile hero uses the existing exterior render")
       assert.match(html, /src="\/videos\/reina-sophia-funnel-hero-desktop.mp4"[^>]*media="\(prefers-reduced-motion: no-preference\) and \(min-width: 768px\)"/)
       assert.doesNotMatch(html, /reina-sophia-funnel-hero(?:-poster)?\.(?:mp4|webp)/, "Removed v2-derived assets must not be referenced")
-      assert.equal((html.match(/<form\b/g) ?? []).length, 1)
-      assert.equal((html.match(/data-funnel-block="/g) ?? []).length, 5)
+      assert.equal((html.match(/<form\b/g) ?? []).length, 2, "Buyer Pack plus a collapsed consultation form")
+      assert.deepEqual([...html.matchAll(/data-funnel-block="([^"]+)"/g)].map(match => match[1]), [
+        "hero", "models", "ownership", "request", "purchase-process", "reasons", "lifestyle", "consultation", "conversion",
+      ], "Pricing, freehold ownership and purchase process must precede the location/lifestyle content")
       assert.match(html, /id="request-prices"/)
-      assert.doesNotMatch(html, /id="request-information"|href="#request-information"|href="\/projects\//)
+      assert.match(html, /id="buying-in-aruba"/)
+      assert.match(html, /href="#buying-in-aruba"/)
+      assert.doesNotMatch(html, /id="request-information"|href="#request-information"/)
       assert.doesNotMatch(html, /funnel_model_view/)
-      assert.match(html, /New Homes for Sale in Aruba/)
-      assert.match(html, /Send Me Prices &amp; Availability/)
+      assert.match(html, /New Freehold Homes in Central Aruba/)
+      assert.match(html, /Own the home\./)
+      assert.match(html, /Own the land\./)
+      assert.match(html, /Homes from AWG 1,140,545/)
+      assert.match(html, /Get the Current Reina Sophia Buyer Pack/)
+      assert.match(html, /Send Me the Buyer Pack/)
+      for (const price of ["From AWG 1,140,545", "From AWG 1,804,539", "From AWG 2,189,211"]) {
+        assert.ok(html.includes(price), `Missing approved price ${price}`)
+      }
+      for (const benefit of ["Current Price List", "Available Residences", "Floorplans", "Payment Structure", "What&#x27;s Included"]) {
+        assert.ok(html.includes(benefit), `Missing Buyer Pack benefit ${benefit}`)
+      }
+      const consultationToggle = html.match(/<details class="group mt-5"[^>]*>/)
+      assert.ok(consultationToggle, "One lightweight consultation expander")
+      assert.doesNotMatch(consultationToggle[0], /\sopen(?:\s|=|>)/, "Consultation must initially be collapsed")
+      assert.match(html, /id="video-consultation"/)
+      assert.match(html, /data-form-location="video-consultation"/)
       assert.match(html, /aria-label="Quick contact" hidden=""/)
       for (const event of ["funnel_primary_cta", "funnel_whatsapp_click", "funnel_form_start", "funnel_form_submit", "funnel_model_interest"]) {
         assert.ok(html.includes(`data-funnel-event="${event}"`), event)
       }
-      for (const card of html.matchAll(/<article\b[\s\S]*?<\/article>/g)) {
+      const cards = [...html.matchAll(/<article\b[\s\S]*?<\/article>/g)]
+      assert.equal(cards.length, 3, "Exactly three comparison cards")
+      for (const [index, card] of cards.entries()) {
+        const slug = ["luca", "oliver", "audrey"][index]
         assert.equal((card[0].match(/<img\b/g) ?? []).length, 1)
-        assert.equal((card[0].match(/<li\b/g) ?? []).length, 3)
+        assert.equal((card[0].match(/<li\b/g) ?? []).length, 5)
         assert.equal((card[0].match(/href="#request-prices"/g) ?? []).length, 1)
+        assert.ok(card[0].includes(`aria-label="View Floorplan for ${slug[0].toUpperCase()}${slug.slice(1)}"`), `${slug} floorplan dialog trigger`)
+        assert.ok(card[0].includes('aria-haspopup="dialog"'), `${slug} accessible dialog trigger`)
+        assert.doesNotMatch(card[0], /href="\/projects\//, `${slug} floorplan stays in the funnel`)
+        assert.ok(card[0].includes(`data-residence="${slug[0].toUpperCase()}${slug.slice(1)}"`), `${slug} selected-residence tracking`)
+        assert.ok(card[0].includes("Check Current Availability"))
       }
+      assert.ok(cards[2][0].includes("160 m² Home"))
+      assert.doesNotMatch(cards[2][0], /130\s*m/)
       assert.doesNotMatch(html, /name="city"|name="comments"|name="marketingConsent"/)
       assert.doesNotMatch(html, /Open WhatsApp chat/)
     } else {
       assert.match(html, /Open WhatsApp chat/, `Existing floating WhatsApp missing on ${route}`)
       assert.doesNotMatch(html, /name="robots" content="noindex, follow"/)
+      if (route.startsWith("/projects/")) assert.match(html, /id="blueprint-sheets-heading"/, `Floorplan target missing on ${route}`)
+      if (route === "/projects/audrey") assert.doesNotMatch(visibleMarkup, /130\s*m/)
+      if (route === "/") {
+        assert.match(html, /Your own home\./)
+        assert.match(html, /Your own land\./)
+        assert.match(html, /In the heart of Aruba\./)
+        assert.match(html, /href="\/aruba-homes#request-prices"/)
+      }
     }
     console.log(`PASS: ${route} HTTP 200`)
   }
