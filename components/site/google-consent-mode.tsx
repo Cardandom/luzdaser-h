@@ -2,7 +2,7 @@
 
 import { GoogleTagManager } from "@next/third-parties/google"
 import { usePathname } from "next/navigation"
-import { useEffect, useState } from "react"
+import { useEffect } from "react"
 
 import {
   PRIVACY_CONSENT_CHANGED_EVENT,
@@ -22,7 +22,6 @@ type GoogleConsentState = {
 declare global {
   interface Window {
     gtag?: (...args: unknown[]) => void
-    reinaSophiaGoogleConsentInitialized?: boolean
   }
 }
 
@@ -38,36 +37,8 @@ function mapGoogleConsent(consent: PrivacyConsent | null): GoogleConsentState {
   }
 }
 
-function ensureGoogleCommandQueue() {
-  window.dataLayer = window.dataLayer ?? []
-  window.gtag =
-    window.gtag ??
-    function gtag() {
-      // GTM recognizes gtag commands by their Arguments-object shape.
-      // eslint-disable-next-line prefer-rest-params
-      window.dataLayer?.push(arguments)
-    }
-}
-
-function applyGoogleConsent(consent: PrivacyConsent | null) {
-  ensureGoogleCommandQueue()
-
-  if (window.reinaSophiaGoogleConsentInitialized) {
-    window.gtag?.("consent", "update", mapGoogleConsent(consent))
-    return
-  }
-
-  window.gtag?.("consent", "default", mapGoogleConsent(consent))
-  window.reinaSophiaGoogleConsentInitialized = true
-}
-
 function updateGoogleConsent(consent: PrivacyConsent) {
-  ensureGoogleCommandQueue()
   window.gtag?.("consent", "update", mapGoogleConsent(consent))
-}
-
-function consentAllowsGoogleTags(consent: PrivacyConsent | null) {
-  return Boolean(consent?.analytics || consent?.advertising)
 }
 
 function isGtmExcludedPath(pathname: string | null) {
@@ -86,30 +57,13 @@ function isGtmExcludedPath(pathname: string | null) {
 export function GoogleConsentMode() {
   const pathname = usePathname()
   const isExcludedRoute = isGtmExcludedPath(pathname)
-  const [shouldLoadGtm, setShouldLoadGtm] = useState(false)
 
   useEffect(() => {
     if (isExcludedRoute) return
 
-    const currentConsent = readPrivacyConsent()
-    let initializeGtm: number | undefined
-
-    applyGoogleConsent(currentConsent)
-
-    if (consentAllowsGoogleTags(currentConsent)) {
-      initializeGtm = window.setTimeout(() => {
-        setShouldLoadGtm(true)
-      }, 0)
-    }
-
-    const handleConsentChanged = (event: Event) => {
-      const consent = (event as CustomEvent<PrivacyConsent>).detail
-
-      updateGoogleConsent(consent)
-
-      if (consentAllowsGoogleTags(consent)) {
-        setShouldLoadGtm(true)
-      }
+    const handleConsentChanged = () => {
+      const consent = readPrivacyConsent()
+      if (consent) updateGoogleConsent(consent)
     }
 
     window.addEventListener(
@@ -118,10 +72,6 @@ export function GoogleConsentMode() {
     )
 
     return () => {
-      if (initializeGtm !== undefined) {
-        window.clearTimeout(initializeGtm)
-      }
-
       window.removeEventListener(
         PRIVACY_CONSENT_CHANGED_EVENT,
         handleConsentChanged,
@@ -129,7 +79,7 @@ export function GoogleConsentMode() {
     }
   }, [isExcludedRoute])
 
-  if (isExcludedRoute || !shouldLoadGtm) {
+  if (isExcludedRoute) {
     return null
   }
 
