@@ -122,7 +122,7 @@ export default function ArubaHomesPage() {
                 </div>
                 <p className="pb-1 text-xs text-muted-foreground lg:hidden">Swipe to compare <span aria-hidden="true">→</span></p>
               </div>
-              <div aria-label="Residence cards. Scroll horizontally to compare." tabIndex={0} className="-mx-5 mt-5 flex snap-x snap-mandatory gap-4 overflow-x-auto px-5 pb-4 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-luxury-gold-ink sm:-mx-8 sm:px-8 lg:mx-0 lg:grid lg:grid-cols-3 lg:gap-5 lg:overflow-visible lg:px-0 lg:pb-0">
+              <div aria-label="Residence cards. Scroll horizontally to compare." tabIndex={0} className="-mx-5 mt-5 flex snap-x snap-mandatory gap-4 overflow-x-auto px-[max(7vw,calc((100vw-28rem)/2))] pb-4 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-luxury-gold-ink sm:-mx-8 lg:mx-0 lg:grid lg:grid-cols-3 lg:gap-5 lg:overflow-visible lg:px-0 lg:pb-0">
                 {residences.map((project) => <ResidenceShowcase key={project.slug} project={project} />)}
               </div>
               <details className="group mt-4 border-t border-luxury-border pt-2">

@@ -170,7 +170,7 @@ export function CookieConsent() {
               className={
                 view === "preferences"
                   ? "absolute right-4 top-4 inline-flex size-10 items-center justify-center rounded-full border border-luxury-border bg-white text-foreground/70 transition hover:border-luxury-gold hover:text-foreground focus-visible:ring-4 focus-visible:ring-luxury-gold/30 focus-visible:outline-none"
-                  : "absolute right-3 top-3 inline-flex size-11 items-center justify-center rounded-full border border-luxury-border bg-white/80 text-foreground/70 transition hover:border-luxury-gold hover:text-foreground focus-visible:ring-4 focus-visible:ring-luxury-gold/30 focus-visible:outline-none sm:right-4 sm:top-4"
+                  : "absolute left-3 top-3 inline-flex size-11 items-center justify-center rounded-full border border-luxury-border bg-white/80 text-foreground/70 transition hover:border-luxury-gold hover:text-foreground focus-visible:ring-4 focus-visible:ring-luxury-gold/30 focus-visible:outline-none sm:right-4 sm:left-auto sm:top-4"
               }
               aria-label="Close cookie preferences"
             >
@@ -180,10 +180,10 @@ export function CookieConsent() {
             {view === "overview" ? (
               <div className="md:flex md:items-center md:gap-6">
                 <div className="min-w-0 flex-1">
-                  <Dialog.Title className="pr-12 font-heading text-xl tracking-tight sm:text-2xl">
+                  <Dialog.Title className="flex min-h-11 items-center justify-center px-12 text-center font-heading text-xl tracking-tight sm:block sm:min-h-0 sm:pr-12 sm:pl-0 sm:text-left sm:text-2xl">
                     Cookie preferences
                   </Dialog.Title>
-                  <Dialog.Description className="mt-1 pr-12 text-sm leading-5 text-foreground/70 md:pr-0">
+                  <Dialog.Description className="mt-3 text-sm leading-5 text-foreground/70 sm:mt-1 sm:pr-12 md:pr-0">
                     We use cookies to improve your experience and understand how
                     our website is used.
                   </Dialog.Description>

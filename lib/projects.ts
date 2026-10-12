@@ -50,11 +50,18 @@ export type ProjectBlueprintSheet = {
   alt: string
 }
 
+export type ProjectGalleryImage = {
+  src: string
+  alt: string
+  title?: string
+}
+
 export type Project = {
   slug: ProjectSlug
   title: string
   price: string
   picture: string
+  galleryImages: ProjectGalleryImage[]
   objectPosition: string
   summary: string
   badge: string
@@ -80,7 +87,24 @@ export const projects: Project[] = [
     slug: "luca",
     title: "Luca",
     price: "From AWG 1,140,545",
-    picture: "/lucaDetails.webp",
+    picture: "/projects/luca/luca-main-photo.webp",
+    galleryImages: [
+      {
+        src: "/projects/luca/luca-main-photo.webp",
+        alt: "Daytime photo of the white and gray Luca residence facade with house number 34",
+        title: "Luca residence",
+      },
+      {
+        src: "/lucaSectionPhotp.webp",
+        alt: "Architectural render of the Luca residence at sunset with palm trees, a K 20 wall, and a black car",
+        title: "Luca at sunset",
+      },
+      {
+        src: "/LucaFrontView.webp",
+        alt: "Daytime architectural render of the Luca residence with a green car at the front",
+        title: "Luca front view",
+      },
+    ],
     objectPosition: "center center",
     summary:
       "A compact boutique residence with crisp lines, warm accents, and a private resort feel.",
@@ -215,6 +239,23 @@ export const projects: Project[] = [
     title: "Oliver",
     price: "From AWG 1,804,539",
     picture: "/front3DOliver.webp",
+    galleryImages: [
+      {
+        src: "/front3DOliver.webp",
+        alt: "Architectural render of the Oliver residence at sunset",
+        title: "Oliver arrival view",
+      },
+      {
+        src: "/projects/oliver/oliver-main-photo.webp",
+        alt: "Evening architectural render of the single-story Oliver residence",
+        title: "Oliver evening view",
+      },
+      {
+        src: "/Oliver.webp",
+        alt: "Architectural render of the Oliver residence terrace and pool",
+        title: "Oliver terrace and pool",
+      },
+    ],
     objectPosition: "center center",
     summary:
       "A more expansive villa composition with a softer palette, garden framing, and a relaxed outdoor rhythm.",
@@ -345,6 +386,28 @@ export const projects: Project[] = [
     title: "Audrey",
     price: "From AWG 2,189,211",
     picture: "/projects/audrey/audrey-front-elevation.webp",
+    galleryImages: [
+      {
+        src: "/projects/audrey/audrey-front-elevation.webp",
+        alt: "Architectural render of the two-story Audrey residence front elevation",
+        title: "Audrey front elevation",
+      },
+      {
+        src: "/projects/audrey/audrey-community-streetscape.webp",
+        alt: "Architectural render of two-story Audrey residences along a landscaped street",
+        title: "Audrey community streetscape",
+      },
+      {
+        src: "/projects/audrey/audrey-evening-arrival.webp",
+        alt: "Evening architectural render of the two-story Audrey residence",
+        title: "Audrey evening arrival",
+      },
+      {
+        src: "/projects/audrey/audrey-villa-collection.webp",
+        alt: "Architectural render of the two-story Audrey villa collection",
+        title: "Audrey villa collection",
+      },
+    ],
     objectPosition: "center center",
     summary:
       "A two-level villa with four bedrooms, three bathrooms, and a refined minimalist character.",
