@@ -16,6 +16,7 @@ import {
   type FunnelRequestType,
   type ResidenceName,
 } from "../_lib/contact-payload"
+import { formatAwg, type Configuration } from "@/lib/commercial-pricing"
 
 type SubmissionState = "idle" | "submitting" | "success" | "error"
 
@@ -30,19 +31,26 @@ const buyerPackBenefits = [
 const ResidenceContext = createContext<{
   residence: ResidenceName | null
   selectResidence: (residence: ResidenceName | null) => void
+  configuration: Configuration | null
+  setConfiguration: (configuration: Configuration | null) => void
 } | null>(null)
 
-export function FunnelProvider({ children }: { children: ReactNode }) {
-  const [residence, selectResidence] = useState<ResidenceName | null>(null)
+export function FunnelProvider({ children, initialResidence = null }: { children: ReactNode; initialResidence?: ResidenceName | null }) {
+  const [residence, setResidence] = useState<ResidenceName | null>(initialResidence)
+  const [configuration, setConfiguration] = useState<Configuration | null>(null)
+  function selectResidence(value: ResidenceName | null) {
+    setResidence(value)
+    setConfiguration(null)
+  }
 
   return (
-    <ResidenceContext.Provider value={{ residence, selectResidence }}>
+    <ResidenceContext.Provider value={{ residence, selectResidence, configuration, setConfiguration }}>
       {children}
     </ResidenceContext.Provider>
   )
 }
 
-function useResidence() {
+export function useResidence() {
   const context = useContext(ResidenceContext)
   if (!context) throw new Error("Funnel controls require FunnelProvider")
   return context
@@ -59,7 +67,7 @@ export function RequestAvailabilityLink({
 
   return (
     <a
-      href="#request-prices"
+      href="#build-your-home"
       onClick={(event) => {
         selectResidence(residence)
         onClick?.(event)
@@ -67,10 +75,10 @@ export function RequestAvailabilityLink({
       data-funnel-event="funnel_model_interest"
       data-cta-location="residence-card"
       data-residence={residence}
-      aria-label={`Check current availability for ${residence}`}
+      aria-label={`Customize ${residence}`}
       className="inline-flex min-h-12 w-full items-center justify-between gap-2 rounded-full border border-luxury-gold/60 bg-luxury-gold-soft/30 px-5 text-sm font-semibold text-foreground transition-colors hover:bg-luxury-gold-soft motion-reduce:transition-none"
     >
-      Check Current Availability
+      Customize {residence}
       <ArrowRight className="size-4" aria-hidden="true" />
     </a>
   )
@@ -89,7 +97,7 @@ export function FunnelForm({
   children?: ReactNode
   requestType?: FunnelRequestType
 }) {
-  const { residence, selectResidence } = useResidence()
+  const { residence, selectResidence, configuration } = useResidence()
   const [status, setStatus] = useState<SubmissionState>("idle")
   const submitting = useRef(false)
   const isSubmitting = status === "submitting"
@@ -113,7 +121,7 @@ export function FunnelForm({
           "Content-Type": "application/json",
         },
         signal: AbortSignal.timeout(25000),
-        body: JSON.stringify(createFunnelContactPayload(fields, residence, id, requestType)),
+        body: JSON.stringify(createFunnelContactPayload(fields, residence, id, requestType, isConsultation ? null : configuration)),
       })
 
       if (!response.ok) throw new Error("Contact request failed")
@@ -182,7 +190,15 @@ export function FunnelForm({
         </ul>
       )}
 
-      {residence && (
+      {configuration && !isConsultation ? (
+        <div className="mt-4 rounded-xl bg-stone-50 p-4 text-sm" aria-live="polite">
+          <p className="text-xs font-semibold uppercase tracking-wider text-luxury-gold-ink">Your configuration</p>
+          <p className="mt-2 font-semibold">{configuration.residence}</p>
+          <p className="mt-1 text-muted-foreground">{configuration.upgrades.map((upgrade) => upgrade.label).join(" · ") || "Base configuration"}</p>
+          <p className="mt-2">Estimated starting configuration: <strong>{formatAwg(configuration.total)}</strong></p>
+          <a href="#build-your-home" className="mt-2 inline-block underline underline-offset-4">Edit configuration</a>
+        </div>
+      ) : residence && (
         <div className="mt-3 flex flex-wrap items-center justify-between gap-2 rounded-xl bg-stone-50 px-3 text-sm">
           <p aria-live="polite">Interested in: <strong>{residence}</strong></p>
           <button

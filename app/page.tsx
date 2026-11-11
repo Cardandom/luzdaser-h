@@ -8,6 +8,7 @@ import { HomeExperienceLoader } from "@/components/site/home-experience-loader"
 import { HomeVideoLoadCoordinator } from "@/components/site/home-video-load-coordinator"
 import { ScrollVideoRevealSection } from "@/components/ScrollVideoRevealSection"
 import { SiteFooter } from "@/components/site/site-footer"
+import { PersonalizationSection } from "@/components/site/personalization-section"
 
 const homeScrollVideoProjectIds = ["oliver", "luca", "audrey"] as const
 
@@ -53,6 +54,7 @@ export default function HomePage() {
         videoSrc="/videos/scroll-audrey-desktop-g4-hq-v1.mp4"
         revealOnHashNavigation
       />
+      <PersonalizationSection />
       <CtaSection />
       <BenefitsSection />
       <ConstructionProgressSection />

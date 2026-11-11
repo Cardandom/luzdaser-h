@@ -14,7 +14,7 @@ const heroFeatures = [
   },
   {
     icon: Waves,
-    label: "Private Pool",
+    label: "Optional Private Pool",
   },
   {
     icon: MapPin,
@@ -83,7 +83,7 @@ export function HeroSection() {
               </h1>
 
               <p className="mt-4 max-w-xl text-sm leading-6 text-foreground drop-shadow-sm sm:text-base">
-                Contemporary private residences with individual lots, private pools
+                Contemporary private residences with individual lots, optional private pools
                 and modern finishes inside a residential community in central Aruba.
               </p>
 

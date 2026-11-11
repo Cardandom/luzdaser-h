@@ -33,7 +33,20 @@ function loadTypeScript(file, dependencies = {}, globals = {}) {
   return context.exports
 }
 
-const { createFunnelContactPayload } = loadTypeScript("app/aruba-homes/_lib/contact-payload.ts")
+const pricing = loadTypeScript("lib/commercial-pricing.ts")
+const { commercialPricing, emptyUpgrades, getConfiguration, formatAwg } = pricing
+assert.equal(commercialPricing.luca.startingPackage, 1032202)
+assert.equal(commercialPricing.oliver.startingPackage, 1463914)
+assert.equal(commercialPricing.audrey.startingPackage, 1650606)
+assert.equal(commercialPricing.audrey.appliances, 12000)
+assert.match(fs.readFileSync("lib/projects.ts", "utf8"), /slug: "audrey"[\s\S]*?160 m² Home/)
+const configured = getConfiguration("oliver", { ...emptyUpgrades, pool: true, kitchen: "fullKitchen", appliances: true, terrace: true })
+assert.equal(configured.total, 1596554)
+assert.equal(configured.upgrades.some(upgrade => upgrade.label === "Appliance Set"), false)
+assert.equal(getConfiguration("oliver", { ...emptyUpgrades, pool: true, kitchen: "fullKitchen", terrace: true }).total, configured.total)
+assert.equal(getConfiguration("audrey", { ...emptyUpgrades, appliances: true }).total, 1662606)
+assert.equal(formatAwg(1032202), "AWG 1,032,202")
+const { createFunnelContactPayload } = loadTypeScript("app/aruba-homes/_lib/contact-payload.ts", { "@/lib/commercial-pricing": pricing })
 const { getWhatsAppUrl } = loadTypeScript("lib/contact-config.ts")
 const { POST } = loadTypeScript("app/api/contact/route.ts", {
   resend: {
@@ -72,6 +85,13 @@ for (const residence of [null, "Oliver", "Luca", "Audrey"]) {
 }
 
 const selectedPayload = createFunnelContactPayload(fields, "Audrey", "request-prices")
+const personalizedPayload = createFunnelContactPayload(fields, "Oliver", "request-prices", "buyer-pack", configured)
+assert.match(personalizedPayload.comments, /Residence: Oliver/)
+assert.match(personalizedPayload.comments, /Starting package: AWG 1,463,914/)
+assert.match(personalizedPayload.comments, /Estimated starting configuration: AWG 1,596,554/)
+assert.doesNotMatch(personalizedPayload.comments, /Appliance Set/)
+assert.equal((await POST(request(personalizedPayload))).status, 200)
+assert.ok(deliveries.at(-1).text.includes(personalizedPayload.comments))
 
 const consultationPayload = createFunnelContactPayload(fields, "Oliver", "consultation-form", "video-consultation")
 assert.equal(consultationPayload.marketingConsent, false)
@@ -140,6 +160,7 @@ function createFormHarness({ requestType = "buyer-pack", response, trackingThrow
       },
     },
     "../_lib/contact-payload": { createFunnelContactPayload },
+    "@/lib/commercial-pricing": pricing,
   }, {
     AbortSignal: { timeout() { return undefined } },
     FormData: class {
@@ -158,7 +179,7 @@ function createFormHarness({ requestType = "buyer-pack", response, trackingThrow
   const form = FunnelForm({ id: requestType === "buyer-pack" ? "request-prices" : "video-consultation", requestType, whatsappHref: funnelUrl.toString() })
   assert.equal(form.type, "form")
   const cardLink = RequestAvailabilityLink({ residence: "Luca" })
-  assert.equal(cardLink.props.href, "#request-prices")
+  assert.equal(cardLink.props.href, "#build-your-home")
   cardLink.props.onClick()
   assert.deepEqual(selections, ["Luca"])
   return {
@@ -318,15 +339,16 @@ if (process.argv[2]) {
       assert.match(heroVideos[0][0], /poster="\/videos\/reina-sophia-funnel-hero-v3-poster.webp"/)
       assert.match(heroVideos[0][0], /preload="metadata"/)
       assert.doesNotMatch(heroVideos[0][0], /\ssrc=/, "Viewport selection must happen through source media")
-      assert.doesNotMatch(html, /src="\/videos\/reina-sophia-funnel-hero-mobile.mp4"/, "Mobile hero must not load interior video frames")
-      assert.match(visibleMarkup, /alt="Exterior sunset render of the Oliver residence at Reina Sophia"/, "Mobile hero uses the existing exterior render")
+      assert.match(html, /src="\/videos\/reina-sophia-funnel-hero-mobile.mp4"[^>]*media="\(prefers-reduced-motion: no-preference\) and \(max-width: 767px\)"/)
       assert.match(html, /src="\/videos\/reina-sophia-funnel-hero-desktop.mp4"[^>]*media="\(prefers-reduced-motion: no-preference\) and \(min-width: 768px\)"/)
       assert.doesNotMatch(html, /reina-sophia-funnel-hero(?:-poster)?\.(?:mp4|webp)/, "Removed v2-derived assets must not be referenced")
-      assert.equal((html.match(/<form\b/g) ?? []).length, 2, "Buyer Pack plus a collapsed consultation form")
+      assert.equal((html.match(/<form\b/g) ?? []).length, 1, "Only the primary Buyer Pack form is rendered")
       assert.deepEqual([...html.matchAll(/data-funnel-block="([^"]+)"/g)].map(match => match[1]), [
-        "hero", "models", "ownership", "request", "purchase-process", "reasons", "lifestyle", "consultation", "conversion",
-      ], "Pricing, freehold ownership and purchase process must precede the location/lifestyle content")
+        "hero", "models", "request", "ownership", "purchase-process", "conversion",
+      ], "The form precedes the compact ownership and purchase process sections")
       assert.match(html, /id="request-prices"/)
+      assert.match(html, /id="build-your-home"/)
+      assert.ok(html.indexOf('id="build-your-home"') < html.indexOf('data-funnel-block="request"'))
       assert.match(html, /id="buying-in-aruba"/)
       assert.match(html, /href="#buying-in-aruba"/)
       assert.doesNotMatch(html, /id="request-information"|href="#request-information"/)
@@ -334,20 +356,20 @@ if (process.argv[2]) {
       assert.match(html, /New Freehold Homes in Central Aruba/)
       assert.match(html, /Own the home\./)
       assert.match(html, /Own the land\./)
-      assert.match(html, /Homes from AWG 1,140,545/)
+      assert.match(html, /Homes from AWG 1,032,202/)
       assert.match(html, /Get the Current Reina Sophia Buyer Pack/)
       assert.match(html, /Send Me the Buyer Pack/)
-      for (const price of ["From AWG 1,140,545", "From AWG 1,804,539", "From AWG 2,189,211"]) {
+      for (const price of ["From AWG 1,032,202", "From AWG 1,463,914", "From AWG 1,650,606"]) {
         assert.ok(html.includes(price), `Missing approved price ${price}`)
       }
       for (const benefit of ["Current Price List", "Available Residences", "Floorplans", "Payment Structure", "What&#x27;s Included"]) {
         assert.ok(html.includes(benefit), `Missing Buyer Pack benefit ${benefit}`)
       }
-      const consultationToggle = html.match(/<details class="group mt-5"[^>]*>/)
-      assert.ok(consultationToggle, "One lightweight consultation expander")
-      assert.doesNotMatch(consultationToggle[0], /\sopen(?:\s|=|>)/, "Consultation must initially be collapsed")
-      assert.match(html, /id="video-consultation"/)
-      assert.match(html, /data-form-location="video-consultation"/)
+      assert.doesNotMatch(visibleMarkup, /id="video-consultation"|Personal Guidance|data-funnel-block="(?:lifestyle|consultation|reasons)"/)
+      assert.match(visibleMarkup, /Why Reina Sophia/)
+      assert.match(visibleMarkup, /Southern Caribbean Location/)
+      assert.match(visibleMarkup, /Central Paradera/)
+      assert.match(visibleMarkup, /Get My Personalized Offer/)
       assert.match(html, /aria-label="Quick contact" hidden=""/)
       for (const event of ["funnel_primary_cta", "funnel_whatsapp_click", "funnel_form_start", "funnel_form_submit", "funnel_model_interest"]) {
         assert.ok(html.includes(`data-funnel-event="${event}"`), event)
@@ -357,13 +379,12 @@ if (process.argv[2]) {
       for (const [index, card] of cards.entries()) {
         const slug = ["luca", "oliver", "audrey"][index]
         assert.equal((card[0].match(/<img\b/g) ?? []).length, 1)
-        assert.equal((card[0].match(/<li\b/g) ?? []).length, 5)
-        assert.equal((card[0].match(/href="#request-prices"/g) ?? []).length, 1)
-        assert.ok(card[0].includes(`aria-label="View Floorplan for ${slug[0].toUpperCase()}${slug.slice(1)}"`), `${slug} floorplan dialog trigger`)
-        assert.ok(card[0].includes('aria-haspopup="dialog"'), `${slug} accessible dialog trigger`)
-        assert.doesNotMatch(card[0], /href="\/projects\//, `${slug} floorplan stays in the funnel`)
+        assert.equal((card[0].match(/href="#build-your-home"/g) ?? []).length, 1)
+        assert.equal((card[0].match(/<li\b/g) ?? []).length, 2, `${slug} has two architectural details`)
+        assert.ok(card[0].includes("Base home + freehold land"))
+        assert.doesNotMatch(card[0], /View Floorplan|View photos|Personalize with|Optional upgrades|href="\/projects\//, `${slug} stays compact and inside the funnel`)
         assert.ok(card[0].includes(`data-residence="${slug[0].toUpperCase()}${slug.slice(1)}"`), `${slug} selected-residence tracking`)
-        assert.ok(card[0].includes("Check Current Availability"))
+        assert.ok(card[0].includes(`Customize ${slug[0].toUpperCase()}${slug.slice(1)}`))
       }
       assert.ok(cards[2][0].includes("160 m² Home"))
       assert.doesNotMatch(cards[2][0], /130\s*m/)
@@ -381,6 +402,13 @@ if (process.argv[2]) {
         assert.match(html, /href="\/aruba-homes#request-prices"/)
       }
     }
+    assert.doesNotMatch(visibleMarkup, /1,140,545|1,804,539|2,189,211|US\$|\bUSD\b|\$(?:573|813|917)K/)
     console.log(`PASS: ${route} HTTP 200`)
   }
+  for (const model of ["luca", "oliver", "audrey"]) {
+    const html = await (await fetch(new URL(`/aruba-homes?model=${model}`, baseUrl))).text()
+    const radios = [...html.matchAll(/<input\b[^>]*name="residence-model"[^>]*>/g)].map(match => match[0])
+    assert.ok(radios.some(radio => radio.includes(`value="${model}"`) && radio.includes("checked")), `${model} must be preselected`)
+  }
+  console.log("PASS: residence links preselect each requested model")
 }

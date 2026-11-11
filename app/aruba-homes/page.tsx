@@ -1,22 +1,21 @@
 import type { Metadata } from "next"
 import Image from "next/image"
 import Link from "next/link"
-import { ArrowDown, ArrowRight, BedDouble, MapPin, MessageCircleMore, ShieldCheck, Waves } from "lucide-react"
+import { ArrowDown, ArrowRight, MessageCircleMore } from "lucide-react"
 
 import { BuyerPackVisual } from "./_components/buyer-pack-visual"
 import { BuyingProcess } from "./_components/buying-process"
 import { FreeholdOwnership } from "./_components/freehold-ownership"
 import { CookieSettingsButton } from "@/components/site/cookie-settings-button"
-import { ConstructionProgressSection } from "@/components/site/construction-progress-section"
-import { LifestyleBento } from "./_components/lifestyle-bento"
-import { LocationStory } from "./_components/location-story"
 import { contactPhone, contactPhoneDisplay, getWhatsAppUrl } from "@/lib/contact-config"
 import { brandName, legalEntityName, privacyEmail, registeredAddress } from "@/lib/legal-config"
 import { getProjectBySlug, priceListNote } from "@/lib/projects"
-import { FunnelForm, FunnelProvider, VideoConsultationRequest } from "./_components/funnel-interactions"
+import { FunnelForm, FunnelProvider } from "./_components/funnel-interactions"
 import { MobileFunnelActions } from "./_components/mobile-funnel-actions"
 import { FunnelHeroVideo } from "./_components/funnel-hero-video"
 import { ResidenceShowcase } from "./_components/residence-showcase"
+import { HomeConfigurator } from "./_components/home-configurator"
+import { commercialPricing, type ResidenceSlug } from "@/lib/commercial-pricing"
 import styles from "./funnel.module.css"
 
 const whatsappHref = getWhatsAppUrl(
@@ -29,40 +28,36 @@ const residences = (["luca", "oliver", "audrey"] as const).map((slug) => {
   return project
 })
 
-const projectPillars = [
-  { label: "Freehold Land", icon: ShieldCheck },
-  { label: "Private Pool", icon: Waves },
-  { label: "2–4 Bedrooms", icon: BedDouble },
-  { label: "Central Aruba", icon: MapPin },
-]
-
 const primaryButtonClass = "inline-flex min-h-12 items-center justify-center gap-3 rounded-full bg-linear-to-b from-luxury-gold-soft to-luxury-gold px-6 py-3 text-sm font-semibold text-stone-950 shadow-sm transition-shadow hover:shadow-md motion-reduce:transition-none"
 
 export const metadata: Metadata = {
   title: "Homes in Aruba | Reina Sophia Residences",
   description:
-    "Explore freehold homes with private pools at Reina Sophia Residences in Paradera, central Aruba. Request the current Buyer Pack, pricing and availability.",
+    "Explore freehold homes with optional private pools at Reina Sophia Residences in Paradera, central Aruba. Request the current Buyer Pack, pricing and availability.",
   robots: { index: false, follow: true },
   alternates: { canonical: "/aruba-homes" },
   openGraph: {
     type: "website",
     url: "/aruba-homes",
     title: "Own the home. Own the land. | Reina Sophia Residences",
-    description: "Freehold homes with private pools in Paradera, central Aruba. Request current prices, floorplans and availability.",
+    description: "Freehold homes with optional private pools in Paradera, central Aruba. Request current prices, floorplans and availability.",
     images: [{ url: "/front3DOliver.webp", alt: "Architectural render of the Oliver residence at sunset" }],
   },
   twitter: {
     card: "summary_large_image",
     title: "Own the home. Own the land. | Reina Sophia Residences",
-    description: "Freehold homes with private pools in Paradera, central Aruba. Request current prices, floorplans and availability.",
+    description: "Freehold homes with optional private pools in Paradera, central Aruba. Request current prices, floorplans and availability.",
     images: ["/front3DOliver.webp"],
   },
 }
 
-export default function ArubaHomesPage() {
+export default async function ArubaHomesPage({ searchParams }: { searchParams: Promise<{ model?: string | string[] }> }) {
+  const model = (await searchParams).model
+  const initialResidence = typeof model === "string" && Object.hasOwn(commercialPricing, model)
+    ? commercialPricing[model as ResidenceSlug].name : null
   return (
     <div className={`${styles.page} aruba-homes-page bg-stone-50`}>
-      <FunnelProvider>
+      <FunnelProvider initialResidence={initialResidence}>
         <a href="#funnel-main" className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:rounded-full focus:bg-white focus:p-4">
           Skip to content
         </a>
@@ -82,7 +77,7 @@ export default function ArubaHomesPage() {
         </header>
 
         <main id="funnel-main">
-          <section id="funnel-hero" data-funnel-block="hero" aria-labelledby="hero-title" className="mx-auto grid max-w-7xl items-center gap-4 px-5 pt-4 pb-5 sm:gap-8 sm:px-8 sm:py-8 lg:grid-cols-12 lg:gap-10 lg:px-10">
+          <section id="funnel-hero" data-funnel-block="hero" aria-labelledby="hero-title" className="mx-auto grid max-w-7xl items-center gap-4 px-5 pt-4 pb-3 sm:gap-8 sm:px-8 sm:pt-8 sm:pb-4 lg:grid-cols-12 lg:gap-10 lg:px-10">
             <figure className="relative order-1 aspect-square overflow-hidden rounded-3xl bg-stone-200 lg:order-2 lg:col-span-7 lg:aspect-4/3">
               <FunnelHeroVideo />
               <div className="absolute inset-x-0 bottom-0 h-1/2 bg-linear-to-t from-black/80 to-transparent" />
@@ -96,9 +91,10 @@ export default function ArubaHomesPage() {
                 Own the home.<br /><span className="italic text-luxury-gold-ink">Own the land.</span>
               </h1>
               <p className="mt-3 max-w-md text-sm leading-6 text-muted-foreground sm:text-base sm:leading-7">
-                Private residences in Paradera with freehold land, private pools and the privacy of a residential community in central Aruba.
+                Private residences in Paradera with freehold land, optional private pools and the privacy of a residential community in central Aruba.
               </p>
               <p className="mt-3 text-lg font-semibold text-foreground">{residences[0].price.replace(/^From /, "Homes from ")}</p>
+              <p className="mt-1 text-xs text-muted-foreground">Base home + freehold land. Optional upgrades available.</p>
               <div className="mt-3 flex flex-col items-start gap-1 sm:mt-4 sm:gap-2">
                 <a href="#request-prices" data-funnel-event="funnel_primary_cta" data-cta-location="hero" className={`${primaryButtonClass} w-full sm:w-auto`}>
                   <span>Get Prices &amp; Availability</span> <ArrowDown className="size-4 shrink-0" aria-hidden="true" />
@@ -108,9 +104,6 @@ export default function ArubaHomesPage() {
                 </a>
               </div>
             </div>
-            <ul aria-label="Project at a glance" className="order-3 grid grid-cols-2 gap-x-4 gap-y-3 border-t border-luxury-border pt-4 md:grid-cols-4 lg:col-span-12">
-              {projectPillars.map(({ label, icon: Icon }) => <li key={label} className="flex items-center justify-center gap-2 text-xs leading-5 text-muted-foreground"><Icon className="size-4 shrink-0 text-luxury-gold-ink" aria-hidden="true" />{label}</li>)}
-            </ul>
           </section>
 
           <section data-funnel-block="models" aria-labelledby="residences-title" className="bg-white py-8 sm:py-12">
@@ -135,7 +128,7 @@ export default function ArubaHomesPage() {
             </div>
           </section>
 
-          <FreeholdOwnership />
+          <HomeConfigurator />
 
           <section data-funnel-block="request" aria-labelledby="request-prices-title" className="bg-white">
             <div className="mx-auto grid max-w-7xl items-center gap-3 px-5 py-8 sm:px-8 sm:py-10 lg:grid-cols-12 lg:gap-10 lg:px-10">
@@ -146,24 +139,8 @@ export default function ArubaHomesPage() {
             </div>
           </section>
 
+          <FreeholdOwnership />
           <BuyingProcess />
-
-          <ConstructionProgressSection />
-
-          <LocationStory />
-          <LifestyleBento />
-
-          <section data-funnel-block="consultation" aria-labelledby="consultation-title" className="bg-foreground text-white">
-            <div className="mx-auto max-w-7xl px-5 py-8 sm:px-8 sm:py-10 lg:px-10">
-              <p className="text-xs font-medium uppercase tracking-widest text-luxury-gold-soft">Personal Guidance</p>
-              <h2 id="consultation-title" className="mt-3 font-heading text-3xl leading-tight sm:text-4xl">Prefer to speak with someone first?</h2>
-              <p className="mt-3 max-w-2xl text-sm leading-6 text-white/75">Schedule a private video consultation with the Reina Sophia team to discuss your options and next steps.</p>
-              <ul aria-label="Topics for the consultation" className="mt-5 flex flex-wrap gap-x-5 gap-y-2 text-xs text-white/85 sm:text-sm">
-                {["Residence Options", "Current Pricing", "Buying Process"].map((item) => <li key={item} className="flex items-center gap-2"><span aria-hidden="true" className="size-1.5 rounded-full bg-luxury-gold-soft" />{item}</li>)}
-              </ul>
-              <VideoConsultationRequest whatsappHref={whatsappHref} />
-            </div>
-          </section>
 
           <section id="funnel-closing" data-funnel-block="conversion" aria-labelledby="options-title" className="bg-white">
             <div className="mx-auto grid max-w-7xl gap-6 px-5 pt-10 pb-8 sm:px-8 lg:grid-cols-12 lg:items-center lg:px-10">
@@ -172,7 +149,7 @@ export default function ArubaHomesPage() {
                 <p className="mt-3 max-w-lg text-sm leading-6 text-muted-foreground">Request current pricing and availability for Reina Sophia Residences.</p>
               </div>
               <div className="flex flex-col gap-3 lg:col-span-5 lg:items-end">
-                <a href="#request-prices" data-funnel-event="funnel_primary_cta" data-cta-location="conversion-banner" className={primaryButtonClass}>Get Prices &amp; Availability <ArrowRight className="size-4" aria-hidden="true" /></a>
+                <a href="#request-prices" data-funnel-event="funnel_primary_cta" data-cta-location="conversion-banner" className={primaryButtonClass}>Get My Personalized Offer <ArrowRight className="size-4" aria-hidden="true" /></a>
                 <a href={whatsappHref} target="_blank" rel="noopener noreferrer" data-funnel-event="funnel_whatsapp_click" data-cta-location="conversion-banner" className="inline-flex min-h-11 items-center justify-center gap-2 px-5 text-sm text-foreground underline underline-offset-4"><MessageCircleMore className="size-4 text-[#25D366]" aria-hidden="true" />WhatsApp Us</a>
               </div>
             </div>

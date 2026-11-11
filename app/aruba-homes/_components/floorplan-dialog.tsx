@@ -33,7 +33,7 @@ export function FloorplanDialog({ residence, slug, sheet }: {
       }}
       onOpenChangeComplete={(nextOpen) => {
         if (!nextOpen && requestAvailability.current) {
-          document.getElementById("request-prices")?.scrollIntoView({ block: "start" })
+          document.getElementById("build-your-home")?.scrollIntoView({ block: "start" })
         }
       }}
     >
@@ -51,7 +51,7 @@ export function FloorplanDialog({ residence, slug, sheet }: {
         <Dialog.Popup
           aria-modal="true"
           initialFocus={closeRef}
-          finalFocus={() => requestAvailability.current ? document.getElementById("request-prices-name") : true}
+          finalFocus={() => requestAvailability.current ? document.getElementById("build-your-home") : true}
           className={`${styles.floorplanDialog} fixed inset-x-0 bottom-0 z-50 mx-auto flex max-h-dvh w-full max-w-5xl flex-col overflow-hidden rounded-t-3xl border border-luxury-border bg-white text-foreground shadow-2xl sm:inset-x-6 sm:bottom-auto sm:top-1/2 sm:w-auto sm:-translate-y-1/2 sm:rounded-3xl`}
         >
           <div className="flex shrink-0 items-center justify-between gap-3 border-b border-luxury-border px-5 py-4 sm:px-6">

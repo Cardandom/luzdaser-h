@@ -1,4 +1,6 @@
-﻿import {
+import { commercialPricing, formatAwg } from "@/lib/commercial-pricing"
+
+import {
   DoorOpen,
   House,
   Sprout,
@@ -80,13 +82,13 @@ export type Project = {
 }
 
 export const priceListNote =
-  "Starting package prices from the August 27, 2026 price list, valid through December 2026 or while current phase availability lasts. Request current availability."
+  "Starting package prices based on current November 2026 commercial pricing. Starting prices combine a base residence with the lowest currently listed compatible lot. Final pricing depends on lot selection, availability and optional upgrades."
 
 export const projects: Project[] = [
   {
     slug: "luca",
     title: "Luca",
-    price: "From AWG 1,140,545",
+    price: `From ${formatAwg(commercialPricing.luca.startingPackage)}`,
     picture: "/projects/luca/luca-main-photo.webp",
     galleryImages: [
       {
@@ -119,17 +121,17 @@ export const projects: Project[] = [
       { icon: BedDouble, label: "2 Bedrooms" },
       { icon: Bath, label: "2 Bathrooms" },
       { icon: Ruler, label: "227 m² Lot" },
-      { icon: WavesLadder, label: "Private Pool" },
+      { icon: WavesLadder, label: "Optional Private Pool" },
     ],
     highlightsTitle: "Finishes and Comfort",
     features: [
       { icon: House, label: "80 m² House" },
       { icon: BedDouble, label: "Two Bedrooms" },
       { icon: Bath, label: "Two Bathrooms" },
-      { icon: CookingPot, label: "Luxury Kitchen With Electricity" },
+      { icon: CookingPot, label: "Kitchen Packages Available" },
       { icon: Sprout, label: "Minimalist Design" },
       { icon: AirVent, label: "Air Conditioning" },
-      { icon: WavesLadder, label: "Private Pool · Approx. 11–12 m²" },
+      { icon: WavesLadder, label: "Optional Pool · Approx. 11–12 m²" },
       { icon: ShieldCheckIcon, label: "Quality" },
       { icon: RockingChair, label: "Confort" },
       { icon: Gem, label: "Exclusiveness" }
@@ -237,7 +239,7 @@ export const projects: Project[] = [
   {
     slug: "oliver",
     title: "Oliver",
-    price: "From AWG 1,804,539",
+    price: `From ${formatAwg(commercialPricing.oliver.startingPackage)}`,
     picture: "/front3DOliver.webp",
     galleryImages: [
       {
@@ -264,12 +266,12 @@ export const projects: Project[] = [
     boardTitle: "Oliver",
     boardSubtitle: "Private Villa Living in Central Aruba",
     intro:
-      "Oliver balances privacy and openness with generous outdoor living and a calm interior atmosphere. Its 130 m² home can be configured with three or four bedrooms according to buyer preference, with three bathrooms, a private 18 m² pool, a terrace and a private garden.",
+      "Oliver balances privacy and openness with generous outdoor living and a calm interior atmosphere. Its 130 m² home can be configured with three or four bedrooms according to buyer preference, with three bathrooms and a private garden. Personalize the outdoor space with an optional pool and covered terrace.",
     comparisonFeatures: [
       { icon: House, label: "130 m² Home" },
       { icon: BedDouble, label: "3–4 Bedrooms" },
       { icon: Bath, label: "3 Bathrooms" },
-      { icon: WavesLadder, label: "Private 18 m² Pool" },
+      { icon: WavesLadder, label: "Optional 18 m² Pool" },
       { icon: TreePine, label: "Private Garden" },
     ],
     comparisonNote:
@@ -278,10 +280,10 @@ export const projects: Project[] = [
       { icon: House, label: "130 m² House" },
       { icon: BedDouble, label: "Three or Four Bedrooms" },
       { icon: Bath, label: "Three bathrooms" },
-      { icon: CookingPot, label: "Dual Luxury Kitchen" },
+      { icon: CookingPot, label: "Kitchen Packages Available" },
       { icon: Sprout, label: "Minimalist Design" },
       { icon: AirVent, label: "Air Conditioning" },
-      { icon: WavesLadder, label: "18 m² Pool Area" },
+      { icon: WavesLadder, label: "Optional 18 m² Pool" },
       { icon: Beef, label: "BBQ Area"},
       { icon: ShieldCheckIcon, label: "Quality Finishes" },
       { icon: RockingChair, label: "Confort" },
@@ -363,7 +365,7 @@ export const projects: Project[] = [
         picture: "/projects/oliver/oliver-front-view-02.webp",
         alt: "Terrace and exterior view for Oliver",
         objectPosition: "center center",
-        caption: "A broad terrace that opens the home to the garden.",
+        caption: "An outdoor setting that opens the home to the garden; covered terrace available as an upgrade.",
       },
       {
         title: "Interior calm",
@@ -384,7 +386,7 @@ export const projects: Project[] = [
   {
     slug: "audrey",
     title: "Audrey",
-    price: "From AWG 2,189,211",
+    price: `From ${formatAwg(commercialPricing.audrey.startingPackage)}`,
     picture: "/projects/audrey/audrey-front-elevation.webp",
     galleryImages: [
       {
@@ -416,13 +418,13 @@ export const projects: Project[] = [
     boardTitle: "Audrey",
     boardSubtitle: "Two-Level Villa in Central Aruba",
     intro:
-      "Audrey is a two-level villa designed for generous family living, with four bedrooms, three bathrooms, a luxury kitchen with appliances, and a private 18 m² pool framed by landscaping.",
+      "Audrey is a two-level villa designed for generous family living, with four bedrooms, three bathrooms, and opportunities to personalize the kitchen and outdoor space with an optional pool.",
     comparisonFeatures: [
       { icon: House, label: "160 m² Home" },
       { icon: BedDouble, label: "4 Bedrooms" },
       { icon: Bath, label: "3 Bathrooms" },
       { icon: LayoutPanelTop, label: "Two Floors" },
-      { icon: WavesLadder, label: "Private 18 m² Pool" },
+      { icon: WavesLadder, label: "Optional 18 m² Pool" },
     ],
     highlightsTitle: "Comfort and Quality",
     features: [
@@ -431,25 +433,25 @@ export const projects: Project[] = [
       { icon: BedDouble, label: "Four Bedrooms" },
       { icon: Bath, label: "Three Bathrooms" },
       { icon: Sprout, label: "Minimalist Design" },
-      { icon: CookingPot, label: "Luxury Kitchen with Appliances" },
+      { icon: CookingPot, label: "Kitchen Packages Available" },
       { icon: AirVent, label: "Air-Conditioning" },
-      { icon: WavesLadder, label: "18 m² Pool" },
+      { icon: WavesLadder, label: "Optional 18 m² Pool" },
       { icon: CarFront, label: "Two Parking Spaces" },
-      { icon: Ruler, label: "12 m² Terrace" },
+      { icon: Ruler, label: "Optional Covered Terrace" },
       { icon: TreePine, label: "Landscaping" },
     ],
     highlights: [
       {
         icon: CookingPot,
-        label: "Equipped Kitchen",
+        label: "Kitchen Packages Available",
         description:
-          "A fully equipped kitchen with countertop, modern cabinets, and appliances included.",
+          "Choose a kitchen package to suit your lifestyle; the full integrated kitchen includes appliances.",
       },
       {
         icon: DoorOpen,
         label: "Sliding Door",
         description:
-          "Double-glazed sliding doors connect the interior with the pool area.",
+          "Double-glazed sliding doors connect the interior with the outdoor living space.",
       },
       {
         icon: Bath,
